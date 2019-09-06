@@ -39,3 +39,5 @@ class LoadPageTests(base.StaticTests):
         """
         # He sees that the page's title includes the expected text
         self.assertIn(self.CONFIG["TITLE_TEXT"], self.browser.title)
+    
+    

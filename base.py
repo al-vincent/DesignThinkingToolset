@@ -2,6 +2,32 @@ from selenium import webdriver
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.conf import settings
 import os
+from json import load
+
+
+# -----------------------------------------------------------------------------------------
+# HELPER FUNCTIONS
+# -----------------------------------------------------------------------------------------
+
+def get_webdriver():
+    """
+    Choose the webdriver to use, based on the test environment.
+    Chromedriver is fast and effective on Windows / local machine, but *very* fiddly to set
+    up in Travis CI. Firefox / geckodriver are instead used in this environment, and run
+    headlessly.
+    """
+    if 'BUILD_ENV' in os.environ:
+        from selenium.webdriver.firefox.options import Options
+        options = Options()
+        options.add_argument('-headless')
+        return webdriver.Firefox(firefox_options=options)
+    else:
+        return webdriver.Chrome()
+
+
+# -----------------------------------------------------------------------------------------
+# TEST TEMPLATE CLASSES
+# -----------------------------------------------------------------------------------------
 
 class StaticTests(StaticLiveServerTestCase):
     """
@@ -14,7 +40,7 @@ class StaticTests(StaticLiveServerTestCase):
     at the start of the test suite and torn down at the end.
     """
     # read in config vars
-    with open(os.path.join(settings.STATIC, 'js/config.json'), "r") as f:
+    with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
         CONFIG = load(f)["HTML"]
 
     @classmethod
@@ -44,3 +70,29 @@ class StaticTests(StaticLiveServerTestCase):
         """
         # Cornelius opens the homepage
         self.browser.get(self.live_server_url)
+
+# -----------------------------------------------------------------------------------------
+
+class DynamicTests(StaticLiveServerTestCase):
+    """
+    Tests that interract with the elements on a page, potentially changing state between
+    tests. The browser is closed down after each test to ensure isolation and restarted
+    at the beginning of each new test.
+    """
+    # read in config vars
+    with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
+        CONFIG = load(f)["HTML"]
+
+    
+    def setUp(self):
+        """
+        Browse to the homepage. 
+        """
+        # Cornelius opens the homepage
+        self.browser.get(self.live_server_url)
+    
+    def tearDown(self):
+        """
+        Close down the browser.
+        """
+        self.browser.quit()
