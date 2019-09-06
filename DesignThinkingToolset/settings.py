@@ -14,18 +14,9 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '#8#-3^2w=gy9-n*bv7=o1jx@y##28d3*f)8opzldr3(+&)_=_('
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')  # html templates
+STATIC_DIR = os.path.join(BASE_DIR, 'static')       # js, css, imgs etc.
+MEDIA_DIR = os.path.join(BASE_DIR, 'media')         # media files
 
 
 # Application definition
@@ -37,6 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'PostItFinder',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +46,7 @@ ROOT_URLCONF = 'DesignThinkingToolset.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATE_DIR, ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -116,5 +108,18 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [STATIC_DIR, ]
+
+# See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
+if 'DJANGO_DEBUG_FALSE' in os.environ:  
+    DEBUG = False
+    SECRET_KEY = os.environ['DJANGO_SECRET_KEY']  
+    ALLOWED_HOSTS = [os.environ['SITENAME']]  
+    STATIC = STATIC_ROOT
+else:
+    DEBUG = True  
+    SECRET_KEY = 'insecure-key-for-dev'
+    ALLOWED_HOSTS = []
+    STATIC = STATIC_DIR
