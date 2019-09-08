@@ -5,7 +5,7 @@ import time
 import os
 from json import load
 
-import base
+from functional_tests import base
 
 # -----------------------------------------------------------------------------------------
 # HELPER FUNCTIONS
