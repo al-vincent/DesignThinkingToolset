@@ -1,6 +1,23 @@
 {   
     "HTML": {
         "TITLE_TEXT": "Post-it Finder",
-        "BODY_TEXT": "Blah blah blah"
+        "BODY": {
+            "ID": "Find post-it notes in an image",
+            "TEXT": "Find post-it notes in an image"
+        },
+        "UPLOAD_IMAGE_FORM":{
+            "ID": "form-upload-image",
+            "CHOOSE_IMAGE_BTN": {
+                "ID": "id_choose_img_btn"
+            },
+            "CHOOSE_IMAGE_LBL": {
+                "XPATH": "//label[@for='id_choose_img_btn']",
+                "TEXT": "Click here to select an image to analyse"
+            },
+            "UPLOAD_IMAGE_BTN": {
+                "ID": "id_upload_image_btn",
+                "TEXT": "Click here to upload the image"
+            }
+        }
     }
 }

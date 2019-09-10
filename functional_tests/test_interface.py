@@ -35,9 +35,17 @@ class LoadPageTests(base.StaticTests):
         
     def test_page_has_correct_title(self):
         """
-        First simple test; ensure that the page title includes the correct text.
+        Ensure that the page title includes the correct text.
         """
         # He sees that the page's title includes the expected text
         self.assertIn(self.CONFIG["TITLE_TEXT"], self.browser.title)
     
+    def test_page_has_button_to_get_image_from_file(self):
+        """
+        Test whether the home page contains a button for getting images from local system.
+        Check that the button is 
+        """
+        cfg = self.CONFIG["UPLOAD_IMAGE_FORM"]["CHOOSE_IMAGE_LBL"]
+        img_btn = self.browser.find_element_by_xpath(cfg["XPATH"])
+        self.assertEqual(img_btn.get_attribute("innerText"), cfg["TEXT"])
     

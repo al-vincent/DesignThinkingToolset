@@ -7,7 +7,13 @@
 
     <title>{{title}}</title>
   </head>
+
   <body>
-	{{body_text}}
+    {{body_text}}
+    
+    <form id="form-upload-image" method="POST">
+        {% csrf_token %}
+        {{ form }}
+    </form>
   </body>
 </html>
