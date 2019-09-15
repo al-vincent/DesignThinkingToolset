@@ -41,7 +41,9 @@ class StaticTests(StaticLiveServerTestCase):
     """
     # read in config vars
     with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
-        CONFIG = load(f)["HTML"]
+        CONFIG = load(f)
+        ELEMS = CONFIG["HTML"]
+        PATHS = CONFIG["PATHS"]
 
     @classmethod
     def setUpClass(cls):
@@ -81,7 +83,9 @@ class DynamicTests(StaticLiveServerTestCase):
     """
     # read in config vars
     with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
-        CONFIG = load(f)["HTML"]
+        CONFIG = load(f)
+        ELEMS = CONFIG["HTML"]
+        PATHS = CONFIG["PATHS"]
 
     
     def setUp(self):
@@ -89,6 +93,7 @@ class DynamicTests(StaticLiveServerTestCase):
         Browse to the homepage. 
         """
         # Cornelius opens the homepage
+        self.browser = get_webdriver()
         self.browser.get(self.live_server_url)
     
     def tearDown(self):
