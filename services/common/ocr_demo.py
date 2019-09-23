@@ -52,7 +52,7 @@ def analyse_image(image_path, subscription_key, analysis_url):
         analysis = response_final.json()
             
         time.sleep(1)
-        # In this case, we've got our reults
+        # In this case, we've got our results
         if ("recognitionResults" in analysis):
             poll = False
         # in this case, the analysis has completed but failed to work
@@ -114,10 +114,10 @@ def show_results(analysis, image_path):
     """
     polygons = []
     # check if we
-    if ("recognitionResults" in analysis):
+    if "recognitionResults" in analysis:
         # Extract the recognized text, with bounding boxes.
         polygons = [(line["boundingBox"], line["text"]) for line in analysis["recognitionResults"][0]["lines"]]
-        
+        print(f"Polygons: {polygons}")
         # Display the image and overlay it with the extracted text.
         plt.figure(figsize=(30, 30))
         # TODO: we've already got the image once, better to pass it in?
@@ -158,6 +158,7 @@ def main():
     
     # Set image_path to the local path of an image that you want to analyze.
     IMAGE_PATH = "C:/Users/Al/OneDrive/Pictures/PostIts/persona.jpg"
+#    IMAGE_PATH = "C:/Users/Al/OneDrive/Code/DesignThinkingToolset/media/test/test_img.jpg"
     
     # analyse the image
     results = analyse_image(image_path=IMAGE_PATH, 

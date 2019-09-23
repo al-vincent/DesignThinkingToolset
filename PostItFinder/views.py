@@ -15,7 +15,7 @@ def index(request):
     #       I want to upload the file to the Azure server; different process...??
     # **********
     # check if input is HTTP POST  
-    file_name = None
+    img_file = None
     if request.method == 'POST':
         # is POST request; the form has been activated
         form = UploadImageForm(request.POST, request.FILES, label_suffix='')
@@ -25,7 +25,7 @@ def index(request):
             # useful link: https://docs.djangoproject.com/en/2.2/topics/http/file-uploads/ 
             print("Form is valid")
             print(type(request.FILES["choose_img_btn"]))
-            file_name = request.FILES["choose_img_btn"].temporary_file_path()
+            img_file = request.FILES["choose_img_btn"].temporary_file_path()
         else:
             # there are errors in the form; print to terminal 
             print(form.errors)
@@ -39,7 +39,7 @@ def index(request):
                "form": form,
                "submit_id": CONFIG["UPLOAD_IMG_FORM"]["UPLOAD_IMG_BTN"]["ID"],
                "submit_text": CONFIG["UPLOAD_IMG_FORM"]["UPLOAD_IMG_BTN"]["TEXT"],
-               "img_file": file_name}
+               "img_file": img_file}
 
     return render(request, "PostItFinder/index.html", context=context)   
     
