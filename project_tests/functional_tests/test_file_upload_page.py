@@ -5,7 +5,8 @@ import time
 import os
 from json import load
 
-from functional_tests import base
+# from functional_tests import base
+from project_tests.functional_tests import base
 
 
 # -----------------------------------------------------------------------------------------

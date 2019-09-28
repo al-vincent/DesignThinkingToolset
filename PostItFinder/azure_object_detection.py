@@ -7,8 +7,7 @@ import functools
 from sys import exit
 
 
-def analyse_image(prediction_key, subscription_key, project_id, published_name, 
-                  image_path):
+def analyse_image(prediction_key, subscription_key, project_id, published_name, image_path):
     """
     Access the Azure Custom Vision service to process an image.
     
@@ -33,7 +32,6 @@ def analyse_image(prediction_key, subscription_key, project_id, published_name,
         'Prediction-key': subscription_key
     }
 
-
     # Read the image into a byte array
     try:
         with open(image_path, "rb") as f:
@@ -53,16 +51,15 @@ def analyse_image(prediction_key, subscription_key, project_id, published_name,
 
     data = None
     try:
-        # https://uksouth.api.cognitive.microsoft.com/customvision/v3.0/Prediction/cd4ddca3-84e1-4707-8e71-aa76a7816ae1/detect/iterations/PostItDetector_v0.4/image
         conn = http.client.HTTPSConnection('uksouth.api.cognitive.microsoft.com')
         conn.request("POST", f"/customvision/v3.0/Prediction/{project_id}/detect/iterations/{published_name}/image", image_bytes, headers)
         data = conn.getresponse().read()
         conn.close()
+        return loads(data.decode("utf-8"))
     except Exception as err:
         # print("[Errno {0}] {1}".format(e.errno, e.strerror))
         print(f"ERROR: {err}")
-
-    return loads(data.decode("utf-8"))
+        return None
 
 def image_transpose_exif(img):
     """
@@ -131,7 +128,6 @@ def show_results(analysis, image_path, threshold=0.2):
         for line in analysis["predictions"]:
             # Extract the bounding boxes and their probability of correct ID
             bb = line["boundingBox"]
-#            if line["probability"] > 0.15:
             polygons.append({
                         "vertices": [(bb["left"] * width, bb["top"] * height),
                                     ((bb["left"] + bb["width"]) * width, bb["top"] * height),
@@ -140,23 +136,18 @@ def show_results(analysis, image_path, threshold=0.2):
                         "probability": line["probability"]
                          })
 
-#        print(f"Polygons: {polygons}")
-#         Display the image and overlay it with the extracted text.
+        # Display the image and overlay it with the extracted text.
         plt.figure(figsize=(30, 30))
         
         # check the image orientation, and alter if necessary
-        
         new_image = image_transpose_exif(image)
         ax = plt.imshow(new_image)
         # plot each of the display boxes
         for polygon in polygons:
-#            vertices = [(polygon[0][i], polygon[0][i+1]) for i in range(0, len(polygon[0]), 2)]
-            # text = polygon[1]
             if polygon["probability"] >= threshold:
                 patch = Polygon(polygon["vertices"], closed=True, fill=False, 
                                 linewidth=2, color='r')
                 ax.axes.add_patch(patch)
-            # plt.text(vertices[0][0], vertices[0][1], text, fontsize=15, va="top")
         image.close()
     else:
         print(f"*** WARNING: no text was found in {image_path}. Results: {analysis} ***")
@@ -185,7 +176,6 @@ def main():
     # Set the threshold, i.e. the lowest probability of 'correctness' at which 
     # images are kept.
     THRESHOLD = 0.2
-    # print(image_data)
     show_results(analysis=image_data, image_path=IMAGE_PATH, threshold=THRESHOLD)
 
 if __name__ == "__main__":
