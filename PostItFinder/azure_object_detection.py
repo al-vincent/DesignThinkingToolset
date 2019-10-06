@@ -4,10 +4,23 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 from PIL import Image
 import functools
-from sys import exit
+import os
 
+def get_image_bytes(image_path):
+    # Read the image into a byte array
+    try:
+        with open(image_path, "rb") as f:
+            return f.read()
+    except FileNotFoundError:
+        print(f"*** ERROR: the file {image_path} was not found. ***")
+        # exit(1)
+        return None
+    except Exception as err:
+        print(f"*** ERROR: {err}")
+        # exit(2)
+        return None
 
-def analyse_image(prediction_key, subscription_key, project_id, published_name, image_path):
+def analyse_image(prediction_key, subscription_key, project_id, published_name, image_bytes):
     """
     Access the Azure Custom Vision service to process an image.
     
@@ -17,7 +30,7 @@ def analyse_image(prediction_key, subscription_key, project_id, published_name, 
         - subscription_key (str), the ID for the Azure subscription
         - project_id (str), the Custom Vision identifier for the project
         - published_name (str), the name of the published model
-        - image_path (str), the file-path to the image that we want to process
+        - image_bytes (bytes), the image to be analysed
     
     Returns:
         - JSON-style dict containing the results of the analysis (e.g. bounding
@@ -32,17 +45,6 @@ def analyse_image(prediction_key, subscription_key, project_id, published_name, 
         'Prediction-key': subscription_key
     }
 
-    # Read the image into a byte array
-    try:
-        with open(image_path, "rb") as f:
-            image_bytes = f.read()
-    except FileNotFoundError:
-        print(f"*** ERROR: the file {image_path} was not found. ***")
-        exit(1)
-    except Exception as err:
-        print(f"*** ERROR: {err}")
-        exit(2)
-        
     # AV: not currently used, but might be good to pass an app name at some point?
     params = urllib.parse.urlencode({
         # Request parameters
@@ -158,20 +160,20 @@ def main():
     Example runner for the function 
     """
     # Azure Custom Vision parameters
-    PREDICTION_KEY = "500276662a3f42808a2fcdf1863634f9"
-    SUBSCRIPTION_KEY = "f42dd8268e6a466db3a285bd8b758de7"
-    PROJECT_ID = "cd4ddca3-84e1-4707-8e71-aa76a7816ae1"
-    PUBLISHED_NAME = "PostItDetector_v0.4"
+    PREDICTION_KEY = os.environ.get("PREDICTION_KEY") 
+    SUBSCRIPTION_KEY = os.environ.get("SUBSCRIPTION_KEY")
+    PROJECT_ID = os.environ.get("PROJECT_ID") 
+    PUBLISHED_NAME = os.environ.get("PUBLISHED_NAME") 
 
     # Image file to process
     # IMAGE_PATH = "C:/Users/Al/OneDrive/Code/DesignThinkingToolset/media/test/test_img.jpg"
     IMAGE_PATH = "C:/Users/Al/OneDrive/Pictures/PostIts/persona.jpg"
-
+    image_bytes = get_image_bytes(IMAGE_PATH)
     image_data = analyse_image(prediction_key=PREDICTION_KEY,
                                subscription_key=SUBSCRIPTION_KEY,
                                project_id=PROJECT_ID,
                                published_name=PUBLISHED_NAME,
-                               image_path=IMAGE_PATH)
+                               image_bytes=image_bytes)
     
     # Set the threshold, i.e. the lowest probability of 'correctness' at which 
     # images are kept.
