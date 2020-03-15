@@ -21,6 +21,6 @@ class HomePageTests(TestCase):
         self.assertTemplateUsed(response, 'PostItFinder/index.html')
 
     def test_get_image_file(self):
-        # response = self.client.post('/', data={'item_text': 'A new list item'})
-        # self.assertIn('A new list item', response.content.decode())
+        # response = self.client.post('/', data={"img_file": 'A new list item'})
+        # # self.assertIn('A new list item', response.content.decode())
         pass

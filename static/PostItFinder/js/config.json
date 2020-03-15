@@ -18,7 +18,7 @@
             },
             "CHOOSE_IMG_LBL": {
                 "XPATH": "//label[@for='id_choose_img_btn']",
-                "TEXT": "Click here to select an image to analyse"
+                "TEXT": "Select an image to analyse"
             },
             "UPLOAD_IMG_BTN": {
                 "ID": "btn-upload-image",

@@ -5,7 +5,8 @@ import time
 import os
 from json import load
 
-from functional_tests import base
+# from functional_tests import base
+from project_tests.functional_tests import base
 
 
 # -----------------------------------------------------------------------------------------
@@ -21,7 +22,9 @@ class HomePageStaticTests(base.StaticTests):
     need to be created and destroyed after each test; instead, it can be spun up once
     at the start of the test suite and torn down at the end.
     """
-        
+    def test_page_uses_app_template(self):
+        pass
+
     def test_page_has_correct_title(self):
         """
         Ensure that the page title includes the correct text.
