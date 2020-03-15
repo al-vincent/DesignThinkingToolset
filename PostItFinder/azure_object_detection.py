@@ -12,7 +12,7 @@ def get_image_bytes(image_path):
         with open(image_path, "rb") as f:
             return f.read()
     except FileNotFoundError:
-        print(f"*** ERROR: the file {image_path} was not found. ***")
+        print(f"*** ERROR: the file '{image_path}' was not found. ***")
         # exit(1)
         return None
     except Exception as err:
@@ -51,16 +51,19 @@ def analyse_image(prediction_key, subscription_key, project_id, published_name, 
         'application': '{string}',
     })
 
-    data = None
     try:
         conn = http.client.HTTPSConnection('uksouth.api.cognitive.microsoft.com')
         conn.request("POST", f"/customvision/v3.0/Prediction/{project_id}/detect/iterations/{published_name}/image", image_bytes, headers)
         data = conn.getresponse().read()
         conn.close()
-        return loads(data.decode("utf-8"))
+        json_data = loads(data.decode("utf-8"))
+        if "predictions" in json_data:
+            return json_data
+        else:
+            print(f"*** ERROR, analyse_image,  unexpected return: {json_data}")
+            return None
     except Exception as err:
-        # print("[Errno {0}] {1}".format(e.errno, e.strerror))
-        print(f"ERROR: {err}")
+        print(f"*** ERROR: analyse_image, {err} ***")
         return None
 
 def image_transpose_exif(img):
@@ -163,7 +166,7 @@ def main():
     PREDICTION_KEY = os.environ.get("PREDICTION_KEY") 
     SUBSCRIPTION_KEY = os.environ.get("SUBSCRIPTION_KEY")
     PROJECT_ID = os.environ.get("PROJECT_ID") 
-    PUBLISHED_NAME = os.environ.get("PUBLISHED_NAME") 
+    PUBLISHED_NAME = os.environ.get("PUBLISHED_NAME")
 
     # Image file to process
     # IMAGE_PATH = "C:/Users/Al/OneDrive/Code/DesignThinkingToolset/media/test/test_img.jpg"

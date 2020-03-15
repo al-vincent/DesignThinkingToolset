@@ -22,7 +22,9 @@ class HomePageStaticTests(base.StaticTests):
     need to be created and destroyed after each test; instead, it can be spun up once
     at the start of the test suite and torn down at the end.
     """
-        
+    def test_page_uses_app_template(self):
+        pass
+
     def test_page_has_correct_title(self):
         """
         Ensure that the page title includes the correct text.
