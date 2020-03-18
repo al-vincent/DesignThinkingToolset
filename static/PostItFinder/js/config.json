@@ -1,28 +1,76 @@
 {   
     "PATHS": {
+        "PAGES": {
+            "HOME": "PostItFinder/index.html"
+        },
         "TEST_IMG": {
             "DIR": "test",
             "FILE": "test_img.jpg"
         }
-    },   
+    },
+    "CONSTANTS":{
+        "THEME_COLOUR": "#55B776",
+        "DISABLED_COLOUR": "7D7D7D"
+    },
     "HTML": {
-        "TITLE_TEXT": "Post-it Finder",
-        "BODY": {
-            "ID": "Find post-it notes in an image",
-            "TEXT": "Find post-it notes in an image"
+        "TITLE": "SNIP",
+        "BASE":{
+            "NAVBAR": {
+                "ID": "navbar-id",
+                "LOGO": {
+                    "ID": "logo-id",
+                    "IMAGE": "logo-image"
+                },
+                "ABOUT": {
+                    "ID": "about-id"
+                },
+                "FAQ": {
+                    "ID": "faq-id"
+                }
+            }
         },
-        "UPLOAD_IMG_FORM":{
-            "ID": "form-upload-image",
+        "APP": {
+            "STEPPER_BAR": {
+                "ID": "stepper-id",
+                "STEP_1": {
+                    "ID": "step1-id",
+                    "TEXT": "SELECT IMAGE",
+                    "ACTIVE": true
+                },
+                "STEP_2": {
+                    "ID": "step2-id",
+                    "TEXT": "FIND REGIONS",
+                    "ACTIVE": false
+                },
+                "STEP_3": {
+                    "ID": "step3-id",
+                    "TEXT": "FIND TEXT AND OUTPUT",
+                    "ACTIVE": false
+                }
+            },
+            "NEXT_BTN": {
+                "ID": "next-btn-id"
+            },
+            "PREVIOUS_BTN": {
+                "ID": "previous-btn-id"
+            },
+            "IMAGE_PANE": {
+                "ID": "img-pane-id"
+            }
+        },
+        "HOME": {
             "CHOOSE_IMG_BTN": {
-                "ID": "id_choose_img_btn"
+                "ID": "choose-img-button-id"
             },
-            "CHOOSE_IMG_LBL": {
-                "XPATH": "//label[@for='id_choose_img_btn']",
-                "TEXT": "Select an image to analyse"
-            },
-            "UPLOAD_IMG_BTN": {
-                "ID": "btn-upload-image",
-                "TEXT": "Click here to upload the image"
+            "UPLOAD_IMG_FORM":{
+                "ID": "form-upload-image",
+                "CHOOSE_IMG_BTN": {
+                    "ID": "id_choose_img_btn"
+                },
+                "CHOOSE_IMG_LBL": {
+                    "XPATH": "//label[@for='id_choose_img_btn']",
+                    "TEXT": "Choose image"
+                }
             }
         }
     }
