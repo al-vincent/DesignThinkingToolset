@@ -44,6 +44,7 @@ class StaticTests(StaticLiveServerTestCase):
         CONFIG = load(f)
         ELEMS = CONFIG["HTML"]
         PATHS = CONFIG["PATHS"]
+        CONST = CONFIG["CONSTANTS"]
 
     @classmethod
     def setUpClass(cls):
@@ -86,7 +87,7 @@ class DynamicTests(StaticLiveServerTestCase):
         CONFIG = load(f)
         ELEMS = CONFIG["HTML"]
         PATHS = CONFIG["PATHS"]
-
+        CONST = CONFIG["CONSTANTS"]
     
     def setUp(self):
         """
