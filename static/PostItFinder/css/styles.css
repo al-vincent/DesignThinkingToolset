@@ -1,0 +1,84 @@
+/* ========================================================================== 
+ * Resizable boxes
+ * ========================================================================== */
+/* Change the rect and circle colours  */
+.box:hover{
+    fill: red;
+    background-color: red;
+}
+
+.top-left:hover, .bottom-right:hover {
+    cursor: move;
+    /* Resize handles on hover. Won't work on all browsers, and hidden 
+    by cursor anyway (unless the radius increases a lot), so commented */
+    /* r: 5; */  
+}
+
+rect:hover {
+    cursor: grab;
+}
+
+rect:active {
+    cursor: grabbing;
+}
+
+/* Allows for a smooth transition when the handle radius changes. 
+HOWEVER, when the handle is dragged a lag is introduced which causes the 
+handle to no longer be bound to the rect element (hence commented out) */
+/* .top-left, .bottom-right {
+    transition: all 0.5s;
+} */
+
+/* ========================================================================== 
+ * Stepper progress bar
+ * ========================================================================== */
+
+ /* credit: http://kodhus.com/newsite/step-progress-bar-css-only/ */
+.stepper-bar {
+    counter-reset: step;
+}
+.stepper-bar li {
+    list-style-type: none;
+    width: 25%; /* this is 100 / num_items_in_stepper; update if using more than 4 steps */
+    float: left;
+    font-size: 20px;
+    position: relative;
+    text-align: center;
+    text-transform: uppercase;
+    color: #7d7d7d;
+}
+.stepper-bar li:before {
+    width: 70px;
+    height: 70px;
+    content: counter(step);
+    counter-increment: step;
+    line-height: 60px;
+    border: 5px solid #7d7d7d;
+    display: block;
+    text-align: center;
+    margin: 0 auto 10px auto;
+    border-radius: 50%;
+    background-color: white;
+}
+.stepper-bar li:after {
+    width: 100%;
+    height: 5px;
+    content: '';
+    position: absolute;
+    background-color: #7d7d7d;
+    top: 35px;
+    left: -50%;
+    z-index: -1;
+}
+.stepper-bar li:first-child:after {
+    content: none;
+}
+.stepper-bar li.active {
+    color: #55b776;
+}
+.stepper-bar li.active:before {
+    border-color: #55b776;
+}
+.stepper-bar li.active + li:after {
+    background-color: #55b776;
+}
