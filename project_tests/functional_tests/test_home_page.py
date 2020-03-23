@@ -60,13 +60,15 @@ class HomePageStaticTests(base.StaticTests):
     def test_navbar_uses_correct_logo(self):
         pass
 
-    def test_navbar_about_link_is_displayed(self):
-        about_link = self.browser.find_element_by_id(self.ELEMS["BASE"]["NAVBAR"]["ABOUT"]["ID"])
-        self.assertTrue(about_link.is_displayed())
+    def test_navbar_items_are_displayed(self):
+        for nav_item in self.ELEMS["BASE"]["NAVBAR"]["PAGES"]:
+            link = self.browser.find_element_by_id(nav_item["ID"])
+            self.assertTrue(link.is_displayed())
 
-    def test_navbar_faq_link_is_displayed(self):
-        faq_link = self.browser.find_element_by_id(self.ELEMS["BASE"]["NAVBAR"]["FAQ"]["ID"])
-        self.assertTrue(faq_link.is_displayed())
+    def test_navbar_items_show_correct_text(self):
+        for nav_item in self.ELEMS["BASE"]["NAVBAR"]["PAGES"]:
+            element = self.browser.find_element_by_id(nav_item["ID"])
+            self.assertEqual(element.get_attribute("innerText"), nav_item["TEXT"])
     
     # -------------------------------------------------------------------------------------
     # Stepper bar tests

@@ -21,12 +21,18 @@
                     "ID": "logo-id",
                     "IMAGE": "logo-image"
                 },
-                "ABOUT": {
-                    "ID": "about-id"
-                },
-                "FAQ": {
-                    "ID": "faq-id"
-                }
+                "PAGES":[
+                    {
+                        "PAGE": "about.html",
+                        "ID": "about-id",
+                        "TEXT": "About"
+                    },
+                    {
+                        "PAGE": "faq.html",
+                        "ID": "faq-id",
+                        "TEXT": "FAQ"
+                    }
+                ]
             }
         },
         "APP": {
@@ -65,11 +71,15 @@
             "UPLOAD_IMG_FORM":{
                 "ID": "form-upload-image",
                 "CHOOSE_IMG_BTN": {
-                    "ID": "id_choose_img_btn"
+                    "ID": "choose_img_btn_id"
                 },
                 "CHOOSE_IMG_LBL": {
-                    "XPATH": "//label[@for='id_choose_img_btn']",
+                    "XPATH": "//label[@for='choose_img_btn_id']",
                     "TEXT": "Choose image"
+                },
+                "SUBMIT_BUTTON": {
+                    "ID": "submit_btn_id",
+                    "TEXT": "Submit"
                 }
             }
         }

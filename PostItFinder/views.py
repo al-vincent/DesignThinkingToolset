@@ -32,12 +32,14 @@ def index(request):
     else:
         # Not a POST request; just render the form
         form = UploadImageForm(label_suffix='')
-
+        
     context = {"title": CONFIG["TITLE"],
+               "navbar_id": CONFIG["BASE"]["NAVBAR"]["ID"],
+               "nav_items": CONFIG["BASE"]["NAVBAR"]["PAGES"],
                "form_id": CONFIG["HOME"]["UPLOAD_IMG_FORM"]["ID"],
                "form": form,
-               "submit_id": CONFIG["HOME"]["UPLOAD_IMG_FORM"]["CHOOSE_IMG_BTN"]["ID"],
-               "submit_text": CONFIG["HOME"]["UPLOAD_IMG_FORM"]["CHOOSE_IMG_LBL"]["TEXT"],
+               "submit_id": CONFIG["HOME"]["UPLOAD_IMG_FORM"]["SUBMIT_BUTTON"]["ID"],
+               "submit_text": CONFIG["HOME"]["UPLOAD_IMG_FORM"]["SUBMIT_BUTTON"]["TEXT"],
                "img_file": img_file}
 
     return render(request, "PostItFinder/index.html", context=context)   
