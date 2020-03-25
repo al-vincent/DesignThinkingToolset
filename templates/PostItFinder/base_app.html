@@ -1,0 +1,80 @@
+{% extends "PostItFinder/base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+    <!-- stepper bar -->
+    <div class="row mt-5 mb-5">
+        <div class="col-12">
+            <!-- NOTE: UPPER_CASE vars are passed via config.json... -->
+            <ul id="{{ stepper.ID }}", class="{{ stepper.CLASS }}">
+                {% for item in stepper.ITEMS %}
+                <!-- ...lower_case vars are passed via views.py -->
+                <li id= "{{ item.ID }}" class="{{ item.class }}">
+                    {{ item.TEXT }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <!-- /stepper bar -->
+
+    <!-- explanatory text -->
+    <div class="row mt-5 mb-5">
+        <div class="mx-auto">
+            <p id="{{ explain_text.id }}" class="lead">{{ explain_text.text }}</p>
+        </div>
+    </div>
+    <!-- /explanatory text -->
+
+    <!-- buttons -->
+    <div class="row mt-5 mb-5">
+        <!-- "previous" button -->
+        <div class="col-2">
+            <div class="row">
+                <div class="mx-auto">
+                    <button id="{{ next_btn.ID}}" type="button" class="btn btn-success btn-lg rounded-circle">
+                        {{ next_btn.SYMBOL }}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- \"previous" button -->
+
+        <!-- image action buttons -->
+        <div class="col-8">
+            <div class="row">
+                <div class="mx-auto">
+                    {% block image_action_buttons %}{% endblock %}
+                </div>
+            </div>
+        </div>        
+        <!-- /image action buttons -->
+
+        <!-- "next" button -->
+        <div class="col-2">
+            <div class="row">
+                <div class="mx-auto">
+                    <button id="{{ prev_btn.ID}}" type="button" class="btn btn-success btn-lg rounded-circle">
+                        {{ prev_btn.SYMBOL }}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- \"next" button -->
+
+    </div>
+    <!-- /buttons -->
+
+    <!-- image pane -->
+    <div class="row mt-5 mb-5">
+        <div class="mx-auto">
+            <div id="{{ image_pane.ID }}">[Image preview pane]</div>
+        </div>
+    </div>
+    <!-- /image pane -->
+
+    {% block page_content %}{% endblock %}
+
+{% endblock %}

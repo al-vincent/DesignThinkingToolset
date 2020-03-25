@@ -21,7 +21,7 @@
                     "ID": "logo-id",
                     "IMAGE": "logo-image"
                 },
-                "PAGES":[
+                "PAGES": [
                     {
                         "PAGE": "about.html",
                         "ID": "about-id",
@@ -38,27 +38,32 @@
         "APP": {
             "STEPPER_BAR": {
                 "ID": "stepper-id",
-                "STEP_1": {
-                    "ID": "step1-id",
-                    "TEXT": "SELECT IMAGE",
-                    "ACTIVE": true
-                },
-                "STEP_2": {
-                    "ID": "step2-id",
-                    "TEXT": "FIND REGIONS",
-                    "ACTIVE": false
-                },
-                "STEP_3": {
-                    "ID": "step3-id",
-                    "TEXT": "FIND TEXT AND OUTPUT",
-                    "ACTIVE": false
-                }
+                "CLASS": "stepper-bar",
+                "ITEMS": [
+                    {
+                        "ID": "step1-id",
+                        "TEXT": "SELECT IMAGE"
+                    },
+                    {
+                        "ID": "step2-id",
+                        "TEXT": "FIND REGIONS"
+                    },
+                    {
+                        "ID": "step3-id",
+                        "TEXT": "FIND TEXT AND OUTPUT"
+                    }
+                ]
+            },
+            "EXPLAIN_TEXT": {
+                "ID": "explain-text-id"
             },
             "NEXT_BTN": {
-                "ID": "next-btn-id"
+                "ID": "next-btn-id",
+                "SYMBOL": "R-ARR"
             },
             "PREVIOUS_BTN": {
-                "ID": "previous-btn-id"
+                "ID": "previous-btn-id",
+                "SYMBOL": "L-ARR"
             },
             "IMAGE_PANE": {
                 "ID": "img-pane-id"

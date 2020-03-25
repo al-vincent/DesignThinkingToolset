@@ -32,10 +32,15 @@ def index(request):
     else:
         # Not a POST request; just render the form
         form = UploadImageForm(label_suffix='')
-        
+
     context = {"title": CONFIG["TITLE"],
-               "navbar_id": CONFIG["BASE"]["NAVBAR"]["ID"],
-               "nav_items": CONFIG["BASE"]["NAVBAR"]["PAGES"],
+               "navbar": CONFIG["BASE"]["NAVBAR"],
+               "stepper": CONFIG["APP"]["STEPPER_BAR"],
+               "explain_text": {"id": CONFIG["APP"]["STEPPER_BAR"]["ID"], 
+                                "text": "Explainer text"},
+               "next_btn": CONFIG["APP"]["NEXT_BTN"],
+               "prev_btn": CONFIG["APP"]["PREVIOUS_BTN"],
+               "image_pane": CONFIG["APP"]["IMAGE_PANE"],
                "form_id": CONFIG["HOME"]["UPLOAD_IMG_FORM"]["ID"],
                "form": form,
                "submit_id": CONFIG["HOME"]["UPLOAD_IMG_FORM"]["SUBMIT_BUTTON"]["ID"],

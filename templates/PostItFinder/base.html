@@ -19,7 +19,7 @@
     </head>    
     <body>
         <!-- navbar -->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-success" id="{{ navbar_id }}">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-success" id="{{ navbar.ID }}">
             {% block navbar %}
             <!-- SNIP icon -->
             <a class="navbar-brand" href="#">SNIP</a>
@@ -28,7 +28,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
-                    {% for item in nav_items %}
+                    {% for item in navbar.PAGES %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ item.PAGE }}" id="{{ item.ID }}">{{ item.TEXT }}</a>
                     </li>
