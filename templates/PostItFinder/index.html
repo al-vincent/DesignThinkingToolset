@@ -2,23 +2,12 @@
 
 {% block title %}{{ title }}{% endblock %}
 
-{% block page_content %}
+{% block previous_button %}
+<!-- don't show the previous button on this page -->
+{% endblock%}
 
-    <div class="row mt-5 mb-5">
-      {{ body_text }}
-    </div>
-    
-    <div class="row mt-5 mb-5">
-      <form id="{{ form_id }}" method="POST" enctype="multipart/form-data">
-          {% csrf_token %}
-
-          {{ form }}
-          <input id="{{ submit_id }}" class="row" type="submit" name="submit" value="{{ submit_text }}"/>
-      </form>
-    </div>
-
-    <div class="row mt-5 mb-5">
-      <p>File: {{ img_file }}</p>    
-    </div>
-
+{% block image_action_buttons %}
+  <button id="{{ choose_img_btn.ID }}" type="button" class="btn btn-outline-success btn-lg">
+    {{ choose_img_btn.TEXT }}
+  </button>
 {% endblock %}

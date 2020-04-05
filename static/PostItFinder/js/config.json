@@ -55,7 +55,8 @@
                 ]
             },
             "EXPLAIN_TEXT": {
-                "ID": "explain-text-id"
+                "ID": "explain-text-id",
+                "TEXT": "Placeholder explainer text"
             },
             "NEXT_BTN": {
                 "ID": "next-btn-id",
@@ -70,22 +71,12 @@
             }
         },
         "HOME": {
-            "CHOOSE_IMG_BTN": {
-                "ID": "choose-img-button-id"
+            "EXPLAIN_TEXT": {
+                "TEXT": "Choose an image to process from your computer"
             },
-            "UPLOAD_IMG_FORM":{
-                "ID": "form-upload-image",
-                "CHOOSE_IMG_BTN": {
-                    "ID": "choose_img_btn_id"
-                },
-                "CHOOSE_IMG_LBL": {
-                    "XPATH": "//label[@for='choose_img_btn_id']",
-                    "TEXT": "Choose image"
-                },
-                "SUBMIT_BUTTON": {
-                    "ID": "submit_btn_id",
-                    "TEXT": "Submit"
-                }
+            "CHOOSE_IMG_BTN": {
+                "ID": "choose-img-btn-id",
+                "TEXT": "Choose image"
             }
         }
     }

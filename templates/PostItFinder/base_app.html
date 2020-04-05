@@ -8,7 +8,7 @@
     <div class="row mt-5 mb-5">
         <div class="col-12">
             <!-- NOTE: UPPER_CASE vars are passed via config.json... -->
-            <ul id="{{ stepper.ID }}", class="{{ stepper.CLASS }}">
+            <ul id="{{ stepper.ID }}" class="{{ stepper.CLASS }}">
                 {% for item in stepper.ITEMS %}
                 <!-- ...lower_case vars are passed via views.py -->
                 <li id= "{{ item.ID }}" class="{{ item.class }}">
@@ -23,7 +23,7 @@
     <!-- explanatory text -->
     <div class="row mt-5 mb-5">
         <div class="mx-auto">
-            <p id="{{ explain_text.id }}" class="lead">{{ explain_text.text }}</p>
+            <p id="{{ explain_text.ID }}" class="lead">{{ explain_text.TEXT }}</p>
         </div>
     </div>
     <!-- /explanatory text -->
@@ -34,9 +34,11 @@
         <div class="col-2">
             <div class="row">
                 <div class="mx-auto">
-                    <button id="{{ next_btn.ID}}" type="button" class="btn btn-success btn-lg rounded-circle">
-                        {{ next_btn.SYMBOL }}
+                    {% block previous_button %}
+                    <button id="{{ prev_btn.ID}}" type="button" class="btn btn-success btn-lg rounded-circle">
+                        {{ prev_btn.SYMBOL }}
                     </button>
+                    {% endblock %}
                 </div>
             </div>
         </div>
@@ -56,9 +58,11 @@
         <div class="col-2">
             <div class="row">
                 <div class="mx-auto">
-                    <button id="{{ prev_btn.ID}}" type="button" class="btn btn-success btn-lg rounded-circle">
-                        {{ prev_btn.SYMBOL }}
+                    {% block next_button %}
+                    <button id="{{ next_btn.ID}}" type="button" class="btn btn-success btn-lg rounded-circle">
+                        {{ next_btn.SYMBOL }}
                     </button>
+                    {% endblock %}
                 </div>
             </div>
         </div>
@@ -75,6 +79,6 @@
     </div>
     <!-- /image pane -->
 
-    {% block page_content %}{% endblock %}
+    <!-- {% block page_content %}{% endblock %} -->
 
 {% endblock %}

@@ -91,49 +91,58 @@ class HomePageStaticTests(base.StaticTests):
     # -------------------------------------------------------------------------------------
     # Explanatory text tests
     # -------------------------------------------------------------------------------------
-    def test_text_is_displayed(self):
-        pass
+    def test_explain_text_is_displayed(self):
+        explain_txt = self.browser.find_element_by_id(self.ELEMS["APP"]["EXPLAIN_TEXT"]["ID"])
+        self.assertTrue(explain_txt.is_displayed())
 
-    def test_text_is_correct(self):
-        pass
+    def test_explain_text_is_correct(self):
+        explain_txt = self.browser.find_element_by_id(self.ELEMS["APP"]["EXPLAIN_TEXT"]["ID"])
+        intended_text = self.ELEMS["HOME"]["EXPLAIN_TEXT"]["TEXT"]
+        self.assertEqual(explain_txt.get_attribute("innerText"), intended_text)
 
     # -------------------------------------------------------------------------------------
     # Choose-image button tests
     # -------------------------------------------------------------------------------------
     def test_choose_image_button_is_displayed(self):
-        pass
+        img_btn = self.browser.find_element_by_id(self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"])
+        self.assertTrue(img_btn.is_displayed())
 
     def test_choose_image_button_is_active(self):
-        pass
+        img_btn = self.browser.find_element_by_id(self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"])
+        self.assertTrue(img_btn.is_enabled())
     
     def test_choose_image_button_has_correct_label_text(self):
         """
         Test whether the home page has a button for uploading images to the service,
         and whether the button contains the correct text.
         """
-        cfg = self.ELEMS["HOME"]["UPLOAD_IMG_FORM"]["CHOOSE_IMG_LBL"]
-        img_btn = self.browser.find_element_by_xpath(cfg["XPATH"])
+        cfg = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]
+        img_btn = self.browser.find_element_by_id(cfg["ID"])
         self.assertEqual(img_btn.get_attribute("innerText"), cfg["TEXT"])
 
     # -------------------------------------------------------------------------------------
     # Next button tests
     # -------------------------------------------------------------------------------------
     def test_next_button_is_displayed(self):        
-        pass
+        next_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"])
+        self.assertTrue(next_btn.is_displayed())
 
     def test_next_button_is_active(self):
         # NOTE: should the button be *inactive* until an image is selected??
         # Without an image, there's no point in continuing.
-        pass
+        next_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"])
+        self.assertTrue(next_btn.is_enabled())
 
     # -------------------------------------------------------------------------------------
     # Previous button tests
     # -------------------------------------------------------------------------------------
-    def test_previous_button_is_not_visible(self):
-        pass
-
-    def test_previous_button_is_not_active(self):
-        pass
+    def test_previous_button_does_not_exist(self):
+        # NOTE: this works as follows:
+        #   - find_elements_by_id will return a list.
+        #   - if there are no elements in the DOM with the ID, it'll be an empty list
+        #   - an empty list is falsey, so can use assertFalse directly
+        prev_btn = self.browser.find_elements_by_id(self.ELEMS["APP"]["PREVIOUS_BTN"]["ID"])
+        self.assertFalse(prev_btn)
 
     # -------------------------------------------------------------------------------------
     # Preview pane tests
@@ -192,17 +201,18 @@ class HomePageDynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     # Choose-image button tests
     # -------------------------------------------------------------------------------------
-    def test_only_image_files_can_be_selected(self):
-        # Try adding several non-image files..?
-        # Can't possibly test every option - will stick with trying a few
-        pass
+    # def test_only_image_files_can_be_selected(self):
+    #     # Try adding several non-image files..?
+    #     # Can't possibly test every option - will stick with trying a few
+    #     pass
 
-    def test_clicking_upload_button_gets_file(self):
-        upload_button = self.browser.find_element_by_id(self.ELEMS["HOME"]["UPLOAD_IMG_FORM"]["CHOOSE_IMG_BTN"]["ID"])
-        file_path = os.path.join(settings.MEDIA_DIR, self.PATHS["TEST_IMG"]["DIR"], self.PATHS["TEST_IMG"]["FILE"])
-        upload_button.send_keys(file_path)
-        # self.assertEqual(file_path)
-        print(f"Inner text: {upload_button.get_attribute('innerText')}")
+    # def test_clicking_upload_button_gets_file(self):
+        # upload_button = self.browser.find_element_by_id(self.ELEMS["HOME"]["UPLOAD_IMG_FORM"]["CHOOSE_IMG_BTN"]["ID"])
+        # file_path = os.path.join(settings.MEDIA_DIR, self.PATHS["TEST_IMG"]["DIR"], self.PATHS["TEST_IMG"]["FILE"])
+        # upload_button.send_keys(file_path)
+        # # self.assertEqual(file_path)
+        # print(f"Inner text: {upload_button.get_attribute('innerText')}")
+        # pass
 
     # # -------------------------------------------------------------------------------------
     # # Next button tests
