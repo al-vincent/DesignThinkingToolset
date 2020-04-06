@@ -13,13 +13,13 @@
               integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" 
               crossorigin="anonymous">
         <!-- custom CSS -->
-        <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'PostItFinder/css/styles.css' %}">
         
         <title>{% block title %}SNIP{% endblock %}</title>
     </head>    
     <body>
         <!-- navbar -->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-success" id="{{ navbar_id }}">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-success" id="{{ navbar.ID }}">
             {% block navbar %}
             <!-- SNIP icon -->
             <a class="navbar-brand" href="#">SNIP</a>
@@ -28,7 +28,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
-                    {% for item in nav_items %}
+                    {% for item in navbar.PAGES %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ item.PAGE }}" id="{{ item.ID }}">{{ item.TEXT }}</a>
                     </li>

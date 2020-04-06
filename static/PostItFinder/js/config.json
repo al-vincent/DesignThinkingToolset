@@ -21,7 +21,7 @@
                     "ID": "logo-id",
                     "IMAGE": "logo-image"
                 },
-                "PAGES":[
+                "PAGES": [
                     {
                         "PAGE": "about.html",
                         "ID": "about-id",
@@ -38,49 +38,48 @@
         "APP": {
             "STEPPER_BAR": {
                 "ID": "stepper-id",
-                "STEP_1": {
-                    "ID": "step1-id",
-                    "TEXT": "SELECT IMAGE",
-                    "ACTIVE": true
-                },
-                "STEP_2": {
-                    "ID": "step2-id",
-                    "TEXT": "FIND REGIONS",
-                    "ACTIVE": false
-                },
-                "STEP_3": {
-                    "ID": "step3-id",
-                    "TEXT": "FIND TEXT AND OUTPUT",
-                    "ACTIVE": false
-                }
+                "CLASS": "stepper-bar",
+                "ITEMS": [
+                    {
+                        "ID": "step1-id",
+                        "TEXT": "SELECT IMAGE",
+                        "CLASS": ""
+                    },
+                    {
+                        "ID": "step2-id",
+                        "TEXT": "FIND REGIONS",
+                        "CLASS": ""
+                    },
+                    {
+                        "ID": "step3-id",
+                        "TEXT": "FIND TEXT AND OUTPUT",
+                        "CLASS": ""
+                    }
+                ]
+            },
+            "EXPLAIN_TEXT": {
+                "ID": "explain-text-id",
+                "TEXT": "Placeholder explainer text"
             },
             "NEXT_BTN": {
-                "ID": "next-btn-id"
+                "ID": "next-btn-id",
+                "SYMBOL": "R-ARR"
             },
             "PREVIOUS_BTN": {
-                "ID": "previous-btn-id"
+                "ID": "previous-btn-id",
+                "SYMBOL": "L-ARR"
             },
             "IMAGE_PANE": {
                 "ID": "img-pane-id"
             }
         },
-        "HOME": {
-            "CHOOSE_IMG_BTN": {
-                "ID": "choose-img-button-id"
+        "HOME": {            
+            "EXPLAIN_TEXT": {
+                "TEXT": "Choose an image to process from your computer"
             },
-            "UPLOAD_IMG_FORM":{
-                "ID": "form-upload-image",
-                "CHOOSE_IMG_BTN": {
-                    "ID": "choose_img_btn_id"
-                },
-                "CHOOSE_IMG_LBL": {
-                    "XPATH": "//label[@for='choose_img_btn_id']",
-                    "TEXT": "Choose image"
-                },
-                "SUBMIT_BUTTON": {
-                    "ID": "submit_btn_id",
-                    "TEXT": "Submit"
-                }
+            "CHOOSE_IMG_BTN": {
+                "ID": "choose-img-btn-id",
+                "TEXT": "Choose image"
             }
         }
     }
