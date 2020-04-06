@@ -74,19 +74,36 @@ class HomePageStaticTests(base.StaticTests):
     # Stepper bar tests
     # -------------------------------------------------------------------------------------
     def test_stepper_bar_is_displayed(self):
-        pass
+        stepper = self.browser.find_element_by_id(self.ELEMS["APP"]["STEPPER_BAR"]["ID"])
+        self.assertTrue(stepper.is_displayed())
 
-    def test_stepper_bar_has_correct_steps(self):
-        pass
+    def test_stepper_bar_has_correct_class(self):
+        stepper = self.browser.find_element_by_id(self.ELEMS["APP"]["STEPPER_BAR"]["ID"])
+        intended_class = self.ELEMS["APP"]["STEPPER_BAR"]["CLASS"]
+        self.assertEqual(stepper.get_attribute("class"), intended_class)
 
+    def test_stepper_bar_has_correct_number_of_steps(self):
+        stepper = self.browser.find_element_by_id(self.ELEMS["APP"]["STEPPER_BAR"]["ID"])
+        steps = stepper.find_elements_by_tag_name("li")
+        self.assertEqual(len(steps), len(self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]))
+    
+    def test_steps_have_correct_text(self):
+        items = self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]
+        for item in items:
+            step = self.browser.find_element_by_id(item["ID"])
+            self.assertEqual(step.get_attribute("innerText"), item["TEXT"])
+        
     def test_step_1_is_active(self):
-        pass
+        cfg = self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"][0]
+        step1 = self.browser.find_element_by_id(cfg["ID"])
+        self.assertIn("active", step1.get_attribute("class"))
 
-    def test_step_2_is_inactive(self):
-        pass
-
-    def test_step_3_is_inactive(self):
-        pass
+    def test_other_steps_are_inactive(self):
+        items = self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]
+        for item in items:
+            if items.index(item) != 0:
+                step = self.browser.find_element_by_id(item["ID"])
+                self.assertNotIn("active", step.get_attribute("class"))
 
     # -------------------------------------------------------------------------------------
     # Explanatory text tests
@@ -147,11 +164,14 @@ class HomePageStaticTests(base.StaticTests):
     # -------------------------------------------------------------------------------------
     # Preview pane tests
     # -------------------------------------------------------------------------------------
-    def test_preview_pane_is_rendered(self):
-        pass
+    def test_image_pane_exists(self):
+        img_pane = self.browser.find_elements_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        self.assertTrue(img_pane)
 
-    def test_preview_pane_is_empty(self):
-        pass
+    def test_image_pane_does_not_contain_img(self):
+        img_pane = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        imgs = img_pane.find_elements_by_tag_name("img")
+        self.assertFalse(imgs)
 
 
 # =========================================================================================

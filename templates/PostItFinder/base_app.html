@@ -11,7 +11,7 @@
             <ul id="{{ stepper.ID }}" class="{{ stepper.CLASS }}">
                 {% for item in stepper.ITEMS %}
                 <!-- ...lower_case vars are passed via views.py -->
-                <li id= "{{ item.ID }}" class="{{ item.class }}">
+                <li id= "{{ item.ID }}" class="{{ item.CLASS }}">
                     {{ item.TEXT }}
                 </li>
                 {% endfor %}

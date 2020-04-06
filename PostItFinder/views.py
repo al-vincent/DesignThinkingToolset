@@ -9,13 +9,14 @@ def index(request):
     with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
         CONFIG = load(f)["HTML"]
 
-    explain_text = CONFIG["APP"]["EXPLAIN_TEXT"]
-    explain_text["TEXT"] =  CONFIG["HOME"]["EXPLAIN_TEXT"]["TEXT"]
+    # Update config to include the explanatory text for the home page
+    CONFIG["APP"]["EXPLAIN_TEXT"]["TEXT"] =  CONFIG["HOME"]["EXPLAIN_TEXT"]["TEXT"]
+    CONFIG["APP"]["STEPPER_BAR"]["ITEMS"][0]["CLASS"] = "active"
 
     context = {"title": CONFIG["TITLE"],
                "navbar": CONFIG["BASE"]["NAVBAR"],
                "stepper": CONFIG["APP"]["STEPPER_BAR"],
-               "explain_text": explain_text,
+               "explain_text": CONFIG["APP"]["EXPLAIN_TEXT"],
                "next_btn": CONFIG["APP"]["NEXT_BTN"],
                "prev_btn": CONFIG["APP"]["PREVIOUS_BTN"],
                "choose_img_btn": CONFIG["HOME"]["CHOOSE_IMG_BTN"],

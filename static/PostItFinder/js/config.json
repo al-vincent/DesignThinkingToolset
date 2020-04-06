@@ -42,15 +42,18 @@
                 "ITEMS": [
                     {
                         "ID": "step1-id",
-                        "TEXT": "SELECT IMAGE"
+                        "TEXT": "SELECT IMAGE",
+                        "CLASS": ""
                     },
                     {
                         "ID": "step2-id",
-                        "TEXT": "FIND REGIONS"
+                        "TEXT": "FIND REGIONS",
+                        "CLASS": ""
                     },
                     {
                         "ID": "step3-id",
-                        "TEXT": "FIND TEXT AND OUTPUT"
+                        "TEXT": "FIND TEXT AND OUTPUT",
+                        "CLASS": ""
                     }
                 ]
             },
@@ -70,7 +73,7 @@
                 "ID": "img-pane-id"
             }
         },
-        "HOME": {
+        "HOME": {            
             "EXPLAIN_TEXT": {
                 "TEXT": "Choose an image to process from your computer"
             },
