@@ -30,7 +30,7 @@
                 <ul class="navbar-nav">
                     {% for item in navbar.PAGES %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ item.PAGE }}" id="{{ item.ID }}">{{ item.TEXT }}</a>
+                        <a class="nav-link" href="{% url item.URL %}" id="{{ item.ID }}">{{ item.TEXT }}</a>
                     </li>
                     {% endfor %}
                 </ul>
