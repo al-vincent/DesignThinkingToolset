@@ -42,10 +42,10 @@ class StaticTests(StaticLiveServerTestCase):
     # read in config vars
     with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
         CONFIG = load(f)
-        PATHS = CONFIG["PATHS"]
         ELEMS = CONFIG["HTML"]
+        PATHS = CONFIG["PATHS"]
         CONST = CONFIG["CONSTANTS"]
-         
+
     @classmethod
     def setUpClass(cls):
         """
@@ -85,10 +85,10 @@ class DynamicTests(StaticLiveServerTestCase):
     # read in config vars
     with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
         CONFIG = load(f)
-        PATHS = CONFIG["PATHS"]
         ELEMS = CONFIG["HTML"]
+        PATHS = CONFIG["PATHS"]
         CONST = CONFIG["CONSTANTS"]
-       
+    
     def setUp(self):
         """
         Browse to the homepage. 

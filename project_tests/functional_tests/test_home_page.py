@@ -1,8 +1,5 @@
 from selenium.webdriver.support.ui import Select
-# from selenium.webdriver import ActionChains
 from django.conf import settings
-from django.urls import reverse, resolve
-from django.http import HttpRequest
 
 import time
 import os
@@ -42,7 +39,7 @@ class HomePageStaticTests(base.StaticTests):
         fail and we'll need to fix.
         """
         response = self.client.get("/")
-        self.assertTemplateUsed(response, self.PATHS["HOME"])
+        self.assertTemplateUsed(response, self.PATHS["PAGES"]["HOME"])
 
     def test_page_has_correct_title(self):
         """
@@ -205,12 +202,8 @@ class HomePageDynamicTests(base.DynamicTests):
     # def test_clicking_logo_takes_user_to_home(self):
     #     pass
 
-    def test_clicking_about_link_takes_user_to_about_url(self):
-        base_url = self.browser.current_url
-        page = self.ELEMS["BASE"]["NAVBAR"]["PAGES"][0]        
-        page_elem = self.browser.find_element_by_id(page["ID"]).click()
-        self.assertEqual(self.browser.current_url, base_url[:-1] + reverse(page["URL"]))
-
+    # def test_clicking_about_takes_user_to_about_page(self):
+    #     pass
 
     # def test_clicking_faq_takes_user_to_faq_page(self):
     #     pass

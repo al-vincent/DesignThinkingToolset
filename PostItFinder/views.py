@@ -1,44 +1,27 @@
 from django.shortcuts import render
 from django.conf import settings
-from django.urls import reverse
-
 import os
 from json import load
 
 
-# NOTE: can I replace these with the built-in static finders?
-with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
-    CONFIG = load(f)
-    PATHS = CONFIG["PATHS"]
-    HTML = CONFIG["HTML"]
+def index(request):
+    # NOTE: can I replace these with the built-in static finders?
+    with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
+        CONFIG = load(f)["HTML"]
 
-
-def index(request):    
     # Update config to include the explanatory text for the home page
-    HTML["APP"]["EXPLAIN_TEXT"]["TEXT"] =  HTML["HOME"]["EXPLAIN_TEXT"]["TEXT"]
-    HTML["APP"]["STEPPER_BAR"]["ITEMS"][0]["CLASS"] = "active"
+    CONFIG["APP"]["EXPLAIN_TEXT"]["TEXT"] =  CONFIG["HOME"]["EXPLAIN_TEXT"]["TEXT"]
+    CONFIG["APP"]["STEPPER_BAR"]["ITEMS"][0]["CLASS"] = "active"
 
-    context = {
-        "title": HTML["TITLE"],
-        "navbar": HTML["BASE"]["NAVBAR"],
-        "stepper": HTML["APP"]["STEPPER_BAR"],
-        "explain_text": HTML["APP"]["EXPLAIN_TEXT"],
-        "next_btn": HTML["APP"]["NEXT_BTN"],
-        "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
-        "choose_img_btn": HTML["HOME"]["CHOOSE_IMG_BTN"],
-        "image_pane": HTML["APP"]["IMAGE_PANE"],
-        }
+    context = {"title": CONFIG["TITLE"],
+               "navbar": CONFIG["BASE"]["NAVBAR"],
+               "stepper": CONFIG["APP"]["STEPPER_BAR"],
+               "explain_text": CONFIG["APP"]["EXPLAIN_TEXT"],
+               "next_btn": CONFIG["APP"]["NEXT_BTN"],
+               "prev_btn": CONFIG["APP"]["PREVIOUS_BTN"],
+               "choose_img_btn": CONFIG["HOME"]["CHOOSE_IMG_BTN"],
+               "image_pane": CONFIG["APP"]["IMAGE_PANE"],
+               }
 
-    return render(request, PATHS["HOME"], context=context)
-
-def about(request):
-    context = {
-        "title": "about",
-        "about_content": "some about info"
-        }
+    return render(request, "PostItFinder/index.html", context=context)   
     
-    return render(request, PATHS["ABOUT"], context=context)
-
-def faq(request):
-    pass
-    # return render(request, ROUTES["FAQ"])
