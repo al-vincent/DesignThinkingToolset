@@ -1,8 +1,12 @@
 {   
-    "PATHS": {        
-        "HOME": "PostItFinder/index.html",
-        "ABOUT": "PostItFinder/about.html",
-        "FAQ": "PostItFinder/faq.html"
+    "PATHS": {
+        "PAGES": {
+            "HOME": "PostItFinder/index.html"
+        },
+        "TEST_IMG": {
+            "DIR": "test",
+            "FILE": "test_img.jpg"
+        }
     },
     "CONSTANTS":{
         "THEME_COLOUR": "#55B776",
@@ -18,15 +22,15 @@
                     "IMAGE": "logo-image"
                 },
                 "PAGES": [
-                    {   
+                    {
+                        "PAGE": "about.html",
                         "ID": "about-id",
-                        "TEXT": "About",
-                        "URL": "PostItFinder:about"
+                        "TEXT": "About"
                     },
                     {
+                        "PAGE": "faq.html",
                         "ID": "faq-id",
-                        "TEXT": "FAQ",
-                        "URL": "PostItFinder:faq"
+                        "TEXT": "FAQ"
                     }
                 ]
             }
