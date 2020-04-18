@@ -5,7 +5,7 @@ from django.conf import settings
 import os
 from json import load
 
-from PostItFinder.views import index, about
+from PostItFinder.views import index, about, faq
 
 with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
         CONFIG = load(f)
@@ -37,7 +37,12 @@ class AboutPageTests(TestCase):
         response = self.client.get(reverse(HTML["BASE"]["NAVBAR"]["PAGES"][0]["URL"]))
         self.assertTemplateUsed(response, PATHS["ABOUT"])
 
-    def test_get_image_file(self):
-        # response = self.client.post('/', data={"img_file": 'A new list item'})
-        # # self.assertIn('A new list item', response.content.decode())
-        pass
+class FaqPageTests(TestCase):
+
+    def test_about_url_resolves_to_about_view(self):        
+        url_found = resolve(reverse(HTML["BASE"]["NAVBAR"]["PAGES"][1]["URL"]))
+        self.assertEqual(url_found.func, faq)
+    
+    def test_about_uses_template(self):
+        response = self.client.get(reverse(HTML["BASE"]["NAVBAR"]["PAGES"][1]["URL"]))
+        self.assertTemplateUsed(response, PATHS["FAQ"])

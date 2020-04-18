@@ -212,8 +212,11 @@ class HomePageDynamicTests(base.DynamicTests):
         self.assertEqual(self.browser.current_url, base_url[:-1] + reverse(page["URL"]))
 
 
-    # def test_clicking_faq_takes_user_to_faq_page(self):
-    #     pass
+    def test_clicking_faq_takes_user_to_faq_page(self):
+        base_url = self.browser.current_url
+        page = self.ELEMS["BASE"]["NAVBAR"]["PAGES"][1]        
+        page_elem = self.browser.find_element_by_id(page["ID"]).click()
+        self.assertEqual(self.browser.current_url, base_url[:-1] + reverse(page["URL"]))
 
     # -------------------------------------------------------------------------------------
     # Stepper bar tests

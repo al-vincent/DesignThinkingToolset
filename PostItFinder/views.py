@@ -33,12 +33,16 @@ def index(request):
 
 def about(request):
     context = {
-        "title": "about",
-        "about_content": "some about info"
+        "title": "About",
+        "about_content": "some info about the app"
         }
     
     return render(request, PATHS["ABOUT"], context=context)
 
 def faq(request):
-    pass
-    # return render(request, ROUTES["FAQ"])
+    context = {
+        "title": "FAQ",
+        "faq_content": "some frequently asked questions"
+        }
+    
+    return render(request, PATHS["FAQ"], context=context)
