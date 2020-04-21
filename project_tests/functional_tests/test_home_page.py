@@ -244,23 +244,19 @@ class HomePageDynamicTests(base.DynamicTests):
         # print(f"Inner text: {upload_button.get_attribute('innerText')}")
         # pass
 
-    # # -------------------------------------------------------------------------------------
-    # # Next button tests
-    # # -------------------------------------------------------------------------------------
-    # def test_next_button_is_displayed(self):
-    #     pass
+    # -------------------------------------------------------------------------------------
+    # Next button tests
+    # -------------------------------------------------------------------------------------
+    def test_clicking_next_button_takes_user_to_set_regions_page(self):
+        base_url = self.browser.current_url        
+        btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
+        expected_url = reverse(self.ELEMS["HOME"]["NEXT_BTN"]["URL"])
+        self.assertEqual(self.browser.current_url, base_url[:-1] + expected_url)
 
-    # def test_next_button_is_active(self):
-    #     pass
-
-    # # -------------------------------------------------------------------------------------
-    # # Previous button tests
-    # # -------------------------------------------------------------------------------------
-    # def test_previous_button_is_not_visible(self):
-    #     pass
-
-    # def test_previous_button_is_not_active(self):
-    #     pass
+    # -------------------------------------------------------------------------------------
+    # Previous button tests
+    # -------------------------------------------------------------------------------------
+    # None
 
     # # -------------------------------------------------------------------------------------
     # # Preview pane tests

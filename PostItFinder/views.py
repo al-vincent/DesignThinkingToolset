@@ -18,6 +18,9 @@ def index(request):
     HTML["APP"]["EXPLAIN_TEXT"]["TEXT"] =  HTML["HOME"]["EXPLAIN_TEXT"]["TEXT"]
     HTML["APP"]["STEPPER_BAR"]["ITEMS"][0]["CLASS"] = "active"
 
+    # Update URL for the 'next' button
+    HTML["APP"]["NEXT_BTN"]["URL"] = HTML["HOME"]["NEXT_BTN"]["URL"]
+
     context = {
         "title": HTML["TITLE"],
         "navbar": HTML["BASE"]["NAVBAR"],
@@ -46,3 +49,17 @@ def faq(request):
         }
     
     return render(request, PATHS["FAQ"], context=context)
+
+def set_regions(request):
+    context = {
+        "title": "Set Regions",
+        "navbar": HTML["BASE"]["NAVBAR"],
+        "stepper": HTML["APP"]["STEPPER_BAR"],
+        "explain_text": HTML["APP"]["EXPLAIN_TEXT"],
+        "next_btn": HTML["APP"]["NEXT_BTN"],
+        "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
+        "choose_img_btn": HTML["HOME"]["CHOOSE_IMG_BTN"],
+        "image_pane": HTML["APP"]["IMAGE_PANE"],
+        }
+
+    return render(request, PATHS["SET_REGIONS"], context=context)

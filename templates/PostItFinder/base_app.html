@@ -35,9 +35,9 @@
             <div class="row">
                 <div class="mx-auto">
                     {% block previous_button %}
-                    <button id="{{ prev_btn.ID}}" type="button" class="btn btn-success btn-lg rounded-circle">
+                    <a id="{{ prev_btn.ID}}" href="{% url prev_btn.URL %}" role="button" class="btn btn-success btn-lg rounded-circle">
                         {{ prev_btn.SYMBOL }}
-                    </button>
+                    </a>
                     {% endblock %}
                 </div>
             </div>
@@ -59,9 +59,9 @@
             <div class="row">
                 <div class="mx-auto">
                     {% block next_button %}
-                    <button id="{{ next_btn.ID}}" type="button" class="btn btn-success btn-lg rounded-circle">
+                    <a id="{{ next_btn.ID}}" href="{% url next_btn.URL %}" role="button" class="btn btn-success btn-lg rounded-circle">
                         {{ next_btn.SYMBOL }}
-                    </button>
+                    </a>
                     {% endblock %}
                 </div>
             </div>
