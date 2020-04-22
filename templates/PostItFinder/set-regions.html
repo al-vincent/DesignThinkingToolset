@@ -1,0 +1,9 @@
+{% extends "PostItFinder/base_app.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block image_action_buttons %}
+  <button id="{{ choose_img_btn.ID }}" type="button" class="btn btn-outline-success btn-lg">
+    {{ choose_img_btn.TEXT }}
+  </button>
+{% endblock %}

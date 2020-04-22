@@ -1,27 +1,65 @@
 from django.shortcuts import render
 from django.conf import settings
+from django.urls import reverse
+
 import os
 from json import load
 
 
+# NOTE: can I replace these with the built-in static finders?
+with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
+    CONFIG = load(f)
+    PATHS = CONFIG["PATHS"]
+    HTML = CONFIG["HTML"]
+
 def index(request):
-    # NOTE: can I replace these with the built-in static finders?
-    with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
-        CONFIG = load(f)["HTML"]
-
     # Update config to include the explanatory text for the home page
-    CONFIG["APP"]["EXPLAIN_TEXT"]["TEXT"] =  CONFIG["HOME"]["EXPLAIN_TEXT"]["TEXT"]
-    CONFIG["APP"]["STEPPER_BAR"]["ITEMS"][0]["CLASS"] = "active"
 
-    context = {"title": CONFIG["TITLE"],
-               "navbar": CONFIG["BASE"]["NAVBAR"],
-               "stepper": CONFIG["APP"]["STEPPER_BAR"],
-               "explain_text": CONFIG["APP"]["EXPLAIN_TEXT"],
-               "next_btn": CONFIG["APP"]["NEXT_BTN"],
-               "prev_btn": CONFIG["APP"]["PREVIOUS_BTN"],
-               "choose_img_btn": CONFIG["HOME"]["CHOOSE_IMG_BTN"],
-               "image_pane": CONFIG["APP"]["IMAGE_PANE"],
-               }
+    HTML["APP"]["EXPLAIN_TEXT"]["TEXT"] =  HTML["HOME"]["EXPLAIN_TEXT"]["TEXT"]
+    HTML["APP"]["STEPPER_BAR"]["ITEMS"][0]["CLASS"] = "active"
 
-    return render(request, "PostItFinder/index.html", context=context)   
+    # Update URL for the 'next' button
+    HTML["APP"]["NEXT_BTN"]["URL"] = HTML["HOME"]["NEXT_BTN"]["URL"]
+
+    context = {
+        "title": HTML["TITLE"],
+        "navbar": HTML["BASE"]["NAVBAR"],
+        "stepper": HTML["APP"]["STEPPER_BAR"],
+        "explain_text": HTML["APP"]["EXPLAIN_TEXT"],
+        "next_btn": HTML["APP"]["NEXT_BTN"],
+        "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
+        "choose_img_btn": HTML["HOME"]["CHOOSE_IMG_BTN"],
+        "image_pane": HTML["APP"]["IMAGE_PANE"],
+        }
+
+    return render(request, PATHS["HOME"], context=context)
+
+def about(request):
+    context = {
+        "title": "About",
+        "about_content": "some info about the app"
+        }
     
+    return render(request, PATHS["ABOUT"], context=context)
+
+def faq(request):
+    context = {
+        "title": "FAQ",
+        "faq_content": "some frequently asked questions"
+        }
+    
+    return render(request, PATHS["FAQ"], context=context)
+
+def set_regions(request):
+    context = {
+        "title": "Set Regions",
+        "navbar": HTML["BASE"]["NAVBAR"],
+        "stepper": HTML["APP"]["STEPPER_BAR"],
+        "explain_text": HTML["APP"]["EXPLAIN_TEXT"],
+        "next_btn": HTML["APP"]["NEXT_BTN"],
+        "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
+        "choose_img_btn": HTML["HOME"]["CHOOSE_IMG_BTN"],
+        "image_pane": HTML["APP"]["IMAGE_PANE"],
+        }
+
+    return render(request, PATHS["SET_REGIONS"], context=context)

@@ -1,12 +1,9 @@
 {   
     "PATHS": {
-        "PAGES": {
-            "HOME": "PostItFinder/index.html"
-        },
-        "TEST_IMG": {
-            "DIR": "test",
-            "FILE": "test_img.jpg"
-        }
+        "HOME": "PostItFinder/index.html",
+        "ABOUT": "PostItFinder/about.html",
+        "FAQ": "PostItFinder/faq.html",
+        "SET_REGIONS": "PostItFinder/set-regions.html"
     },
     "CONSTANTS":{
         "THEME_COLOUR": "#55B776",
@@ -22,15 +19,15 @@
                     "IMAGE": "logo-image"
                 },
                 "PAGES": [
-                    {
-                        "PAGE": "about.html",
+                    {   
                         "ID": "about-id",
-                        "TEXT": "About"
+                        "TEXT": "About",
+                        "URL": "PostItFinder:about"
                     },
                     {
-                        "PAGE": "faq.html",
                         "ID": "faq-id",
-                        "TEXT": "FAQ"
+                        "TEXT": "FAQ",
+                        "URL": "PostItFinder:faq"
                     }
                 ]
             }
@@ -63,11 +60,13 @@
             },
             "NEXT_BTN": {
                 "ID": "next-btn-id",
-                "SYMBOL": "R-ARR"
+                "SYMBOL": "R-ARR",
+                "URL": "PostItFinder:index"
             },
             "PREVIOUS_BTN": {
                 "ID": "previous-btn-id",
-                "SYMBOL": "L-ARR"
+                "SYMBOL": "L-ARR",
+                "URL": "PostItFinder:index"
             },
             "IMAGE_PANE": {
                 "ID": "img-pane-id"
@@ -80,7 +79,19 @@
             "CHOOSE_IMG_BTN": {
                 "ID": "choose-img-btn-id",
                 "TEXT": "Choose image"
+            },
+            "NEXT_BTN": {
+                "URL": "PostItFinder:set_regions"
             }
+        },
+        "ABOUT": {
+
+        },
+        "FAQ": {
+
+        },
+        "SET_REGIONS": {
+
         }
     }
 }
