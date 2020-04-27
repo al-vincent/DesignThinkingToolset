@@ -82,3 +82,8 @@
     <!-- {% block page_content %}{% endblock %} -->
 
 {% endblock %}
+
+{% block scripts %}
+    {% load static %}
+    <script type="text/javascript" src="{% static 'PostItFinder/js/d3.min.js' %}"></script>
+{% endblock %}

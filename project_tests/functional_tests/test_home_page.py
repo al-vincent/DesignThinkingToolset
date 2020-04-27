@@ -1,5 +1,6 @@
 from selenium.webdriver.support.ui import Select
 from django.conf import settings
+from django.urls import reverse
 
 import time
 import os
@@ -39,7 +40,7 @@ class HomePageStaticTests(base.StaticTests):
         fail and we'll need to fix.
         """
         response = self.client.get("/")
-        self.assertTemplateUsed(response, self.PATHS["PAGES"]["HOME"])
+        self.assertTemplateUsed(response, self.PATHS["HOME"])
 
     def test_page_has_correct_title(self):
         """
