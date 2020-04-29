@@ -11,3 +11,9 @@
     {{ choose_img_btn.TEXT }}
   </button>
 {% endblock %}
+
+{% block scripts %}
+  {{ block.super }}  
+  {% load static %}
+  <script type="text/javascript" src="{% static 'PostItFinder/js/index.js' %}"></script>
+{% endblock %}
