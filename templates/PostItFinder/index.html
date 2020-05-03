@@ -7,9 +7,15 @@
 {% endblock%}
 
 {% block image_action_buttons %}
-  <button id="{{ choose_img_btn.ID }}" type="button" class="btn btn-outline-success btn-lg">
-    {{ choose_img_btn.TEXT }}
-  </button>
+  <div class="custom-file">
+    <input type="file" accept=".jpg, .png, .gif, .bmp" 
+          id="{{ choose_img_btn.ID }}"
+          class="custom-file-input">
+    </input>
+    <label class="custom-file-label" for="{{ choose_img_btn.ID }}">
+      {{ choose_img_btn.TEXT }}
+    </label>
+  </div>
 {% endblock %}
 
 {% block scripts %}

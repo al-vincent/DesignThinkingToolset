@@ -1,15 +1,14 @@
 "use strict";
 
-// console.log("Hello, this is the index");
-function main() {    
-    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
-    const CONTAINER = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.ID);
-    const WIDTH = CONTAINER.clientWidth;
-    const HEIGHT = (WIDTH / 4608) * 3456;
-    const FILE = "C:\\Users\\al_vi\\OneDrive\\Code\\DesignThinkingToolset\\media\\test\\test_img.jpg"
-    
-    const svg = createSvg(CONFIG.HTML.APP.IMAGE_PANE.ID, WIDTH, HEIGHT);
-    createImage(svg, FILE, WIDTH, HEIGHT);
-}
+// Add the following code if you want the name of the file appear on select
+// https://www.w3schools.com/bootstrap4/bootstrap_forms_custom.asp
+$(".custom-file-input").on("change", function() {
+    const fileName = $(this).val().split("\\").pop();    
+    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
 
-main();
+
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    previewImage(this, CONFIG.HTML.APP.IMAGE_PANE.ID);
+});
+
+

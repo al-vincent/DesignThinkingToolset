@@ -120,23 +120,20 @@ class HomePageStaticTests(base.StaticTests):
 
     # -------------------------------------------------------------------------------------
     # Choose-image button tests
-    # -------------------------------------------------------------------------------------
-    def test_choose_image_button_is_displayed(self):
-        img_btn = self.browser.find_element_by_id(self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"])
-        self.assertTrue(img_btn.is_displayed())
-
-    def test_choose_image_button_is_active(self):
-        img_btn = self.browser.find_element_by_id(self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"])
-        self.assertTrue(img_btn.is_enabled())
+    # -------------------------------------------------------------------------------------    
+    def test_choose_image_input_is_active(self):
+        img_input = self.browser.find_element_by_id(self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"])
+        self.assertTrue(img_input.is_enabled())
     
-    def test_choose_image_button_has_correct_label_text(self):
+    def test_choose_image_label_has_correct_label_text(self):
         """
         Test whether the home page has a button for uploading images to the service,
         and whether the button contains the correct text.
         """
         cfg = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]
-        img_btn = self.browser.find_element_by_id(cfg["ID"])
-        self.assertEqual(img_btn.get_attribute("innerText"), cfg["TEXT"])
+        input_id = cfg["ID"]
+        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')
+        self.assertEqual(img_label.get_attribute("innerText"), cfg["TEXT"])
 
     # -------------------------------------------------------------------------------------
     # Next button tests
@@ -225,18 +222,110 @@ class HomePageDynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     # Choose-image button tests
     # -------------------------------------------------------------------------------------
-    # def test_only_image_files_can_be_selected(self):
-    #     # Try adding several non-image files..?
-    #     # Can't possibly test every option - will stick with trying a few
+    # N.B. we don't want to run the test below! The dialog opened is an OS dialog, which 
+    # Selenium can't interact with (including closing the dialog)
+    # def test_clicking_choose_image_opens_dialog(self):
     #     pass
 
-    # def test_clicking_upload_button_gets_file(self):
-        # upload_button = self.browser.find_element_by_id(self.ELEMS["HOME"]["UPLOAD_IMG_FORM"]["CHOOSE_IMG_BTN"]["ID"])
-        # file_path = os.path.join(settings.MEDIA_DIR, self.PATHS["TEST_IMG"]["DIR"], self.PATHS["TEST_IMG"]["FILE"])
-        # upload_button.send_keys(file_path)
-        # # self.assertEqual(file_path)
-        # print(f"Inner text: {upload_button.get_attribute('innerText')}")
-        # pass
+    def test_jpg_can_be_selected(self):
+        img_file = "test_jpg.jpg"
+        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+
+        # get the input and label elements
+        input_elem = self.browser.find_element_by_id(input_id)
+        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+        
+        # update the input directly with the file path
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        input_elem.send_keys(path)
+        self.assertEqual(img_label.get_attribute("innerText"), img_file)
+
+        # wait a few seconds for the iamge to render
+        time.sleep(3)
+
+        # check whether the image src attribute is no longer '#'
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        self.assertNotIn("#", img.get_attribute("src"))
+    
+    def test_png_can_be_selected(self):
+        img_file = "test_png.png"
+        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+
+        # get the input and label elements
+        input_elem = self.browser.find_element_by_id(input_id)
+        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+        
+        # update the input directly with the file path
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        input_elem.send_keys(path)
+        self.assertEqual(img_label.get_attribute("innerText"), img_file)
+
+        # wait a few seconds for the iamge to render
+        time.sleep(3)
+
+        # check whether the image src attribute is no longer '#'
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        self.assertNotIn("#", img.get_attribute("src"))
+    
+    def test_bmp_can_be_selected(self):
+        img_file = "test_bmp.bmp"
+        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+
+        # get the input and label elements
+        input_elem = self.browser.find_element_by_id(input_id)
+        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+        
+        # update the input directly with the file path
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        input_elem.send_keys(path)
+        self.assertEqual(img_label.get_attribute("innerText"), img_file)
+
+        # wait a few seconds for the iamge to render
+        time.sleep(3)
+
+        # check whether the image src attribute is no longer '#'
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        self.assertNotIn("#", img.get_attribute("src"))
+    
+    def test_gif_can_be_selected(self):
+        img_file = "test_gif.gif"
+        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+
+        # get the input and label elements
+        input_elem = self.browser.find_element_by_id(input_id)
+        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+        
+        # update the input directly with the file path
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        input_elem.send_keys(path)
+        self.assertEqual(img_label.get_attribute("innerText"), img_file)
+
+        # wait a few seconds for the iamge to render
+        time.sleep(3)
+
+        # check whether the image src attribute is no longer '#'
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        self.assertNotIn("#", img.get_attribute("src"))
+
+    def test_tif_cannot_be_selected(self):
+        img_file = "test_tif.tif"
+        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+
+        # get the input and label elements
+        input_elem = self.browser.find_element_by_id(input_id)
+        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+        
+        # update the input directly with the file path
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        input_elem.send_keys(path)
+        self.assertEqual(img_label.get_attribute("innerText"), img_file)
+
+        # wait a few seconds for the iamge to render
+        time.sleep(3)
+
+        # check whether the image src attribute is no longer '#'
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        self.assertIn("#", img.get_attribute("src"))
 
     # -------------------------------------------------------------------------------------
     # Next button tests

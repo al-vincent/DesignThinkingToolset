@@ -46,11 +46,7 @@
 
         <!-- image action buttons -->
         <div class="col-8">
-            <div class="row">
-                <div class="mx-auto">
-                    {% block image_action_buttons %}{% endblock %}
-                </div>
-            </div>
+            {% block image_action_buttons %}{% endblock %}
         </div>        
         <!-- /image action buttons -->
 
@@ -71,10 +67,13 @@
     </div>
     <!-- /buttons -->
 
+
     <!-- image pane -->
     <div class="row mt-5 mb-5">
         <div class="col-12">
-            <div id="{{ image_pane.ID }}"></div>
+            {% block image_pane %}
+            <img id="{{ image_pane.ID }}" class="img-fluid" src="#" alt="No image selected">
+            {% endblock %}
         </div>
     </div>
     <!-- /image pane -->
@@ -86,8 +85,9 @@
 {% block scripts %}
     <!-- pass data to javascript as JSON -->
     {{ config|json_script:"config-id" }}
-    {% load static %}
+
     <!-- load JavaScript files -->
+    {% load static %}
     <script type="text/javascript" src="{% static 'PostItFinder/js/d3.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'PostItFinder/js/drawSvgAndImage.js' %}"></script>
 {% endblock %}
