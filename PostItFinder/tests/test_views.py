@@ -22,10 +22,10 @@ class HomePageTests(TestCase):
         response = self.client.get('/')
         self.assertTemplateUsed(response, PATHS["HOME"])
 
-     def test_get_image_file(self):
-        # response = self.client.post('/', data={"img_file": 'A new list item'})
-        # # self.assertIn('A new list item', response.content.decode())
-        pass
+    # def test_get_image_file(self):         
+        # response = self.client.post('/', data={"img_file": 'A new list item'
+        # self.assertIn('A new list item', response.content.decode())
+        # pass
 
 class AboutPageTests(TestCase):
 

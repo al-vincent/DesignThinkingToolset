@@ -30,6 +30,7 @@ def index(request):
         "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
         "choose_img_btn": HTML["HOME"]["CHOOSE_IMG_BTN"],
         "image_pane": HTML["APP"]["IMAGE_PANE"],
+        "config": CONFIG,
         }
 
     return render(request, PATHS["HOME"], context=context)

@@ -1,0 +1,96 @@
+{% extends "PostItFinder/base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+    <!-- stepper bar -->
+    <div class="row mt-5 mb-5">
+        <div class="col-12">
+            <!-- NOTE: UPPER_CASE vars are passed via config.json... -->
+            <ul id="{{ stepper.ID }}" class="{{ stepper.CLASS }}">
+                {% for item in stepper.ITEMS %}
+                <!-- ...lower_case vars are passed via views.py -->
+                <li id= "{{ item.ID }}" class="{{ item.CLASS }}">
+                    {{ item.TEXT }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <!-- /stepper bar -->
+
+    <!-- explanatory text -->
+    <div class="row mt-5 mb-5">
+        <div class="mx-auto">
+            <p id="{{ explain_text.ID }}" class="lead">{{ explain_text.TEXT }}</p>
+        </div>
+    </div>
+    <!-- /explanatory text -->
+
+    <!-- buttons -->
+    <div class="row mt-5 mb-5">
+        <!-- "previous" button -->
+        <div class="col-2 col-lg-3">
+            <div class="row">
+                <div class="mx-auto">
+                    {% block previous_button %}
+                    <a id="{{ prev_btn.ID}}" href="{% url prev_btn.URL %}" role="button" class="btn btn-success btn-lg rounded-circle">
+                        {{ prev_btn.SYMBOL }}
+                    </a>
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+        <!-- \"previous" button -->
+
+        <!-- image action buttons -->
+        <div class="col-8 col-lg-6">
+            {% block image_action_buttons %}{% endblock %}
+        </div>        
+        <!-- /image action buttons -->
+
+        <!-- "next" button -->
+        <div class="col-2 col-lg-3">
+            <div class="row">
+                <div class="mx-auto">
+                    {% block next_button %}
+                    <a id="{{ next_btn.ID}}" href="{% url next_btn.URL %}" role="button" 
+                    class="btn btn-success btn-lg rounded-circle">
+                        {{ next_btn.SYMBOL }}
+                    </a>
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+        <!-- \"next" button -->
+
+    </div>
+    <!-- /buttons -->
+
+
+    <!-- image pane -->
+    <div class="row mt-5 mb-5">
+        <div class="col-2"></div>
+        <div class="col-12 col-lg-8">
+            {% block image_pane %}
+            <img id="{{ image_pane.ID }}" class="img-fluid" src="#" alt="No image selected">
+            {% endblock %}
+        </div>
+        <div class="col-2"></div>
+    </div>
+    <!-- /image pane -->
+
+    <!-- {% block page_content %}{% endblock %} -->
+
+{% endblock %}
+
+{% block scripts %}
+    <!-- pass data to javascript as JSON -->
+    {{ config|json_script:"config-id" }}
+
+    <!-- load JavaScript files -->
+    {% load static %}
+    <script type="text/javascript" src="{% static 'PostItFinder/js/d3.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'PostItFinder/js/drawSvgAndImage.js' %}"></script>
+{% endblock %}

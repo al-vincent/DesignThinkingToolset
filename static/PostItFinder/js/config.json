@@ -60,12 +60,12 @@
             },
             "NEXT_BTN": {
                 "ID": "next-btn-id",
-                "SYMBOL": "R-ARR",
+                "SYMBOL": "N",
                 "URL": "PostItFinder:index"
             },
             "PREVIOUS_BTN": {
                 "ID": "previous-btn-id",
-                "SYMBOL": "L-ARR",
+                "SYMBOL": "P",
                 "URL": "PostItFinder:index"
             },
             "IMAGE_PANE": {
@@ -82,6 +82,9 @@
             },
             "NEXT_BTN": {
                 "URL": "PostItFinder:set_regions"
+            },
+            "IMAGE_PANE": {
+                "FILE_STORE_KEY": "fileInfo"
             }
         },
         "ABOUT": {
