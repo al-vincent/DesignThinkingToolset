@@ -17,7 +17,7 @@
  * @param {string} imgID - the ID of the HTML <img> element that will display the image
  * @todo - add .onerror events for reader, img (in addition to the .onloads)
  */
-function previewImage(input, imgID) {
+function previewImage(input, imgID, fileInfoKey) {
     if (input.files && input.files[0]) {        
         const reader = new FileReader();
         reader.onload = function(myFile) {            
@@ -30,6 +30,7 @@ function previewImage(input, imgID) {
         };
 
         reader.readAsDataURL(input.files[0]);
+        sessionStorage.setItem(fileInfoKey, input.files[0]);
     }
 }
 

@@ -129,6 +129,8 @@ class HomePageStaticTests(base.StaticTests):
         """
         Test whether the home page has a button for uploading images to the service,
         and whether the button contains the correct text.
+
+        The label element has no ID of its own, so use XPath to find / select it.
         """
         cfg = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]
         input_id = cfg["ID"]
@@ -142,11 +144,12 @@ class HomePageStaticTests(base.StaticTests):
         next_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"])
         self.assertTrue(next_btn.is_displayed())
 
-    def test_next_button_is_active(self):
+    def test_next_button_is_disabled(self):
         # NOTE: should the button be *inactive* until an image is selected??
         # Without an image, there's no point in continuing.
         next_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"])
-        self.assertTrue(next_btn.is_enabled())
+        self.assertTrue(next_btn.get_attribute("aria-disabled"))
+        self.assertIn("disabled", next_btn.get_attribute("class"))
 
     # -------------------------------------------------------------------------------------
     # Previous button tests
@@ -200,8 +203,11 @@ class HomePageDynamicTests(base.DynamicTests):
     # def test_clicking_logo_takes_user_to_home(self):
     #     pass
 
-    # def test_clicking_about_takes_user_to_about_page(self):
-    #     pass
+    def test_clicking_about_takes_user_to_faq_page(self):
+        base_url = self.browser.current_url
+        page = self.ELEMS["BASE"]["NAVBAR"]["PAGES"][0]        
+        page_elem = self.browser.find_element_by_id(page["ID"]).click()
+        self.assertEqual(self.browser.current_url, base_url[:-1] + reverse(page["URL"]))
 
     def test_clicking_faq_takes_user_to_faq_page(self):
         base_url = self.browser.current_url
@@ -220,7 +226,7 @@ class HomePageDynamicTests(base.DynamicTests):
     # None
 
     # -------------------------------------------------------------------------------------
-    # Choose-image button tests
+    # Choose-image button tests and preview pane tests
     # -------------------------------------------------------------------------------------
     # N.B. we don't want to run the test below! The dialog opened is an OS dialog, which 
     # Selenium can't interact with (including closing the dialog)
@@ -240,7 +246,7 @@ class HomePageDynamicTests(base.DynamicTests):
         input_elem.send_keys(path)
         self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
-        # wait a few seconds for the iamge to render
+        # wait a few seconds for the image to render
         time.sleep(3)
 
         # check whether the image src attribute is no longer '#'
@@ -260,7 +266,7 @@ class HomePageDynamicTests(base.DynamicTests):
         input_elem.send_keys(path)
         self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
-        # wait a few seconds for the iamge to render
+        # wait a few seconds for the image to render
         time.sleep(3)
 
         # check whether the image src attribute is no longer '#'
@@ -280,7 +286,7 @@ class HomePageDynamicTests(base.DynamicTests):
         input_elem.send_keys(path)
         self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
-        # wait a few seconds for the iamge to render
+        # wait a few seconds for the image to render
         time.sleep(3)
 
         # check whether the image src attribute is no longer '#'
@@ -300,7 +306,7 @@ class HomePageDynamicTests(base.DynamicTests):
         input_elem.send_keys(path)
         self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
-        # wait a few seconds for the iamge to render
+        # wait a few seconds for the image to render
         time.sleep(3)
 
         # check whether the image src attribute is no longer '#'
@@ -320,17 +326,53 @@ class HomePageDynamicTests(base.DynamicTests):
         input_elem.send_keys(path)
         self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
-        # wait a few seconds for the iamge to render
+        # wait a few seconds for the image to render
         time.sleep(3)
 
         # check whether the image src attribute is no longer '#'
         img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
         self.assertIn("#", img.get_attribute("src"))
 
+    def test_file_info_put_in_sessionStorage(self):
+        img_file = "test_jpg.jpg"
+        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+
+        # get the input and label elements
+        input_elem = self.browser.find_element_by_id(input_id)
+        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+        
+        # update the input directly with the file path
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        input_elem.send_keys(path)
+
+        # wait a few seconds for the image to render
+        time.sleep(3)
+
+        # check whether there is anything in sessionStorage
+        key = self.ELEMS['HOME']['IMAGE_PANE']['FILE_STORE_KEY']
+        script = f"return sessionStorage.getItem('{key}');"
+        self.assertIsNotNone(self.browser.execute_script(script))
+
     # -------------------------------------------------------------------------------------
     # Next button tests
     # -------------------------------------------------------------------------------------
     def test_clicking_next_button_takes_user_to_set_regions_page(self):
+        # load an image so enable the button
+        img_file = "test_jpg.jpg"
+        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+
+        # get the input and label elements
+        input_elem = self.browser.find_element_by_id(input_id)
+        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+        
+        # update the input directly with the file path
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        input_elem.send_keys(path)
+
+        # wait a few seconds for the image to render
+        time.sleep(3)
+
+        # click the Next button
         base_url = self.browser.current_url        
         btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
         expected_url = reverse(self.ELEMS["HOME"]["NEXT_BTN"]["URL"])
@@ -340,9 +382,3 @@ class HomePageDynamicTests(base.DynamicTests):
     # Previous button tests
     # -------------------------------------------------------------------------------------
     # None
-
-    # # -------------------------------------------------------------------------------------
-    # # Preview pane tests
-    # # -------------------------------------------------------------------------------------
-    # def test_clicking_choose_image_file_button_opens_window(self):
-    #     pass

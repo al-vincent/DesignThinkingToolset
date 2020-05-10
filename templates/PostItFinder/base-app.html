@@ -31,7 +31,7 @@
     <!-- buttons -->
     <div class="row mt-5 mb-5">
         <!-- "previous" button -->
-        <div class="col-2">
+        <div class="col-2 col-lg-3">
             <div class="row">
                 <div class="mx-auto">
                     {% block previous_button %}
@@ -45,17 +45,18 @@
         <!-- \"previous" button -->
 
         <!-- image action buttons -->
-        <div class="col-8">
+        <div class="col-8 col-lg-6">
             {% block image_action_buttons %}{% endblock %}
         </div>        
         <!-- /image action buttons -->
 
         <!-- "next" button -->
-        <div class="col-2">
+        <div class="col-2 col-lg-3">
             <div class="row">
                 <div class="mx-auto">
                     {% block next_button %}
-                    <a id="{{ next_btn.ID}}" href="{% url next_btn.URL %}" role="button" class="btn btn-success btn-lg rounded-circle">
+                    <a id="{{ next_btn.ID}}" href="{% url next_btn.URL %}" role="button" 
+                    class="btn btn-success btn-lg rounded-circle">
                         {{ next_btn.SYMBOL }}
                     </a>
                     {% endblock %}
@@ -70,11 +71,13 @@
 
     <!-- image pane -->
     <div class="row mt-5 mb-5">
-        <div class="col-12">
+        <div class="col-2"></div>
+        <div class="col-12 col-lg-8">
             {% block image_pane %}
             <img id="{{ image_pane.ID }}" class="img-fluid" src="#" alt="No image selected">
             {% endblock %}
         </div>
+        <div class="col-2"></div>
     </div>
     <!-- /image pane -->
 
