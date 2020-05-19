@@ -5,7 +5,7 @@ from django.conf import settings
 import os
 from json import load
 
-from PostItFinder.views import index, about, faq, set_regions
+from PostItFinder.views import index, about, faq, set_regions, analyse_text
 
 with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
         CONFIG = load(f)
@@ -13,7 +13,6 @@ with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r
         HTML = CONFIG["HTML"]
 
 class HomePageTests(TestCase):
-
     def test_root_url_resolves_to_index_view(self):
         url_found = resolve("/")
         self.assertEqual(url_found.func, index)
@@ -22,13 +21,7 @@ class HomePageTests(TestCase):
         response = self.client.get('/')
         self.assertTemplateUsed(response, PATHS["HOME"])
 
-    # def test_get_image_file(self):         
-        # response = self.client.post('/', data={"img_file": 'A new list item'
-        # self.assertIn('A new list item', response.content.decode())
-        # pass
-
 class AboutPageTests(TestCase):
-
     def test_about_url_resolves_to_about_view(self):        
         url_found = resolve(reverse(HTML["BASE"]["NAVBAR"]["PAGES"][0]["URL"]))
         self.assertEqual(url_found.func, about)
@@ -38,7 +31,6 @@ class AboutPageTests(TestCase):
         self.assertTemplateUsed(response, PATHS["ABOUT"])
 
 class FaqPageTests(TestCase):
-
     def test_faq_url_resolves_to_faq_view(self):        
         url_found = resolve(reverse(HTML["BASE"]["NAVBAR"]["PAGES"][1]["URL"]))
         self.assertEqual(url_found.func, faq)
@@ -48,7 +40,6 @@ class FaqPageTests(TestCase):
         self.assertTemplateUsed(response, PATHS["FAQ"])
 
 class SetRegionsPageTests(TestCase):
-
     def test_set_regions_url_resolves_to_set_regions_view(self):
         url_found = resolve(reverse(HTML["HOME"]["NEXT_BTN"]["URL"]))
         self.assertEqual(url_found.func, set_regions)
@@ -56,3 +47,12 @@ class SetRegionsPageTests(TestCase):
     def test_set_regions_uses_template(self):
         response = self.client.get(reverse(HTML["HOME"]["NEXT_BTN"]["URL"]))
         self.assertTemplateUsed(response, PATHS["SET_REGIONS"])
+
+class AnalyseTextPageTests(TestCase):
+    def test_analyse_text_url_resolves_to_analyse_text_view(self):
+        url_found = resolve(reverse(HTML["SET_REGIONS"]["NEXT_BTN"]["URL"]))
+        self.assertEqual(url_found.func, analyse_text)
+    
+    def test_analyse_text_uses_template(self):
+        response = self.client.get(reverse(HTML["SET_REGIONS"]["NEXT_BTN"]["URL"]))
+        self.assertTemplateUsed(response, PATHS["ANALYSE_TEXT"])

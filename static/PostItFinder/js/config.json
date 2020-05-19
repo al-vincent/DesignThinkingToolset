@@ -3,7 +3,8 @@
         "HOME": "PostItFinder/index.html",
         "ABOUT": "PostItFinder/about.html",
         "FAQ": "PostItFinder/faq.html",
-        "SET_REGIONS": "PostItFinder/set-regions.html"
+        "SET_REGIONS": "PostItFinder/set-regions.html",
+        "ANALYSE_TEXT": "PostItFinder/analyse-text.html"
     },
     "CONSTANTS":{
         "THEME_COLOUR": "#55B776",
@@ -44,7 +45,7 @@
                     },
                     {
                         "ID": "step2-id",
-                        "TEXT": "FIND REGIONS",
+                        "TEXT": "SET REGIONS",
                         "CLASS": ""
                     },
                     {
@@ -60,19 +61,18 @@
             },
             "NEXT_BTN": {
                 "ID": "next-btn-id",
-                "SYMBOL": "N",
                 "URL": "PostItFinder:index"
             },
             "PREVIOUS_BTN": {
                 "ID": "previous-btn-id",
-                "SYMBOL": "P",
                 "URL": "PostItFinder:index"
             },
             "IMAGE_PANE": {
                 "ID": "img-pane-id"
             }
         },
-        "HOME": {            
+        "HOME": {
+            "URL": "PostItFinder:index",
             "EXPLAIN_TEXT": {
                 "TEXT": "Choose an image to process from your computer"
             },
@@ -94,6 +94,18 @@
 
         },
         "SET_REGIONS": {
+            "URL": "PostItFinder:set_regions",
+            "EXPLAIN_TEXT": {
+                "TEXT": "Do some stuff"
+            },
+            "PREVIOUS_BTN": {
+                "URL": "PostItFinder:index"
+            },
+            "NEXT_BTN": {
+                "URL": "PostItFinder:analyse_text"
+            }
+        },
+        "ANALYSE_TEXT": {
 
         }
     }

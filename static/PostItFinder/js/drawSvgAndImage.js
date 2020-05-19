@@ -11,11 +11,14 @@
 
 /**
  * Displays an image selected by a user from the local filesystem via an HTML input control in the UI.
+ * Also stores the file info in sessionStorage for retrieval by other pages.
  * https://stackoverflow.com/questions/922057/is-it-possible-to-preview-local-images-before-uploading-them-via-a-form, 
  * https://stackoverflow.com/questions/15491193/getting-width-height-of-an-image-with-filereader
  * @param {object} input - the HTML input control that was clicked
  * @param {string} imgID - the ID of the HTML <img> element that will display the image
+ * @param {string} fileInfoKey - the key for the sessionStorage location for the image file
  * @todo - add .onerror events for reader, img (in addition to the .onloads)
+ * @todo - factor out some of the functionality into other functions?
  */
 function previewImage(input, imgID, fileInfoKey) {
     if (input.files && input.files[0]) {        

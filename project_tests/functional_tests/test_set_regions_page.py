@@ -13,7 +13,7 @@ from project_tests.functional_tests import base
 # =========================================================================================
 # STATIC TESTS
 # =========================================================================================
-class HomePageStaticTests(base.StaticTests):
+class SetRegionsPageStaticTests(base.StaticTests):
     """
     Tests to check whether the main page elements exist and render correctly when the 
     user first browses to the page.
@@ -24,23 +24,22 @@ class HomePageStaticTests(base.StaticTests):
     at the start of the test suite and torn down at the end.
     """
 
+    def setUp(self):
+        """
+        setUp() in base.py navigates to the home page. Override it here iot navigate to 
+        the set-regions page.
+        """        
+        self.browser.get(f'{self.live_server_url}{reverse(self.ELEMS["SET_REGIONS"]["URL"])}')
+
     # -------------------------------------------------------------------------------------
     # Page tests
     # -------------------------------------------------------------------------------------
     def test_page_uses_app_template(self):
         """
-        Check that the app uses the index.html template.
-        
-        NOTE that although index.html will inherit from the app template, we don't have 
-        to test this explicitly. If the inheritance works, the page will be rendered 
-        correctly and the tests will pass; if it doesn't work correctly, the tests will 
-        fail and we'll need to fix.
+        Check that the app uses the set-regions.html template.
         """
-        # response = self.client.get("/")
-        # self.assertTemplateUsed(response, self.PATHS["HOME"])
-
-        response = self.client.get(reverse(self.ELEMS["HOME"]["URL"]))
-        self.assertTemplateUsed(response, self.PATHS["HOME"])
+        response = self.client.get(reverse(self.ELEMS["SET_REGIONS"]["URL"]))
+        self.assertTemplateUsed(response, self.PATHS["SET_REGIONS"])
 
     def test_page_has_correct_title(self):
         """
@@ -94,15 +93,15 @@ class HomePageStaticTests(base.StaticTests):
             step = self.browser.find_element_by_id(item["ID"])
             self.assertEqual(step.get_attribute("innerText"), item["TEXT"])
         
-    def test_step_1_is_active(self):
-        cfg = self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"][0]
-        step1 = self.browser.find_element_by_id(cfg["ID"])
-        self.assertIn("active", step1.get_attribute("class"))
+    def test_step_2_is_active(self):
+        cfg = self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"][1]
+        step2 = self.browser.find_element_by_id(cfg["ID"])
+        self.assertIn("active", step2.get_attribute("class"))
 
     def test_other_steps_are_inactive(self):
         items = self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]
         for item in items:
-            if items.index(item) != 0:
+            if items.index(item) != 1:
                 step = self.browser.find_element_by_id(item["ID"])
                 self.assertNotIn("active", step.get_attribute("class"))
 
@@ -115,27 +114,27 @@ class HomePageStaticTests(base.StaticTests):
 
     def test_explain_text_is_correct(self):
         explain_txt = self.browser.find_element_by_id(self.ELEMS["APP"]["EXPLAIN_TEXT"]["ID"])
-        intended_text = self.ELEMS["HOME"]["EXPLAIN_TEXT"]["TEXT"]
+        intended_text = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["TEXT"]
         self.assertEqual(explain_txt.get_attribute("innerText"), intended_text)
 
     # -------------------------------------------------------------------------------------
     # Choose-image button tests
     # -------------------------------------------------------------------------------------    
-    def test_choose_image_input_is_active(self):
-        img_input = self.browser.find_element_by_id(self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"])
-        self.assertTrue(img_input.is_enabled())
+    # def test_choose_image_input_is_active(self):
+    #     img_input = self.browser.find_element_by_id(self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"])
+    #     self.assertTrue(img_input.is_enabled())
     
-    def test_choose_image_label_has_correct_label_text(self):
-        """
-        Test whether the home page has a button for uploading images to the service,
-        and whether the button contains the correct text.
+    # def test_choose_image_label_has_correct_label_text(self):
+    #     """
+    #     Test whether the home page has a button for uploading images to the service,
+    #     and whether the button contains the correct text.
 
-        The label element has no ID of its own, so use XPath to find / select it.
-        """
-        cfg = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]
-        input_id = cfg["ID"]
-        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')
-        self.assertEqual(img_label.get_attribute("innerText"), cfg["TEXT"])
+    #     The label element has no ID of its own, so use XPath to find / select it.
+    #     """
+    #     cfg = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]
+    #     input_id = cfg["ID"]
+    #     img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')
+    #     self.assertEqual(img_label.get_attribute("innerText"), cfg["TEXT"])
 
     # -------------------------------------------------------------------------------------
     # Next button tests
@@ -144,21 +143,22 @@ class HomePageStaticTests(base.StaticTests):
         next_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"])
         self.assertTrue(next_btn.is_displayed())
 
-    def test_next_button_is_disabled(self):        
+    def test_next_button_is_enabled(self):        
         next_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"])
-        self.assertTrue(next_btn.get_attribute("aria-disabled"))
-        self.assertIn("disabled", next_btn.get_attribute("class"))
+        self.assertFalse(next_btn.get_attribute("aria-disabled"))
+        self.assertNotIn("disabled", next_btn.get_attribute("class"))
 
     # -------------------------------------------------------------------------------------
     # Previous button tests
     # -------------------------------------------------------------------------------------
-    def test_previous_button_does_not_exist(self):
-        # NOTE: this works as follows:
-        #   - find_elements_by_id will return a list.
-        #   - if there are no elements in the DOM with the ID, it'll be an empty list
-        #   - an empty list is falsey, so can use assertFalse directly
-        prev_btn = self.browser.find_elements_by_id(self.ELEMS["APP"]["PREVIOUS_BTN"]["ID"])
-        self.assertFalse(prev_btn)
+    def test_previous_button_is_displayed(self):        
+        prev_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["PREVIOUS_BTN"]["ID"])
+        self.assertTrue(prev_btn.is_displayed())
+
+    def test_previous_button_is_enabled(self):        
+        prev_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["PREVIOUS_BTN"]["ID"])
+        self.assertFalse(prev_btn.get_attribute("aria-disabled"))
+        self.assertNotIn("disabled", prev_btn.get_attribute("class"))
 
     # -------------------------------------------------------------------------------------
     # Preview pane tests
@@ -176,7 +176,7 @@ class HomePageStaticTests(base.StaticTests):
 # =========================================================================================
 # DYNAMIC TESTS
 # =========================================================================================
-class HomePageDynamicTests(base.DynamicTests):
+class SetRegionsPageDynamicTests(base.DynamicTests):
     """
     Tests to check whether the interactive elements of the page work as expected; e.g. button-
     clicks, selections etc.
@@ -184,9 +184,16 @@ class HomePageDynamicTests(base.DynamicTests):
     These tests require isolation from each other, so a browser instance is created at the 
     start of each test and destroyed at the end.
     """
-    # # -------------------------------------------------------------------------------------
-    # # Page tests
-    # # -------------------------------------------------------------------------------------
+    def setUp(self):
+        """
+        setUp() in base.py navigates to the home page. Override it here iot navigate to 
+        the set-regions page.
+        """
+        self.browser = base.get_webdriver()
+        self.browser.get(f'{self.live_server_url}{reverse(self.ELEMS["SET_REGIONS"]["URL"])}')
+    # -------------------------------------------------------------------------------------
+    # Page tests
+    # -------------------------------------------------------------------------------------
     # def test_resize_window(self):
     #     """
     #     NOTE: things to test on resize:
@@ -195,9 +202,9 @@ class HomePageDynamicTests(base.DynamicTests):
     #     """
     #     pass
 
-    # # -------------------------------------------------------------------------------------
-    # # Navbar tests
-    # # -------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------------------
+    # Navbar tests
+    # -------------------------------------------------------------------------------------
     # def test_clicking_logo_takes_user_to_home(self):
     #     pass
 
@@ -231,152 +238,140 @@ class HomePageDynamicTests(base.DynamicTests):
     # def test_clicking_choose_image_opens_dialog(self):
     #     pass
 
-    def test_jpg_can_be_selected(self):
-        img_file = "test_jpg.jpg"
-        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+    # def test_jpg_can_be_selected(self):
+    #     img_file = "test_jpg.jpg"
+    #     input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
 
-        # get the input and label elements
-        input_elem = self.browser.find_element_by_id(input_id)
-        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+    #     # get the input and label elements
+    #     input_elem = self.browser.find_element_by_id(input_id)
+    #     img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
-        # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-        input_elem.send_keys(path)
-        self.assertEqual(img_label.get_attribute("innerText"), img_file)
+    #     # update the input directly with the file path
+    #     path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+    #     input_elem.send_keys(path)
+    #     self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
-        # wait a few seconds for the image to render
-        time.sleep(3)
+    #     # wait a few seconds for the image to render
+    #     time.sleep(3)
 
-        # check whether the image src attribute is no longer '#'
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
-        self.assertNotIn("#", img.get_attribute("src"))
+    #     # check whether the image src attribute is no longer '#'
+    #     img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+    #     self.assertNotIn("#", img.get_attribute("src"))
     
-    def test_png_can_be_selected(self):
-        img_file = "test_png.png"
-        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+    # def test_png_can_be_selected(self):
+    #     img_file = "test_png.png"
+    #     input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
 
-        # get the input and label elements
-        input_elem = self.browser.find_element_by_id(input_id)
-        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+    #     # get the input and label elements
+    #     input_elem = self.browser.find_element_by_id(input_id)
+    #     img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
-        # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-        input_elem.send_keys(path)
-        self.assertEqual(img_label.get_attribute("innerText"), img_file)
+    #     # update the input directly with the file path
+    #     path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+    #     input_elem.send_keys(path)
+    #     self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
-        # wait a few seconds for the image to render
-        time.sleep(3)
+    #     # wait a few seconds for the image to render
+    #     time.sleep(3)
 
-        # check whether the image src attribute is no longer '#'
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
-        self.assertNotIn("#", img.get_attribute("src"))
+    #     # check whether the image src attribute is no longer '#'
+    #     img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+    #     self.assertNotIn("#", img.get_attribute("src"))
     
-    def test_bmp_can_be_selected(self):
-        img_file = "test_bmp.bmp"
-        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+    # def test_bmp_can_be_selected(self):
+    #     img_file = "test_bmp.bmp"
+    #     input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
 
-        # get the input and label elements
-        input_elem = self.browser.find_element_by_id(input_id)
-        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+    #     # get the input and label elements
+    #     input_elem = self.browser.find_element_by_id(input_id)
+    #     img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
-        # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-        input_elem.send_keys(path)
-        self.assertEqual(img_label.get_attribute("innerText"), img_file)
+    #     # update the input directly with the file path
+    #     path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+    #     input_elem.send_keys(path)
+    #     self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
-        # wait a few seconds for the image to render
-        time.sleep(3)
+    #     # wait a few seconds for the image to render
+    #     time.sleep(3)
 
-        # check whether the image src attribute is no longer '#'
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
-        self.assertNotIn("#", img.get_attribute("src"))
+    #     # check whether the image src attribute is no longer '#'
+    #     img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+    #     self.assertNotIn("#", img.get_attribute("src"))
     
-    def test_gif_can_be_selected(self):
-        img_file = "test_gif.gif"
-        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+    # def test_gif_can_be_selected(self):
+    #     img_file = "test_gif.gif"
+    #     input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
 
-        # get the input and label elements
-        input_elem = self.browser.find_element_by_id(input_id)
-        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+    #     # get the input and label elements
+    #     input_elem = self.browser.find_element_by_id(input_id)
+    #     img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
-        # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-        input_elem.send_keys(path)
-        self.assertEqual(img_label.get_attribute("innerText"), img_file)
+    #     # update the input directly with the file path
+    #     path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+    #     input_elem.send_keys(path)
+    #     self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
-        # wait a few seconds for the image to render
-        time.sleep(3)
+    #     # wait a few seconds for the image to render
+    #     time.sleep(3)
 
-        # check whether the image src attribute is no longer '#'
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
-        self.assertNotIn("#", img.get_attribute("src"))
+    #     # check whether the image src attribute is no longer '#'
+    #     img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+    #     self.assertNotIn("#", img.get_attribute("src"))
 
-    def test_tif_cannot_be_selected(self):
-        img_file = "test_tif.tif"
-        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+    # def test_tif_cannot_be_selected(self):
+    #     img_file = "test_tif.tif"
+    #     input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
 
-        # get the input and label elements
-        input_elem = self.browser.find_element_by_id(input_id)
-        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+    #     # get the input and label elements
+    #     input_elem = self.browser.find_element_by_id(input_id)
+    #     img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
-        # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-        input_elem.send_keys(path)
-        self.assertEqual(img_label.get_attribute("innerText"), img_file)
+    #     # update the input directly with the file path
+    #     path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+    #     input_elem.send_keys(path)
+    #     self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
-        # wait a few seconds for the image to render
-        time.sleep(3)
+    #     # wait a few seconds for the image to render
+    #     time.sleep(3)
 
-        # check whether the image src attribute is no longer '#'
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
-        self.assertIn("#", img.get_attribute("src"))
+    #     # check whether the image src attribute is no longer '#'
+    #     img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+    #     self.assertIn("#", img.get_attribute("src"))
 
-    def test_file_info_put_in_sessionStorage(self):
-        img_file = "test_jpg.jpg"
-        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+    # def test_file_info_put_in_sessionStorage(self):
+    #     img_file = "test_jpg.jpg"
+    #     input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
 
-        # get the input and label elements
-        input_elem = self.browser.find_element_by_id(input_id)
-        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+    #     # get the input and label elements
+    #     input_elem = self.browser.find_element_by_id(input_id)
+    #     img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
-        # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-        input_elem.send_keys(path)
+    #     # update the input directly with the file path
+    #     path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+    #     input_elem.send_keys(path)
 
-        # wait a few seconds for the image to render
-        time.sleep(3)
+    #     # wait a few seconds for the image to render
+    #     time.sleep(3)
 
-        # check whether there is anything in sessionStorage
-        key = self.ELEMS['HOME']['IMAGE_PANE']['FILE_STORE_KEY']
-        script = f"return sessionStorage.getItem('{key}');"
-        self.assertIsNotNone(self.browser.execute_script(script))
+    #     # check whether there is anything in sessionStorage
+    #     key = self.ELEMS['HOME']['IMAGE_PANE']['FILE_STORE_KEY']
+    #     script = f"return sessionStorage.getItem('{key}');"
+    #     self.assertIsNotNone(self.browser.execute_script(script))
 
     # -------------------------------------------------------------------------------------
     # Next button tests
     # -------------------------------------------------------------------------------------
-    def test_clicking_next_button_takes_user_to_set_regions_page(self):
-        # load an image so enable the button
-        img_file = "test_jpg.jpg"
-        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
-
-        # get the input and label elements
-        input_elem = self.browser.find_element_by_id(input_id)
-        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
-        
-        # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-        input_elem.send_keys(path)
-
-        # wait a few seconds for the image to render
-        time.sleep(3)
-
-        # click the Next button
+    def test_clicking_next_button_takes_user_to_analyse_text_page(self):
         base_url = self.live_server_url        
         btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
-        expected_url = reverse(self.ELEMS["HOME"]["NEXT_BTN"]["URL"])
+        expected_url = reverse(self.ELEMS["SET_REGIONS"]["NEXT_BTN"]["URL"])
         self.assertEqual(self.browser.current_url, base_url + expected_url)
 
     # -------------------------------------------------------------------------------------
     # Previous button tests
     # -------------------------------------------------------------------------------------
-    # None
+    def test_clicking_previous_button_takes_user_to_choose_image_page(self):
+        base_url = self.live_server_url   
+        btn = self.browser.find_element_by_id(self.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
+        expected_url = reverse(self.ELEMS["SET_REGIONS"]["PREVIOUS_BTN"]["URL"])
+        self.assertEqual(self.browser.current_url, base_url + expected_url)
