@@ -5,3 +5,9 @@
 {% block image_action_buttons %}
   
 {% endblock %}
+
+{% block scripts %}
+  {{ block.super }}  
+  {% load static %}
+  <script type="text/javascript" src="{% static 'PostItFinder/js/setRegions.js' %}"></script>
+{% endblock %}

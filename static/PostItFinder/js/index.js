@@ -25,7 +25,11 @@ $(".custom-file-input").on("change", function() {
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
 
     // preview the image selected by the user
-    previewImage(this, CONFIG.HTML.APP.IMAGE_PANE.ID, CONFIG.HTML.HOME.IMAGE_PANE.FILE_STORE_KEY);
+    // console.log(this.files[0]);
+    // previewImage(this, CONFIG.HTML.APP.IMAGE_PANE.ID, CONFIG.HTML.HOME.IMAGE_PANE.FILE_STORE_KEY);
+    previewImage(CONFIG.HTML.APP.IMAGE_PANE.ID,
+        CONFIG.HTML.HOME.IMAGE_PANE.FILE_STORE_KEY,
+        this); 
     
     // set the class and ARIA state of the Next button to active
     const nextBtn = document.getElementById(CONFIG.HTML.APP.NEXT_BTN.ID);

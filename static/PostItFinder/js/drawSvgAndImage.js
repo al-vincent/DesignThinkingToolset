@@ -20,22 +20,50 @@
  * @todo - add .onerror events for reader, img (in addition to the .onloads)
  * @todo - factor out some of the functionality into other functions?
  */
-function previewImage(input, imgID, fileInfoKey) {
-    if (input.files && input.files[0]) {        
-        const reader = new FileReader();
-        reader.onload = function(myFile) {            
-            const img = new Image();
-            img.src = myFile.target.result;
+function previewImage(imgID, fileInfoKey, input) {
+    const storedImg = sessionStorage.getItem(fileInfoKey)
+    if(storedImg) {
+        // Reuse existing Data URL from localStorage
+        // img.setAttribute("src", storedImg);
+        $('#' + imgID).attr('src', storedImg);
+    }
+    else {
+        if (input.files && input.files[0]) {  
+            const reader = new FileReader();
+            reader.onload = function(myFile) {            
+                const img = new Image();
+                img.src = myFile.target.result;            
 
-            img.onload = function() {
-                $('#' + imgID).attr('src', this.src);
-            }            
-        };
+                img.onload = function() {
+                    $('#' + imgID).attr('src', this.src);
+                }
+                sessionStorage.setItem(fileInfoKey, myFile.target.result);
+            };
 
-        reader.readAsDataURL(input.files[0]);
-        sessionStorage.setItem(fileInfoKey, input.files[0]);
+            reader.readAsDataURL(input.files[0]);
+        }
     }
 }
+
+
+// **********************************************************************
+
+function previewImage2(input, imgID) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+
+        const reader = new FileReader();
+        reader.onload = function(elem) {
+
+        }
+    }
+}
+
+// **********************************************************************
+
+
+
+
 
 /**
  * @description - function to create the SVG container.
