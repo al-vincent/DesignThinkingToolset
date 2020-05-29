@@ -5,6 +5,7 @@ from django.urls import reverse
 import time
 import os
 from json import load
+import base64
 
 # from functional_tests import base
 from project_tests.functional_tests import base
@@ -26,10 +27,30 @@ class SetRegionsPageStaticTests(base.StaticTests):
 
     def setUp(self):
         """
-        setUp() in base.py navigates to the home page. Override it here iot navigate to 
-        the set-regions page.
-        """        
-        self.browser.get(f'{self.live_server_url}{reverse(self.ELEMS["SET_REGIONS"]["URL"])}')
+        setUp() in base.py navigates to the home page. We then need to select an image
+        and click the Next button.
+        """                
+        # call the 'normal' setUp from the base class
+        super().setUp()
+
+        # arbitrarily use test_png.png as our test image
+        img_file = "test_jpg.jpg"
+        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+
+        # get the input elements and update with the file path
+        input_elem = self.browser.find_element_by_id(input_id)
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        input_elem.send_keys(path)
+
+        # wait a few seconds for the image to render
+        time.sleep(2)
+
+        # click the Next button
+        nxt_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"])
+        nxt_btn.click()
+
+        # wait for the new page to render
+        time.sleep(2)
 
     # -------------------------------------------------------------------------------------
     # Page tests
@@ -167,10 +188,10 @@ class SetRegionsPageStaticTests(base.StaticTests):
         img_pane = self.browser.find_elements_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
         self.assertTrue(img_pane)
 
-    def test_image_pane_does_not_contain_img(self):
+    def test_image_pane_contains_img(self):
         img_pane = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
         imgs = img_pane.find_elements_by_tag_name("img")
-        self.assertFalse(imgs)
+        self.assertTrue(imgs)
 
 
 # =========================================================================================
@@ -186,11 +207,31 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     """
     def setUp(self):
         """
-        setUp() in base.py navigates to the home page. Override it here iot navigate to 
-        the set-regions page.
+        setUp() in base.py navigates to the home page. We then need to select an image
+        and click the Next button.
         """
-        self.browser = base.get_webdriver()
-        self.browser.get(f'{self.live_server_url}{reverse(self.ELEMS["SET_REGIONS"]["URL"])}')
+        # call the 'normal' setUp from the base class
+        super().setUp()
+
+        # arbitrarily use test_png.png as our test image
+        img_file = "test_jpg.jpg"
+        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+
+        # get the input elements and update with the file path
+        input_elem = self.browser.find_element_by_id(input_id)
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        input_elem.send_keys(path)
+
+        # wait a few seconds for the image to render
+        time.sleep(2)
+
+        # click the Next button
+        nxt_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"])
+        nxt_btn.click()
+
+        # wait for the new page to render
+        time.sleep(2)
+
     # -------------------------------------------------------------------------------------
     # Page tests
     # -------------------------------------------------------------------------------------
@@ -363,7 +404,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     def test_clicking_next_button_takes_user_to_analyse_text_page(self):
         base_url = self.live_server_url        
-        btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
+        self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
         expected_url = reverse(self.ELEMS["SET_REGIONS"]["NEXT_BTN"]["URL"])
         self.assertEqual(self.browser.current_url, base_url + expected_url)
 
@@ -372,6 +413,28 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     def test_clicking_previous_button_takes_user_to_choose_image_page(self):
         base_url = self.live_server_url   
-        btn = self.browser.find_element_by_id(self.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
+        self.browser.find_element_by_id(self.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
         expected_url = reverse(self.ELEMS["SET_REGIONS"]["PREVIOUS_BTN"]["URL"])
         self.assertEqual(self.browser.current_url, base_url + expected_url)
+    
+    def test_image_is_displayed_when_user_clicks_back_button(self):
+        # browse back to the home page
+        self.browser.find_element_by_id(self.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
+        
+        # short wait to ensure the page is rendered
+        time.sleep(2)
+
+        # get the src data for the image as a UTF-8 string decoded from base64
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        src_string = img.get_attribute("src")
+
+        # get the sam UTF-8 string from the original image.
+        img_file = "test_jpg.jpg"        
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+
+        with open(path, "rb") as img_file:
+            b64_encoded_img = base64.b64encode(img_file.read())
+            b64_msg = b64_encoded_img.decode('utf-8')
+
+        # compare the two strings
+        self.assertEqual(src_string, f"data:image/jpeg;base64,{b64_msg}")

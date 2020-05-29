@@ -5,6 +5,7 @@ from django.urls import reverse
 import time
 import os
 from json import load
+import base64
 
 # from functional_tests import base
 from project_tests.functional_tests import base
@@ -346,10 +347,24 @@ class HomePageDynamicTests(base.DynamicTests):
         # wait a few seconds for the image to render
         time.sleep(3)
 
-        # check whether there is anything in sessionStorage
-        key = self.ELEMS['HOME']['IMAGE_PANE']['FILE_STORE_KEY']
-        script = f"return sessionStorage.getItem('{key}');"
-        self.assertIsNotNone(self.browser.execute_script(script))
+        # check whether the base64-encoded string of the image held in sessionStorage 
+        # is correct 
+        # encode the image in base64 and convert to utf-8
+        with open(path, "rb") as img_file:
+            b64_encoded_img = base64.b64encode(img_file.read())
+            b64_msg = b64_encoded_img.decode('utf-8')
+
+        # get the encoding from sessionStorage
+        data_key = self.ELEMS['HOME']['IMAGE_PANE']['FILE_DATA_KEY']
+        script = f"return sessionStorage.getItem({data_key});"
+        # compare the two (with short string added to start of python encoding)
+        self.assertEqual(self.browser.execute_script(script), 
+                        f"data:image/jpeg;base64,{b64_msg}")
+
+        # check whether the file name is in sessionStorage
+        name_key = self.ELEMS['HOME']['IMAGE_PANE']['FILE_NAME_KEY']
+        script = f"return sessionStorage.getItem('{name_key}');"
+        self.assertEqual(self.browser.execute_script(script), img_file")
 
     # -------------------------------------------------------------------------------------
     # Next button tests
@@ -372,7 +387,7 @@ class HomePageDynamicTests(base.DynamicTests):
 
         # click the Next button
         base_url = self.live_server_url        
-        btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
+        self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
         expected_url = reverse(self.ELEMS["HOME"]["NEXT_BTN"]["URL"])
         self.assertEqual(self.browser.current_url, base_url + expected_url)
 

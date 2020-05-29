@@ -14,6 +14,12 @@ window.onload = function() {
     if(nextBtn.getAttribute("aria-disabled") !== true){
         nextBtn.setAttribute("aria-disabled", true);
     }
+
+    // 
+    previewImage(CONFIG.HTML.APP.IMAGE_PANE.ID, 
+        CONFIG.HTML.HOME.IMAGE_PANE.FILE_DATA_KEY,
+        CONFIG.HTML.HOME.IMAGE_PANE.FILE_NAME_KEY);
+    
 }
 
 // https://www.w3schools.com/bootstrap4/bootstrap_forms_custom.asp
@@ -25,10 +31,9 @@ $(".custom-file-input").on("change", function() {
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
 
     // preview the image selected by the user
-    // console.log(this.files[0]);
-    // previewImage(this, CONFIG.HTML.APP.IMAGE_PANE.ID, CONFIG.HTML.HOME.IMAGE_PANE.FILE_STORE_KEY);
     previewImage(CONFIG.HTML.APP.IMAGE_PANE.ID,
-        CONFIG.HTML.HOME.IMAGE_PANE.FILE_STORE_KEY,
+        CONFIG.HTML.HOME.IMAGE_PANE.FILE_DATA_KEY,
+        CONFIG.HTML.HOME.IMAGE_PANE.FILE_NAME_KEY,
         this); 
     
     // set the class and ARIA state of the Next button to active

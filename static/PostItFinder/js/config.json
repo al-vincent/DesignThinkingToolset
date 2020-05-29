@@ -84,7 +84,8 @@
                 "URL": "PostItFinder:set_regions"
             },
             "IMAGE_PANE": {
-                "FILE_STORE_KEY": "fileInfo"
+                "FILE_DATA_KEY": "fileData",
+                "FILE_NAME_KEY": "fileName"
             }
         },
         "ABOUT": {

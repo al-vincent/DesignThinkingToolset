@@ -10,59 +10,55 @@
 "use strict";
 
 /**
- * Displays an image selected by a user from the local filesystem via an HTML input control in the UI.
- * Also stores the file info in sessionStorage for retrieval by other pages.
- * https://stackoverflow.com/questions/922057/is-it-possible-to-preview-local-images-before-uploading-them-via-a-form, 
- * https://stackoverflow.com/questions/15491193/getting-width-height-of-an-image-with-filereader
- * @param {object} input - the HTML input control that was clicked
+ * Displays an image selected by a user from the local filesystem via an 
+ * HTML input control in the UI. Also stores the file data and file name in 
+ * sessionStorage for retrieval by other pages.
+ * https://stackoverflow.com/questions/922057/is-it-possible-to-preview-local-images-before-uploading-them-via-a-form,
+ * https://stackoverflow.com/a/20535454 
  * @param {string} imgID - the ID of the HTML <img> element that will display the image
- * @param {string} fileInfoKey - the key for the sessionStorage location for the image file
+ * @param {string} fileDataKey - the key for the image data string in sessionStorage
+ * @param {string} fileNameKey - the key for the image file name in sessionStorage
+ * @param {object} input - the HTML input control that was clicked
+ * @todo - add checks to see if sessionStorage can be used
  * @todo - add .onerror events for reader, img (in addition to the .onloads)
+ * @todo - add code to final else{} clause - may be better to handle in Django?
  * @todo - factor out some of the functionality into other functions?
  */
-function previewImage(imgID, fileInfoKey, input) {
-    const storedImg = sessionStorage.getItem(fileInfoKey)
-    if(storedImg) {
-        // Reuse existing Data URL from localStorage
-        // img.setAttribute("src", storedImg);
-        $('#' + imgID).attr('src', storedImg);
-    }
-    else {
-        if (input.files && input.files[0]) {  
-            const reader = new FileReader();
-            reader.onload = function(myFile) {            
-                const img = new Image();
-                img.src = myFile.target.result;            
-
-                img.onload = function() {
-                    $('#' + imgID).attr('src', this.src);
-                }
-                sessionStorage.setItem(fileInfoKey, myFile.target.result);
-            };
-
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-}
-
-
-// **********************************************************************
-
-function previewImage2(input, imgID) {
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
-
+function previewImage(imgID, fileDataKey, fileNameKey, input) {
+    // debugger;
+    // case 1: user selects a file using input
+    if (input !== undefined && input.files && input.files[0]) { 
         const reader = new FileReader();
-        reader.onload = function(elem) {
+        reader.onload = function(myFile) {            
+            const img = new Image();
+            img.src = myFile.target.result;            
 
+            img.onload = function() {
+                $('#' + imgID).attr('src', this.src);
+                $('#' + imgID).prop('alt', input.files[0].name);
+            }
+            sessionStorage.setItem(fileDataKey, myFile.target.result);
+            sessionStorage.setItem(fileNameKey, input.files[0].name);
+        };
+
+        reader.readAsDataURL(input.files[0]);
+    } 
+    else {
+        const storedImg = sessionStorage.getItem(fileDataKey);
+        // case 2: user has previously selected a file 
+        if (storedImg) {        
+            $('#' + imgID).attr('src', storedImg);
+            $('#' + imgID).prop('alt', sessionStorage.getItem(fileNameKey));
         }
+        // case 3: user has browsed direct to set-regions or later pages,
+        // so has not selected an image.
+        else {
+            // ?? Need to redirect the user to home (if not already there); 
+            // but how?
+        }
+
     }
 }
-
-// **********************************************************************
-
-
-
 
 
 /**
