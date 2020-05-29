@@ -185,9 +185,9 @@ class HomePageDynamicTests(base.DynamicTests):
     These tests require isolation from each other, so a browser instance is created at the 
     start of each test and destroyed at the end.
     """
-    # # -------------------------------------------------------------------------------------
-    # # Page tests
-    # # -------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------------------
+    # Page tests
+    # -------------------------------------------------------------------------------------
     # def test_resize_window(self):
     #     """
     #     NOTE: things to test on resize:
@@ -196,9 +196,9 @@ class HomePageDynamicTests(base.DynamicTests):
     #     """
     #     pass
 
-    # # -------------------------------------------------------------------------------------
-    # # Navbar tests
-    # # -------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------------------
+    # Navbar tests
+    # -------------------------------------------------------------------------------------
     # def test_clicking_logo_takes_user_to_home(self):
     #     pass
 
@@ -332,7 +332,7 @@ class HomePageDynamicTests(base.DynamicTests):
         img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
         self.assertIn("#", img.get_attribute("src"))
 
-    def test_file_info_put_in_sessionStorage(self):
+    def test_image_src_updates_correctly(self):
         img_file = "test_jpg.jpg"
         input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
 
@@ -364,7 +364,75 @@ class HomePageDynamicTests(base.DynamicTests):
         # check whether the file name is in sessionStorage
         name_key = self.ELEMS['HOME']['IMAGE_PANE']['FILE_NAME_KEY']
         script = f"return sessionStorage.getItem('{name_key}');"
-        self.assertEqual(self.browser.execute_script(script), img_file")
+        self.assertEqual(self.browser.execute_script(script), img_file)
+
+    def test_file_info_put_in_sessionStorage(self):
+        img_file = "test_jpg.jpg"
+        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+
+        # get the input and label elements
+        input_elem = self.browser.find_element_by_id(input_id)
+        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+        
+        # update the input directly with the file path
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        input_elem.send_keys(path)
+
+        # wait a few seconds for the image to render
+        time.sleep(3)
+
+        # check whether the base64-encoded string of the image held in sessionStorage 
+        # is correct 
+        # encode the image in base64 and convert to utf-8
+        with open(path, "rb") as img_file:
+            b64_encoded_img = base64.b64encode(img_file.read())
+            b64_msg = b64_encoded_img.decode('utf-8')
+
+        # get the src data for the image as a UTF-8 string decoded from base64
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        src_string = img.get_attribute("src")
+
+        # compare the two (with short string added to start of python encoding)
+        self.assertEqual(src_string, f"data:image/jpeg;base64,{b64_msg}")
+
+    def test_selecting_new_image_overwrites_previous_image(self):
+        img1 = "test_png.png"
+        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
+        
+        # get the input and label elements
+        input_elem = self.browser.find_element_by_id(input_id)
+        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+        
+        # update the input directly with the file path
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img1)
+        input_elem.send_keys(path)
+
+        # short wait
+        time.sleep(2)
+
+        # update the input with the file path for img2
+        img2 = "test_jpg.jpg"
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img2)
+        input_elem.send_keys(path)
+
+        # get the src data for the image as a UTF-8 string decoded from base64
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        src_string = img.get_attribute("src")
+
+        with open(path, "rb") as img_file:
+            b64_encoded_img = base64.b64encode(img_file.read())
+            b64_msg = b64_encoded_img.decode('utf-8')
+        
+        # compare the string for img2 to the src for the current image
+        self.assertEqual(src_string, f"data:image/jpeg;base64,{b64_msg}")
+
+        # get the encoding from sessionStorage
+        data_key = self.ELEMS['HOME']['IMAGE_PANE']['FILE_DATA_KEY']
+        script = f"return sessionStorage.getItem({data_key});"
+
+        # compare the two (with short string added to start of python encoding)
+        self.assertEqual(self.browser.execute_script(script), 
+                        f"data:image/jpeg;base64,{b64_msg}")
 
     # -------------------------------------------------------------------------------------
     # Next button tests

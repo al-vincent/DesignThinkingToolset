@@ -431,7 +431,6 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # get the sam UTF-8 string from the original image.
         img_file = "test_jpg.jpg"        
         path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-
         with open(path, "rb") as img_file:
             b64_encoded_img = base64.b64encode(img_file.read())
             b64_msg = b64_encoded_img.decode('utf-8')
