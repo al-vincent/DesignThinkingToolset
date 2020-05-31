@@ -14,7 +14,6 @@ with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r
 
 def index(request):
     # Update config to include the explanatory text for the home page
-
     HTML["APP"]["EXPLAIN_TEXT"]["TEXT"] =  HTML["HOME"]["EXPLAIN_TEXT"]["TEXT"]
     HTML["APP"]["STEPPER_BAR"]["ITEMS"][0]["CLASS"] = "active"
 
@@ -52,6 +51,12 @@ def faq(request):
     return render(request, PATHS["FAQ"], context=context)
 
 def set_regions(request):
+    # Update URL for the 'previous' button
+    HTML["APP"]["PREVIOUS_BTN"]["URL"] = HTML["SET_REGIONS"]["PREVIOUS_BTN"]["URL"]
+
+    # Update URL for the 'next' button
+    HTML["APP"]["NEXT_BTN"]["URL"] = HTML["SET_REGIONS"]["NEXT_BTN"]["URL"]
+
     context = {
         "title": "Set Regions",
         "navbar": HTML["BASE"]["NAVBAR"],
@@ -61,6 +66,22 @@ def set_regions(request):
         "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
         "choose_img_btn": HTML["HOME"]["CHOOSE_IMG_BTN"],
         "image_pane": HTML["APP"]["IMAGE_PANE"],
+        "config": CONFIG,
         }
 
     return render(request, PATHS["SET_REGIONS"], context=context)
+
+def analyse_text(request):
+    context = {
+        "title": "Analyse Text",
+        "navbar": HTML["BASE"]["NAVBAR"],
+        "stepper": HTML["APP"]["STEPPER_BAR"],
+        "explain_text": HTML["APP"]["EXPLAIN_TEXT"],
+        "next_btn": HTML["APP"]["NEXT_BTN"],
+        "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
+        "choose_img_btn": HTML["HOME"]["CHOOSE_IMG_BTN"],
+        "image_pane": HTML["APP"]["IMAGE_PANE"],
+        "config": CONFIG,
+        }
+
+    return render(request, PATHS["ANALYSE_TEXT"], context=context)

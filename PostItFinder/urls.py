@@ -8,4 +8,5 @@ urlpatterns = [
     path("about/", views.about, name="about"),
     path("faq/", views.faq, name="faq"),
     path("set-regions/", views.set_regions, name="set_regions"),
+    path("analyse-text/", views.analyse_text, name="analyse_text"),
 ]

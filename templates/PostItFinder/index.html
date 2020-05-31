@@ -18,14 +18,6 @@
   </div>
 {% endblock %}
 
-{% block next_button %}
-<a id="{{ next_btn.ID}}" href="{% url next_btn.URL %}"
-class="btn btn-success btn-lg rounded-circle disabled"
-role="button" aria-disabled="true">
-    {{ next_btn.SYMBOL }}
-</a>
-{% endblock %}
-
 {% block scripts %}
   {{ block.super }}  
   {% load static %}
