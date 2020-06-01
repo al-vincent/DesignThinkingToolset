@@ -10,6 +10,8 @@ import base64
 # from functional_tests import base
 from project_tests.functional_tests import base
 
+# arbitrarily use test_png.png as our setup image throughout
+IMG_FILE = "test_jpg.jpg"
 
 # =========================================================================================
 # STATIC TESTS
@@ -34,12 +36,11 @@ class SetRegionsPageStaticTests(base.StaticTests):
         super().setUp()
 
         # arbitrarily use test_png.png as our test image
-        img_file = "test_jpg.jpg"
         input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
 
         # get the input elements and update with the file path
         input_elem = self.browser.find_element_by_id(input_id)
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', IMG_FILE)
         input_elem.send_keys(path)
 
         # wait a few seconds for the image to render
@@ -113,17 +114,14 @@ class SetRegionsPageStaticTests(base.StaticTests):
         for item in items:
             step = self.browser.find_element_by_id(item["ID"])
             self.assertEqual(step.get_attribute("innerText"), item["TEXT"])
-        
-    def test_step_2_is_active(self):
-        cfg = self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"][1]
-        step2 = self.browser.find_element_by_id(cfg["ID"])
-        self.assertIn("active", step2.get_attribute("class"))
-
-    def test_other_steps_are_inactive(self):
+    
+    def test_correct_steps_are_active(self):
         items = self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]
         for item in items:
-            if items.index(item) != 1:
-                step = self.browser.find_element_by_id(item["ID"])
+            step = self.browser.find_element_by_id(item["ID"])
+            if items.index(item) <= 1:            
+                self.assertIn("active", step.get_attribute("class"))
+            else:
                 self.assertNotIn("active", step.get_attribute("class"))
 
     # -------------------------------------------------------------------------------------
@@ -188,10 +186,18 @@ class SetRegionsPageStaticTests(base.StaticTests):
         img_pane = self.browser.find_elements_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
         self.assertTrue(img_pane)
 
-    def test_image_pane_contains_img(self):
-        img_pane = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
-        imgs = img_pane.find_elements_by_tag_name("img")
-        self.assertTrue(imgs)
+    def test_image_pane_contains_correct_(self):
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        src = img.get_attribute("src")
+
+        # get the sam UTF-8 string from the original image.        
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', IMG_FILE)
+        with open(path, "rb") as f:
+            b64_encoded_img = base64.b64encode(f.read())
+            b64_msg = b64_encoded_img.decode('utf-8')
+
+        # compare the two strings
+        self.assertEqual(src, f"data:image/jpeg;base64,{b64_msg}")
 
 
 # =========================================================================================
@@ -214,12 +220,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         super().setUp()
 
         # arbitrarily use test_png.png as our test image
-        img_file = "test_jpg.jpg"
         input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
 
         # get the input elements and update with the file path
         input_elem = self.browser.find_element_by_id(input_id)
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', IMG_FILE)
         input_elem.send_keys(path)
 
         # wait a few seconds for the image to render
@@ -264,7 +269,18 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     # Stepper bar tests
     # -------------------------------------------------------------------------------------
-    # None
+    def test_returning_to_home_sets_only_step_one_active(self):
+        # browse back to the home page
+        self.browser.find_element_by_id(self.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
+
+        # check classes of all stepper bar items
+        items = self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]
+        for item in items:
+            step = self.browser.find_element_by_id(item["ID"])
+            if items.index(item) <= 0:            
+                self.assertIn("active", step.get_attribute("class"))
+            else:
+                self.assertNotIn("active", step.get_attribute("class"))
 
     # -------------------------------------------------------------------------------------
     # Explanatory text tests
@@ -428,11 +444,10 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
         src_string = img.get_attribute("src")
 
-        # get the sam UTF-8 string from the original image.
-        img_file = "test_jpg.jpg"        
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-        with open(path, "rb") as img_file:
-            b64_encoded_img = base64.b64encode(img_file.read())
+        # get the sam UTF-8 string from the original image.        
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', IMG_FILE)
+        with open(path, "rb") as f:
+            b64_encoded_img = base64.b64encode(f.read())
             b64_msg = b64_encoded_img.decode('utf-8')
 
         # compare the two strings

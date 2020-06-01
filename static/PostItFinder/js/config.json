@@ -68,7 +68,9 @@
                 "URL": "PostItFinder:index"
             },
             "IMAGE_PANE": {
-                "ID": "img-pane-id"
+                "ID": "img-pane-id",
+                "FILE_DATA_KEY": "fileData",
+                "FILE_NAME_KEY": "fileName"
             }
         },
         "HOME": {
@@ -82,10 +84,6 @@
             },
             "NEXT_BTN": {
                 "URL": "PostItFinder:set_regions"
-            },
-            "IMAGE_PANE": {
-                "FILE_DATA_KEY": "fileData",
-                "FILE_NAME_KEY": "fileName"
             }
         },
         "ABOUT": {

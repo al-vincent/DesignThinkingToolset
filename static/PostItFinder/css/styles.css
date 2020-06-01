@@ -37,9 +37,10 @@ handle to no longer be bound to the rect element (hence commented out) */
 .stepper-bar {
     counter-reset: step;
 }
+
 .stepper-bar li {
     list-style-type: none;
-    width: 33%; /* this is 100 / num_items_in_stepper; update if using more than 4 steps */
+    width: 33%; /* this is 100 / num_items_in_stepper; update if using more than 3 steps */
     float: left;
     font-size: 20px;
     position: relative;
@@ -47,6 +48,7 @@ handle to no longer be bound to the rect element (hence commented out) */
     text-transform: uppercase;
     color: #7d7d7d;
 }
+
 .stepper-bar li:before {
     width: 70px;
     height: 70px;
@@ -60,6 +62,7 @@ handle to no longer be bound to the rect element (hence commented out) */
     border-radius: 50%;
     background-color: white;
 }
+
 .stepper-bar li:after {
     width: 100%;
     height: 5px;
@@ -70,15 +73,19 @@ handle to no longer be bound to the rect element (hence commented out) */
     left: -50%;
     z-index: -1;
 }
+
 .stepper-bar li:first-child:after {
     content: none;
 }
+
 .stepper-bar li.active {
     color: #55b776;
 }
+
 .stepper-bar li.active:before {
     border-color: #55b776;
 }
+
 .stepper-bar li.active + li:after {
     background-color: #55b776;
 }

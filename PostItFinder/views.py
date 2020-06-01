@@ -15,7 +15,13 @@ with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r
 def index(request):
     # Update config to include the explanatory text for the home page
     HTML["APP"]["EXPLAIN_TEXT"]["TEXT"] =  HTML["HOME"]["EXPLAIN_TEXT"]["TEXT"]
-    HTML["APP"]["STEPPER_BAR"]["ITEMS"][0]["CLASS"] = "active"
+
+    # Update config to set the 'active' class for the stepper bar
+    for step in HTML["APP"]["STEPPER_BAR"]["ITEMS"]:
+        if step["ID"] == "step1-id":
+            step["CLASS"] = "active"
+        else:
+            step["CLASS"] = ""
 
     # Update URL for the 'next' button
     HTML["APP"]["NEXT_BTN"]["URL"] = HTML["HOME"]["NEXT_BTN"]["URL"]
@@ -51,6 +57,16 @@ def faq(request):
     return render(request, PATHS["FAQ"], context=context)
 
 def set_regions(request):
+    # Update config to include the explanatory text for the home page
+    HTML["APP"]["EXPLAIN_TEXT"]["TEXT"] =  HTML["SET_REGIONS"]["EXPLAIN_TEXT"]["TEXT"]
+
+    # Update config to set the 'active' class for the stepper bar
+    for step in HTML["APP"]["STEPPER_BAR"]["ITEMS"]:
+        if step["ID"] == "step1-id" or step["ID"] == "step2-id":
+            step["CLASS"] = "active"
+        else:
+            step["CLASS"] = ""
+
     # Update URL for the 'previous' button
     HTML["APP"]["PREVIOUS_BTN"]["URL"] = HTML["SET_REGIONS"]["PREVIOUS_BTN"]["URL"]
 
@@ -64,7 +80,6 @@ def set_regions(request):
         "explain_text": HTML["APP"]["EXPLAIN_TEXT"],
         "next_btn": HTML["APP"]["NEXT_BTN"],
         "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
-        "choose_img_btn": HTML["HOME"]["CHOOSE_IMG_BTN"],
         "image_pane": HTML["APP"]["IMAGE_PANE"],
         "config": CONFIG,
         }
@@ -79,7 +94,6 @@ def analyse_text(request):
         "explain_text": HTML["APP"]["EXPLAIN_TEXT"],
         "next_btn": HTML["APP"]["NEXT_BTN"],
         "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
-        "choose_img_btn": HTML["HOME"]["CHOOSE_IMG_BTN"],
         "image_pane": HTML["APP"]["IMAGE_PANE"],
         "config": CONFIG,
         }
