@@ -7,18 +7,22 @@ window.onload = function() {
 
     // set the class and ARIA state of the Next button to active
     const nextBtn = document.getElementById(CONFIG.HTML.APP.NEXT_BTN.ID);
-    if(!nextBtn.classList.contains("disabled")){
-        nextBtn.classList.add("disabled");
-    }
+    // first, check whether there's any image data in sessionStorage; if there
+    // is, the button should be enabled
+    if(!sessionStorage.getItem(CONFIG.HTML.APP.IMAGE_PANE.FILE_DATA_KEY)) {
+        if(!nextBtn.classList.contains("disabled")){
+            nextBtn.classList.add("disabled");
+        }
 
-    if(nextBtn.getAttribute("aria-disabled") !== true){
-        nextBtn.setAttribute("aria-disabled", true);
+        if(nextBtn.getAttribute("aria-disabled") !== true){
+            nextBtn.setAttribute("aria-disabled", true);
+        }
     }
 
     // 
     previewImage(CONFIG.HTML.APP.IMAGE_PANE.ID, 
-        CONFIG.HTML.HOME.IMAGE_PANE.FILE_DATA_KEY,
-        CONFIG.HTML.HOME.IMAGE_PANE.FILE_NAME_KEY);
+        CONFIG.HTML.APP.IMAGE_PANE.FILE_DATA_KEY,
+        CONFIG.HTML.APP.IMAGE_PANE.FILE_NAME_KEY);
     
 }
 
@@ -32,8 +36,8 @@ $(".custom-file-input").on("change", function() {
 
     // preview the image selected by the user
     previewImage(CONFIG.HTML.APP.IMAGE_PANE.ID,
-        CONFIG.HTML.HOME.IMAGE_PANE.FILE_DATA_KEY,
-        CONFIG.HTML.HOME.IMAGE_PANE.FILE_NAME_KEY,
+        CONFIG.HTML.APP.IMAGE_PANE.FILE_DATA_KEY,
+        CONFIG.HTML.APP.IMAGE_PANE.FILE_NAME_KEY,
         this); 
     
     // set the class and ARIA state of the Next button to active

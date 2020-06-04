@@ -68,7 +68,9 @@
                 "URL": "PostItFinder:index"
             },
             "IMAGE_PANE": {
-                "ID": "img-pane-id"
+                "ID": "img-pane-id",
+                "FILE_DATA_KEY": "fileData",
+                "FILE_NAME_KEY": "fileName"
             }
         },
         "HOME": {
@@ -82,10 +84,6 @@
             },
             "NEXT_BTN": {
                 "URL": "PostItFinder:set_regions"
-            },
-            "IMAGE_PANE": {
-                "FILE_DATA_KEY": "fileData",
-                "FILE_NAME_KEY": "fileName"
             }
         },
         "ABOUT": {
@@ -96,8 +94,28 @@
         },
         "SET_REGIONS": {
             "URL": "PostItFinder:set_regions",
-            "EXPLAIN_TEXT": {
-                "TEXT": "Do some stuff"
+            "EXPLAIN_TEXT": { 
+                "INTRO": {
+                    "ID": "intro-id",
+                    "MODAL_ID": "intro-modal-id"
+                },
+                "REGION_SETTING": {
+                    "ID": "region-setting-id",
+                    "OR_MODAL_ID": "obj-rec-region-setting-modal-id",
+                    "RE_MODAL_ID": "reg-edit-region-setting-modal-id"
+                },
+                "REGIONS_MODAL":{
+                    "ID": "regions-modal-id",
+                    "CLOSE_ID": "regions-modal-close-btn-id"
+                },
+                "OBJ_REC_MODAL":{
+                    "ID": "obj-rec-modal-id",
+                    "CLOSE_ID": "obj-rec-modal-close-btn-id"
+                },
+                "REG_EDIT_MODAL": {
+                    "ID": "reg-edit-modal-id",
+                    "CLOSE_ID": "reg-edit-modal-close-btn-id"
+                }
             },
             "PREVIOUS_BTN": {
                 "URL": "PostItFinder:index"

@@ -10,6 +10,8 @@ import base64
 # from functional_tests import base
 from project_tests.functional_tests import base
 
+# arbitrarily use test_png.png as our setup image throughout
+IMG_FILE = "test_jpg.jpg"
 
 # =========================================================================================
 # STATIC TESTS
@@ -34,12 +36,11 @@ class SetRegionsPageStaticTests(base.StaticTests):
         super().setUp()
 
         # arbitrarily use test_png.png as our test image
-        img_file = "test_jpg.jpg"
         input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
 
         # get the input elements and update with the file path
         input_elem = self.browser.find_element_by_id(input_id)
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', IMG_FILE)
         input_elem.send_keys(path)
 
         # wait a few seconds for the image to render
@@ -113,30 +114,43 @@ class SetRegionsPageStaticTests(base.StaticTests):
         for item in items:
             step = self.browser.find_element_by_id(item["ID"])
             self.assertEqual(step.get_attribute("innerText"), item["TEXT"])
-        
-    def test_step_2_is_active(self):
-        cfg = self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"][1]
-        step2 = self.browser.find_element_by_id(cfg["ID"])
-        self.assertIn("active", step2.get_attribute("class"))
-
-    def test_other_steps_are_inactive(self):
+    
+    def test_correct_steps_are_active(self):
         items = self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]
         for item in items:
-            if items.index(item) != 1:
-                step = self.browser.find_element_by_id(item["ID"])
+            step = self.browser.find_element_by_id(item["ID"])
+            if items.index(item) <= 1:            
+                self.assertIn("active", step.get_attribute("class"))
+            else:
                 self.assertNotIn("active", step.get_attribute("class"))
 
     # -------------------------------------------------------------------------------------
     # Explanatory text tests
     # -------------------------------------------------------------------------------------
-    def test_explain_text_is_displayed(self):
-        explain_txt = self.browser.find_element_by_id(self.ELEMS["APP"]["EXPLAIN_TEXT"]["ID"])
-        self.assertTrue(explain_txt.is_displayed())
+    def test_intro_text_is_displayed(self):
+        intro_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["INTRO"]["ID"]
+        intro_txt = self.browser.find_element_by_id(intro_id)
+        self.assertTrue(intro_txt.is_displayed())
 
-    def test_explain_text_is_correct(self):
-        explain_txt = self.browser.find_element_by_id(self.ELEMS["APP"]["EXPLAIN_TEXT"]["ID"])
-        intended_text = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["TEXT"]
-        self.assertEqual(explain_txt.get_attribute("innerText"), intended_text)
+    def test_region_setter_text_is_displayed(self):
+        regions_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGION_SETTING"]["ID"]
+        regions_txt = self.browser.find_element_by_id(regions_id)
+        self.assertTrue(regions_txt.is_displayed())
+
+    def test_regions_modal_is_not_displayed(self):
+        regions_modal_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["ID"]
+        regions_modal = self.browser.find_element_by_id(regions_modal_id)        
+        self.assertFalse(regions_modal.is_displayed())
+    
+    def test_object_recognition_modal_is_not_displayed(self):
+        or_modal_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["OBJ_REC_MODAL"]["ID"]
+        or_modal = self.browser.find_element_by_id(or_modal_id)
+        self.assertFalse(or_modal.is_displayed())
+    
+    def test_region_editor_modal_is_not_displayed(self):
+        re_modal_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REG_EDIT_MODAL"]["ID"]
+        re_modal = self.browser.find_element_by_id(re_modal_id)
+        self.assertFalse(re_modal.is_displayed())
 
     # -------------------------------------------------------------------------------------
     # Choose-image button tests
@@ -188,10 +202,18 @@ class SetRegionsPageStaticTests(base.StaticTests):
         img_pane = self.browser.find_elements_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
         self.assertTrue(img_pane)
 
-    def test_image_pane_contains_img(self):
-        img_pane = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
-        imgs = img_pane.find_elements_by_tag_name("img")
-        self.assertTrue(imgs)
+    def test_image_pane_contains_correct_image(self):
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        src = img.get_attribute("src")
+
+        # get the sam UTF-8 string from the original image.        
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', IMG_FILE)
+        with open(path, "rb") as f:
+            b64_encoded_img = base64.b64encode(f.read())
+            b64_msg = b64_encoded_img.decode('utf-8')
+
+        # compare the two strings
+        self.assertEqual(src, f"data:image/jpeg;base64,{b64_msg}")
 
 
 # =========================================================================================
@@ -214,12 +236,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         super().setUp()
 
         # arbitrarily use test_png.png as our test image
-        img_file = "test_jpg.jpg"
         input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
 
         # get the input elements and update with the file path
         input_elem = self.browser.find_element_by_id(input_id)
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', IMG_FILE)
         input_elem.send_keys(path)
 
         # wait a few seconds for the image to render
@@ -264,12 +285,89 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     # Stepper bar tests
     # -------------------------------------------------------------------------------------
-    # None
+    def test_returning_to_home_sets_only_step_one_active(self):
+        # browse back to the home page
+        self.browser.find_element_by_id(self.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
+
+        # check classes of all stepper bar items
+        items = self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]
+        for item in items:
+            step = self.browser.find_element_by_id(item["ID"])
+            if items.index(item) <= 0:            
+                self.assertIn("active", step.get_attribute("class"))
+            else:
+                self.assertNotIn("active", step.get_attribute("class"))
 
     # -------------------------------------------------------------------------------------
     # Explanatory text tests
     # -------------------------------------------------------------------------------------
-    # None
+    def test_intro_modal_opens_and_closes_correctly(self):
+        # click the <a> tag to open the modal
+        modal_link_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["INTRO"]["MODAL_ID"]
+        self.browser.find_element_by_id(modal_link_id).click()
+
+        # add a brief wait
+        time.sleep(2)
+
+        # check to see if the modal has appeared
+        modal_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["ID"]
+        modal = self.browser.find_element_by_id(modal_id)
+        self.assertTrue(modal.is_displayed())
+
+        # close the modal
+        modal_close_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["CLOSE_ID"]
+        self.browser.find_element_by_id(modal_close_id).click()
+
+        # add a wait to ensure the modal has closed
+        time.sleep(2)
+
+        # check that the modal is no longer displayed
+        self.assertFalse(modal.is_displayed())
+
+    def test_obj_recog_modal_opens_and_closes_correctly(self):
+        ex_txt = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]
+
+        # click the <a> tag to open the modal
+        self.browser.find_element_by_id(ex_txt["REGION_SETTING"]["OR_MODAL_ID"]).click()
+
+        # add a brief wait to ensure the modal has opened
+        time.sleep(2)
+
+        # check to see if the modal has appeared
+        modal = self.browser.find_element_by_id(ex_txt["OBJ_REC_MODAL"]["ID"])
+        self.assertTrue(modal.is_displayed())
+
+        # close the modal
+        self.browser.find_element_by_id(ex_txt["OBJ_REC_MODAL"]["CLOSE_ID"]).click()
+
+        # add a wait to ensure the modal has closed
+        time.sleep(2)
+
+        # check that the modal is no longer displayed
+        self.assertFalse(modal.is_displayed())
+
+    def test_reg_editor_modal_opens_and_closes_correctly(self):
+        # click the <a> tag to open the modal
+        modal_link_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGION_SETTING"]["RE_MODAL_ID"]
+        self.browser.find_element_by_id(modal_link_id).click()
+
+        # add a brief wait
+        time.sleep(2)
+
+        # check to see if the modal has appeared
+        modal_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REG_EDIT_MODAL"]["ID"]
+        modal = self.browser.find_element_by_id(modal_id)
+        self.assertTrue(modal.is_displayed())
+
+        # close the modal
+        modal_close_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REG_EDIT_MODAL"]["CLOSE_ID"]
+        self.browser.find_element_by_id(modal_close_id).click()
+
+        # add a wait to ensure the modal has closed
+        time.sleep(2)
+
+        # check that the modal is no longer displayed
+        self.assertFalse(modal.is_displayed())
 
     # -------------------------------------------------------------------------------------
     # Choose-image button tests and preview pane tests
@@ -428,11 +526,10 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
         src_string = img.get_attribute("src")
 
-        # get the sam UTF-8 string from the original image.
-        img_file = "test_jpg.jpg"        
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-        with open(path, "rb") as img_file:
-            b64_encoded_img = base64.b64encode(img_file.read())
+        # get the sam UTF-8 string from the original image.        
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', IMG_FILE)
+        with open(path, "rb") as f:
+            b64_encoded_img = base64.b64encode(f.read())
             b64_msg = b64_encoded_img.decode('utf-8')
 
         # compare the two strings

@@ -23,7 +23,9 @@
     <!-- explanatory text -->
     <div class="row mt-5 mb-5">
         <div class="mx-auto">
+            {% block explain_text %}
             <p id="{{ explain_text.ID }}" class="lead">{{ explain_text.TEXT }}</p>
+            {% endblock %}
         </div>
     </div>
     <!-- /explanatory text -->
@@ -70,13 +72,13 @@
 
     <!-- image pane -->
     <div class="row mt-5 mb-5">
-        <div class="col-2"></div>
+        <div class="col-lg-2"></div>
         <div class="col-12 col-lg-8">
             {% block image_pane %}
             <img id="{{ image_pane.ID }}" class="img-fluid" src="#" alt="No image selected">
             {% endblock %}
         </div>
-        <div class="col-2"></div>
+        <div class="col-lg-2"></div>
     </div>
     <!-- /image pane -->
 
