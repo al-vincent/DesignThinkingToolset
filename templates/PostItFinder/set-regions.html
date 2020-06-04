@@ -2,9 +2,138 @@
 
 {% block title %}{{ title }}{% endblock %}
 
-{% block image_action_buttons %}
-  
+{% block explain_text %}
+  <div class="row">
+    <div class="col-lg-2"></div>
+    <div id="{{ explain_text.INTRO.ID }}" class="col-12 col-lg-8 lead">
+      <p>
+        This page lets you add 
+        <a id="{{ explain_text.INTRO.MODAL_ID }}" href="#{{ explain_text.REGIONS_MODAL.ID }}" data-toggle="modal" data-target="#{{ explain_text.REGIONS_MODAL.ID }}">
+        <i>regions</i></a> to your image. Regions help to group words which don't 
+        run in lines left-to-right (like sticky notes).
+      </p>
+    </div>
+    <div class="col-lg-2"></div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-2"></div>
+    <div id="{{ explain_text.REGION_SETTING.ID }}" class="col-12 col-lg-8 lead">
+      <p>
+        Regions can be set in two ways. You can use 
+        <a id="{{ explain_text.REGION_SETTING.OR_MODAL_ID }}" href="#{{ explain_text.OBJ_REC_MODAL.ID }}" data-toggle="modal" data-target="#{{ explain_text.OBJ_REC_MODAL.ID }}">
+        <strong>object recognition</strong></a> to automatically identify shapes in the 
+        image; and you can use the 
+        <a id="{{ explain_text.REGION_SETTING.RE_MODAL_ID }}" href="#{{ explain_text.REG_EDIT_MODAL.ID }}" data-toggle="modal" data-target="#{{ explain_text.REG_EDIT_MODAL.ID }}">
+        <strong>region editor</strong></a> to manually set regions.
+      </p>
+    </div>
+    <div class="col-lg-2"></div>
+  </div>
+
+  <!-- regions modal window -->
+  <div id="{{ explain_text.REGIONS_MODAL.ID }}" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Regions</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>
+            The text analytics algorithm used in the next step will create sentences
+            from the words it finds in the image. To do this, it assumes that the 
+            text is structured in a 'normal' printed format; i.e. runs from left-to-right, 
+            and from top-to-bottom.
+          </p>
+          <p>
+            This isn't always true, especially when using sticky notes. For example,
+            if two sticky notes are placed side-by-side then the algorithm will
+            combine the text from both of these sticky notes into one sentence, 
+            which may not be desirable.
+          </p>
+          <p>
+            A <b>region</b> is a user-defined area within the image. All words found
+            within a region will be grouped together. This is very useful for sticky
+            notes, but also for processing other text (e.g. images of forms or other
+            documents which have clear, separate sections).
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button id="{{ explain_text.REGIONS_MODAL.CLOSE_ID }}" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /regions modal window -->
+
+  <!-- object detection modal window -->
+  <div id="{{ explain_text.OBJ_REC_MODAL.ID }}" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Object Recognition</h5>
+          <button id="{{ explain_text.OBJ_REC_MODAL.CLOSE_ID }}" type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>
+            To use object recognition, simply click on the 'Find Regions' button
+            below. This uses image processing techniques to spot sticky note-like 
+            shapes within the image. 
+          </p>
+          <p>
+            <b>Note</b> that the image processing algorithms are not perfect. They
+            are likely to both miss some shapes they should find; and to find some
+            shapes that they shouldn't.
+          </p>
+          <p>
+            To handle this, you can  edit the regions identified by the algorithm 
+            with the region editor.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /object detection modal window -->
+
+  <!-- regions editor modal window -->
+  <div id="{{ explain_text.REG_EDIT_MODAL.ID }}" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Region Editor</h5>
+          <button id="{{ explain_text.REG_EDIT_MODAL.CLOSE_ID }}" type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>
+            The region editor has the following options:
+            <ul>
+              <li>Add a new region by clicking the 'Add Region' button</li>
+              <li>Delete an existing region by double-clicking on it</li>
+              <li>Move a region by clicking the region and dragging it</li>
+              <li>Resize a region by dragging its top-left or bottom-right corners</li>
+            </ul>
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /regions editor modal window -->
 {% endblock %}
+
+{% block image_action_buttons %}{% endblock %}
 
 {% block scripts %}
   {{ block.super }}  

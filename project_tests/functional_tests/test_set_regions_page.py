@@ -127,14 +127,30 @@ class SetRegionsPageStaticTests(base.StaticTests):
     # -------------------------------------------------------------------------------------
     # Explanatory text tests
     # -------------------------------------------------------------------------------------
-    def test_explain_text_is_displayed(self):
-        explain_txt = self.browser.find_element_by_id(self.ELEMS["APP"]["EXPLAIN_TEXT"]["ID"])
-        self.assertTrue(explain_txt.is_displayed())
+    def test_intro_text_is_displayed(self):
+        intro_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["INTRO"]["ID"]
+        intro_txt = self.browser.find_element_by_id(intro_id)
+        self.assertTrue(intro_txt.is_displayed())
 
-    def test_explain_text_is_correct(self):
-        explain_txt = self.browser.find_element_by_id(self.ELEMS["APP"]["EXPLAIN_TEXT"]["ID"])
-        intended_text = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["TEXT"]
-        self.assertEqual(explain_txt.get_attribute("innerText"), intended_text)
+    def test_region_setter_text_is_displayed(self):
+        regions_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGION_SETTING"]["ID"]
+        regions_txt = self.browser.find_element_by_id(regions_id)
+        self.assertTrue(regions_txt.is_displayed())
+
+    def test_regions_modal_is_not_displayed(self):
+        regions_modal_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["ID"]
+        regions_modal = self.browser.find_element_by_id(regions_modal_id)        
+        self.assertFalse(regions_modal.is_displayed())
+    
+    def test_object_recognition_modal_is_not_displayed(self):
+        or_modal_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["OBJ_REC_MODAL"]["ID"]
+        or_modal = self.browser.find_element_by_id(or_modal_id)
+        self.assertFalse(or_modal.is_displayed())
+    
+    def test_region_editor_modal_is_not_displayed(self):
+        re_modal_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REG_EDIT_MODAL"]["ID"]
+        re_modal = self.browser.find_element_by_id(re_modal_id)
+        self.assertFalse(re_modal.is_displayed())
 
     # -------------------------------------------------------------------------------------
     # Choose-image button tests
@@ -186,7 +202,7 @@ class SetRegionsPageStaticTests(base.StaticTests):
         img_pane = self.browser.find_elements_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
         self.assertTrue(img_pane)
 
-    def test_image_pane_contains_correct_(self):
+    def test_image_pane_contains_correct_image(self):
         img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
         src = img.get_attribute("src")
 
@@ -285,7 +301,73 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     # Explanatory text tests
     # -------------------------------------------------------------------------------------
-    # None
+    def test_intro_modal_opens_and_closes_correctly(self):
+        # click the <a> tag to open the modal
+        modal_link_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["INTRO"]["MODAL_ID"]
+        self.browser.find_element_by_id(modal_link_id).click()
+
+        # add a brief wait
+        time.sleep(2)
+
+        # check to see if the modal has appeared
+        modal_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["ID"]
+        modal = self.browser.find_element_by_id(modal_id)
+        self.assertTrue(modal.is_displayed())
+
+        # close the modal
+        modal_close_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["CLOSE_ID"]
+        self.browser.find_element_by_id(modal_close_id).click()
+
+        # add a wait to ensure the modal has closed
+        time.sleep(2)
+
+        # check that the modal is no longer displayed
+        self.assertFalse(modal.is_displayed())
+
+    def test_obj_recog_modal_opens_and_closes_correctly(self):
+        ex_txt = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]
+
+        # click the <a> tag to open the modal
+        self.browser.find_element_by_id(ex_txt["REGION_SETTING"]["OR_MODAL_ID"]).click()
+
+        # add a brief wait to ensure the modal has opened
+        time.sleep(2)
+
+        # check to see if the modal has appeared
+        modal = self.browser.find_element_by_id(ex_txt["OBJ_REC_MODAL"]["ID"])
+        self.assertTrue(modal.is_displayed())
+
+        # close the modal
+        self.browser.find_element_by_id(ex_txt["OBJ_REC_MODAL"]["CLOSE_ID"]).click()
+
+        # add a wait to ensure the modal has closed
+        time.sleep(2)
+
+        # check that the modal is no longer displayed
+        self.assertFalse(modal.is_displayed())
+
+    def test_reg_editor_modal_opens_and_closes_correctly(self):
+        # click the <a> tag to open the modal
+        modal_link_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGION_SETTING"]["RE_MODAL_ID"]
+        self.browser.find_element_by_id(modal_link_id).click()
+
+        # add a brief wait
+        time.sleep(2)
+
+        # check to see if the modal has appeared
+        modal_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REG_EDIT_MODAL"]["ID"]
+        modal = self.browser.find_element_by_id(modal_id)
+        self.assertTrue(modal.is_displayed())
+
+        # close the modal
+        modal_close_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REG_EDIT_MODAL"]["CLOSE_ID"]
+        self.browser.find_element_by_id(modal_close_id).click()
+
+        # add a wait to ensure the modal has closed
+        time.sleep(2)
+
+        # check that the modal is no longer displayed
+        self.assertFalse(modal.is_displayed())
 
     # -------------------------------------------------------------------------------------
     # Choose-image button tests and preview pane tests
