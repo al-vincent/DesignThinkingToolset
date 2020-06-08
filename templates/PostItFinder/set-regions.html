@@ -3,6 +3,7 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block explain_text %}
+  <!-- regions intro paragraph -->
   <div class="row">
     <div class="col-lg-2"></div>
     <div id="{{ explain_text.INTRO.ID }}" class="col-12 col-lg-8 lead">
@@ -15,7 +16,9 @@
     </div>
     <div class="col-lg-2"></div>
   </div>
+  <!-- /regions intro paragraph -->
 
+  <!-- region setting overview paragraph -->
   <div class="row">
     <div class="col-lg-2"></div>
     <div id="{{ explain_text.REGION_SETTING.ID }}" class="col-12 col-lg-8 lead">
@@ -30,6 +33,7 @@
     </div>
     <div class="col-lg-2"></div>
   </div>
+  <!-- /region setting overview paragraph -->
 
   <!-- regions modal window -->
   <div id="{{ explain_text.REGIONS_MODAL.ID }}" class="modal fade" tabindex="-1" role="dialog">
@@ -87,12 +91,12 @@
           </p>
           <p>
             <b>Note</b> that the image processing algorithms are not perfect. They
-            are likely to both miss some shapes they should find; and to find some
-            shapes that they shouldn't.
+            are likely to miss some shapes they should find, and also to find some
+            shapes that shouldn't be included.
           </p>
           <p>
-            To handle this, you can  edit the regions identified by the algorithm 
-            with the region editor.
+            To handle this, after the regions have been identified by the algorithm
+            they can also be tweaked with the region editor.
           </p>
         </div>
         <div class="modal-footer">
@@ -133,10 +137,25 @@
   <!-- /regions editor modal window -->
 {% endblock %}
 
-{% block image_action_buttons %}{% endblock %}
+{% block image_action_buttons %}
+  <div class="row pt-2">
+    <div class="col-6">
+      <button id="{{ find_rgns_btn.ID }}" type="button" class="btn btn-block btn-outline-success">
+        {{ find_rgns_btn.TEXT }}
+      </button>
+    </div>
+
+    <div class="col-6">
+      <button id="{{ add_rgn_btn.ID }}" type="button" class="btn btn-block btn-outline-success">
+        {{ add_rgn_btn.TEXT }}
+      </button>
+    </div>
+  </div>
+{% endblock %}
 
 {% block scripts %}
   {{ block.super }}  
   {% load static %}
+  <script type="text/javascript" src="{% static 'PostItFinder/js/drawAndEditRegions.js' %}"></script>
   <script type="text/javascript" src="{% static 'PostItFinder/js/setRegions.js' %}"></script>
 {% endblock %}

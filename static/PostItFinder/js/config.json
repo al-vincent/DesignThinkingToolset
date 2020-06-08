@@ -68,9 +68,14 @@
                 "URL": "PostItFinder:index"
             },
             "IMAGE_PANE": {
-                "ID": "img-pane-id",
-                "FILE_DATA_KEY": "fileData",
-                "FILE_NAME_KEY": "fileName"
+                "CONTAINER": {
+                    "ID": "img-container-id"
+                },
+                "IMAGE": {
+                    "ID": "img-pane-id",
+                    "FILE_DATA_KEY": "fileData",
+                    "FILE_NAME_KEY": "fileName"
+                }                
             }
         },
         "HOME": {
@@ -116,6 +121,14 @@
                     "ID": "reg-edit-modal-id",
                     "CLOSE_ID": "reg-edit-modal-close-btn-id"
                 }
+            },
+            "FIND_REGIONS_BTN":{
+                "ID": "find-regions-btn-id",
+                "TEXT": "Find Regions"
+            },
+            "ADD_REGION_BTN":{
+                "ID": "add-region-btn-id",
+                "TEXT": "Add Region"
             },
             "PREVIOUS_BTN": {
                 "URL": "PostItFinder:index"

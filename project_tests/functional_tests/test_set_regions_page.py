@@ -153,11 +153,36 @@ class SetRegionsPageStaticTests(base.StaticTests):
         self.assertFalse(re_modal.is_displayed())
 
     # -------------------------------------------------------------------------------------
-    # Choose-image button tests
+    # Find-regions button tests
     # -------------------------------------------------------------------------------------    
-    # def test_choose_image_input_is_active(self):
-    #     img_input = self.browser.find_element_by_id(self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"])
-    #     self.assertTrue(img_input.is_enabled())
+    def test_find_regions_button_is_displayed(self):
+        find_rgns_btn = self.browser.find_element_by_id(self.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"])
+        self.assertTrue(find_rgns_btn.is_displayed())
+
+    def test_add_region_button_is_enabled(self):
+        find_rgns_btn = self.browser.find_element_by_id(self.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"])
+        self.assertTrue(find_rgns_btn.is_enabled())
+
+    def test_add_region_button_has_correct_text(self):
+        find_rgns_btn = self.browser.find_element_by_id(self.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"])
+        intended_text = self.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["TEXT"]
+        self.assertEqual(find_rgns_btn.get_attribute("innerText"), intended_text)
+
+    # -------------------------------------------------------------------------------------
+    # Add-region button tests
+    # -------------------------------------------------------------------------------------    
+    def test_add_region_button_is_displayed(self):
+        add_rgn_btn = self.browser.find_element_by_id(self.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"])
+        self.assertTrue(add_rgn_btn.is_displayed())
+
+    def test_add_region_button_is_enabled(self):
+        add_rgn_btn = self.browser.find_element_by_id(self.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"])
+        self.assertTrue(add_rgn_btn.is_enabled())
+
+    def test_add_region_button_has_correct_text(self):
+        add_rgn_btn = self.browser.find_element_by_id(self.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"])
+        intended_text = self.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["TEXT"]
+        self.assertEqual(add_rgn_btn.get_attribute("innerText"), intended_text)
     
     # def test_choose_image_label_has_correct_label_text(self):
     #     """
@@ -199,11 +224,11 @@ class SetRegionsPageStaticTests(base.StaticTests):
     # Preview pane tests
     # -------------------------------------------------------------------------------------
     def test_image_pane_exists(self):
-        img_pane = self.browser.find_elements_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        img_pane = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         self.assertTrue(img_pane)
 
     def test_image_pane_contains_correct_image(self):
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         src = img.get_attribute("src")
 
         # get the sam UTF-8 string from the original image.        
@@ -370,132 +395,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.assertFalse(modal.is_displayed())
 
     # -------------------------------------------------------------------------------------
-    # Choose-image button tests and preview pane tests
-    # -------------------------------------------------------------------------------------
-    # N.B. we don't want to run the test below! The dialog opened is an OS dialog, which 
-    # Selenium can't interact with (including closing the dialog)
-    # def test_clicking_choose_image_opens_dialog(self):
-    #     pass
-
-    # def test_jpg_can_be_selected(self):
-    #     img_file = "test_jpg.jpg"
-    #     input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
-
-    #     # get the input and label elements
-    #     input_elem = self.browser.find_element_by_id(input_id)
-    #     img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
-        
-    #     # update the input directly with the file path
-    #     path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-    #     input_elem.send_keys(path)
-    #     self.assertEqual(img_label.get_attribute("innerText"), img_file)
-
-    #     # wait a few seconds for the image to render
-    #     time.sleep(3)
-
-    #     # check whether the image src attribute is no longer '#'
-    #     img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
-    #     self.assertNotIn("#", img.get_attribute("src"))
-    
-    # def test_png_can_be_selected(self):
-    #     img_file = "test_png.png"
-    #     input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
-
-    #     # get the input and label elements
-    #     input_elem = self.browser.find_element_by_id(input_id)
-    #     img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
-        
-    #     # update the input directly with the file path
-    #     path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-    #     input_elem.send_keys(path)
-    #     self.assertEqual(img_label.get_attribute("innerText"), img_file)
-
-    #     # wait a few seconds for the image to render
-    #     time.sleep(3)
-
-    #     # check whether the image src attribute is no longer '#'
-    #     img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
-    #     self.assertNotIn("#", img.get_attribute("src"))
-    
-    # def test_bmp_can_be_selected(self):
-    #     img_file = "test_bmp.bmp"
-    #     input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
-
-    #     # get the input and label elements
-    #     input_elem = self.browser.find_element_by_id(input_id)
-    #     img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
-        
-    #     # update the input directly with the file path
-    #     path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-    #     input_elem.send_keys(path)
-    #     self.assertEqual(img_label.get_attribute("innerText"), img_file)
-
-    #     # wait a few seconds for the image to render
-    #     time.sleep(3)
-
-    #     # check whether the image src attribute is no longer '#'
-    #     img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
-    #     self.assertNotIn("#", img.get_attribute("src"))
-    
-    # def test_gif_can_be_selected(self):
-    #     img_file = "test_gif.gif"
-    #     input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
-
-    #     # get the input and label elements
-    #     input_elem = self.browser.find_element_by_id(input_id)
-    #     img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
-        
-    #     # update the input directly with the file path
-    #     path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-    #     input_elem.send_keys(path)
-    #     self.assertEqual(img_label.get_attribute("innerText"), img_file)
-
-    #     # wait a few seconds for the image to render
-    #     time.sleep(3)
-
-    #     # check whether the image src attribute is no longer '#'
-    #     img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
-    #     self.assertNotIn("#", img.get_attribute("src"))
-
-    # def test_tif_cannot_be_selected(self):
-    #     img_file = "test_tif.tif"
-    #     input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
-
-    #     # get the input and label elements
-    #     input_elem = self.browser.find_element_by_id(input_id)
-    #     img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
-        
-    #     # update the input directly with the file path
-    #     path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-    #     input_elem.send_keys(path)
-    #     self.assertEqual(img_label.get_attribute("innerText"), img_file)
-
-    #     # wait a few seconds for the image to render
-    #     time.sleep(3)
-
-    #     # check whether the image src attribute is no longer '#'
-    #     img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
-    #     self.assertIn("#", img.get_attribute("src"))
-
-    # def test_file_info_put_in_sessionStorage(self):
-    #     img_file = "test_jpg.jpg"
-    #     input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
-
-    #     # get the input and label elements
-    #     input_elem = self.browser.find_element_by_id(input_id)
-    #     img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
-        
-    #     # update the input directly with the file path
-    #     path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-    #     input_elem.send_keys(path)
-
-    #     # wait a few seconds for the image to render
-    #     time.sleep(3)
-
-    #     # check whether there is anything in sessionStorage
-    #     key = self.ELEMS['HOME']['IMAGE_PANE']['FILE_STORE_KEY']
-    #     script = f"return sessionStorage.getItem('{key}');"
-    #     self.assertIsNotNone(self.browser.execute_script(script))
+    # Add-region button tests
+    # -------------------------------------------------------------------------------------    
+    # def test_add_region_button_creates_console_msg(self):
+    #     add_rgn_btn = self.browser.find_element_by_id(self.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"])
+    #     self.assertTrue(add_rgn_btn.is_displayed())
 
     # -------------------------------------------------------------------------------------
     # Next button tests
@@ -523,7 +427,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         time.sleep(2)
 
         # get the src data for the image as a UTF-8 string decoded from base64
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         src_string = img.get_attribute("src")
 
         # get the sam UTF-8 string from the original image.        

@@ -75,6 +75,8 @@ def set_regions(request):
         "navbar": HTML["BASE"]["NAVBAR"],
         "stepper": HTML["APP"]["STEPPER_BAR"],
         "explain_text": HTML["SET_REGIONS"]["EXPLAIN_TEXT"],
+        "find_rgns_btn": HTML["SET_REGIONS"]["FIND_REGIONS_BTN"],
+        "add_rgn_btn": HTML["SET_REGIONS"]["ADD_REGION_BTN"],
         "next_btn": HTML["SET_REGIONS"]["NEXT_BTN"],
         "prev_btn": HTML["SET_REGIONS"]["PREVIOUS_BTN"],
         "image_pane": HTML["APP"]["IMAGE_PANE"],

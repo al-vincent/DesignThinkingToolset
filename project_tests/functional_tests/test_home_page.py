@@ -162,11 +162,11 @@ class HomePageStaticTests(base.StaticTests):
     # Preview pane tests
     # -------------------------------------------------------------------------------------
     def test_image_pane_exists(self):
-        img_pane = self.browser.find_elements_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        img_pane = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         self.assertTrue(img_pane)
 
     def test_image_pane_does_not_contain_img(self):
-        img_pane = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        img_pane = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         imgs = img_pane.find_elements_by_tag_name("img")
         self.assertFalse(imgs)
 
@@ -246,7 +246,7 @@ class HomePageDynamicTests(base.DynamicTests):
         time.sleep(3)
 
         # check whether the image src attribute is no longer '#'
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         self.assertNotIn("#", img.get_attribute("src"))
     
     def test_png_can_be_selected(self):
@@ -266,7 +266,7 @@ class HomePageDynamicTests(base.DynamicTests):
         time.sleep(3)
 
         # check whether the image src attribute is no longer '#'
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         self.assertNotIn("#", img.get_attribute("src"))
     
     def test_bmp_can_be_selected(self):
@@ -286,7 +286,7 @@ class HomePageDynamicTests(base.DynamicTests):
         time.sleep(3)
 
         # check whether the image src attribute is no longer '#'
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         self.assertNotIn("#", img.get_attribute("src"))
     
     def test_gif_can_be_selected(self):
@@ -306,7 +306,7 @@ class HomePageDynamicTests(base.DynamicTests):
         time.sleep(3)
 
         # check whether the image src attribute is no longer '#'
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         self.assertNotIn("#", img.get_attribute("src"))
 
     def test_tif_cannot_be_selected(self):
@@ -326,7 +326,7 @@ class HomePageDynamicTests(base.DynamicTests):
         time.sleep(3)
 
         # check whether the image src attribute is no longer '#'
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         self.assertIn("#", img.get_attribute("src"))
 
     def test_file_info_put_in_sessionStorage(self):    
@@ -352,14 +352,14 @@ class HomePageDynamicTests(base.DynamicTests):
             b64_msg = b64_encoded_img.decode('utf-8')
 
         # get the file encoding from sessionStorage
-        data_key = self.ELEMS['APP']['IMAGE_PANE']['FILE_DATA_KEY']
+        data_key = self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["FILE_DATA_KEY"]
         script = f"return sessionStorage.getItem('{data_key}');"
         # compare the two (with short string added to start of python encoding)
         self.assertEqual(self.browser.execute_script(script), 
                         f"data:image/jpeg;base64,{b64_msg}")
 
         # check whether the file name is in sessionStorage
-        name_key = self.ELEMS['APP']['IMAGE_PANE']['FILE_NAME_KEY']
+        name_key = self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["FILE_NAME_KEY"]
         script = f"return sessionStorage.getItem('{name_key}');"
         self.assertEqual(self.browser.execute_script(script), img_file)
 
@@ -386,7 +386,7 @@ class HomePageDynamicTests(base.DynamicTests):
             b64_msg = b64_encoded_img.decode('utf-8')
 
         # get the src data for the image as a UTF-8 string decoded from base64
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         src_string = img.get_attribute("src")
 
         # compare the two (with short string added to start of python encoding)
@@ -413,7 +413,7 @@ class HomePageDynamicTests(base.DynamicTests):
         input_elem.send_keys(path)
 
         # get the src data for the image as a UTF-8 string decoded from base64
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["ID"])
+        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         src_string = img.get_attribute("src")
 
         with open(path, "rb") as f:
@@ -424,7 +424,7 @@ class HomePageDynamicTests(base.DynamicTests):
         self.assertEqual(src_string, f"data:image/jpeg;base64,{b64_msg}")
 
         # get the encoding from sessionStorage
-        data_key = self.ELEMS['APP']['IMAGE_PANE']['FILE_DATA_KEY']
+        data_key = self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["FILE_DATA_KEY"]
         script = f"return sessionStorage.getItem('{data_key}');"
 
         # compare the two (with short string added to start of python encoding)
