@@ -1,25 +1,14 @@
-{% extends "PostItFinder/base-app.html" %}
+{% extends "PostItFinder/base.html" %}
 
 {% block title %}{{ title }}{% endblock %}
 
-{% block previous_button %}
-<!-- don't show the previous button on this page -->
-{% endblock%}
-
-{% block image_action_buttons %}
-  <div class="custom-file">
-    <input type="file" accept=".jpg, .png, .gif, .bmp" 
-          id="{{ choose_img_btn.ID }}"
-          class="custom-file-input">
-    </input>
-    <label class="custom-file-label" for="{{ choose_img_btn.ID }}">
-      {{ choose_img_btn.TEXT }}
-    </label>
-  </div>
-{% endblock %}
-
-{% block scripts %}
-  {{ block.super }}  
-  {% load static %}
-  <script type="text/javascript" src="{% static 'PostItFinder/js/index.js' %}"></script>
+{% block content %}
+    {{ home_content }}
+    <div class="row">
+        <div class="col">
+            <a id="{{ start_btn.ID}}" href="{% url start_btn.URL %}" role="button" class="btn btn-success btn-lg rounded-circle">
+                {{ start_btn.TEXT }}
+            </a>
+        </div>
+    </div>
 {% endblock %}

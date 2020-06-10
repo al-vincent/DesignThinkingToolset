@@ -74,7 +74,8 @@ function createSvg(svgID, width, height) {
     // create svg element:
     const svg = d3.select("#" + svgID).append("svg")
         .attr("width", width)
-        .attr("height", height);
+        .attr("height", height)
+        .attr("class", "svg-wrapper");
 
     return svg;
 }

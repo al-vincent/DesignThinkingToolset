@@ -74,9 +74,11 @@
     <div class="row mt-5 mb-5">
         <div class="col-lg-2"></div>
         <div class="col-12 col-lg-8">
-            {% block image_pane %}
-            <img id="{{ image_pane.ID }}" class="img-fluid" src="#" alt="No image selected">
-            {% endblock %}
+            <div id="{{ image_pane.CONTAINER.ID }}" class="img-overlay-wrap">
+                {% block image_pane %}            
+                <img id="{{ image_pane.IMAGE.ID }}" class="img-fluid" src="#" alt="No image selected">            
+                {% endblock %}
+            </div>
         </div>
         <div class="col-lg-2"></div>
     </div>
