@@ -54,7 +54,7 @@ handle to no longer be bound to the rect element (hence commented out) */
 
 .stepper-bar li {
     list-style-type: none;
-    width: 33%; /* this is 100 / num_items_in_stepper; update if using more than 3 steps */
+    width: 25%; /* this is 100 / num_steps; update if using more than 4 steps */
     float: left;
     font-size: 20px;
     position: relative;

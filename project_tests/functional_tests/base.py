@@ -3,7 +3,11 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.conf import settings
 import os
 from json import load
+import time
 
+
+# arbitrarily use test_png.png as our setup image throughout
+IMG_FILE = "test_jpg.jpg"
 
 # -----------------------------------------------------------------------------------------
 # HELPER FUNCTIONS
@@ -24,6 +28,12 @@ def get_webdriver():
     else:
         return webdriver.Chrome()
 
+# read in config vars
+with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
+    CONFIG = load(f)
+    ELEMS = CONFIG["HTML"]
+    PATHS = CONFIG["PATHS"]
+    CONST = CONFIG["CONSTANTS"]
 
 # -----------------------------------------------------------------------------------------
 # TEST TEMPLATE CLASSES
@@ -39,12 +49,12 @@ class StaticTests(StaticLiveServerTestCase):
     need to be created and destroyed after each test; instead, it can be spun up once
     at the start of the test suite and torn down at the end.
     """
-    # read in config vars
-    with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
-        CONFIG = load(f)
-        ELEMS = CONFIG["HTML"]
-        PATHS = CONFIG["PATHS"]
-        CONST = CONFIG["CONSTANTS"]
+    # # read in config vars
+    # with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
+    #     CONFIG = load(f)
+    #     ELEMS = CONFIG["HTML"]
+    #     PATHS = CONFIG["PATHS"]
+    #     CONST = CONFIG["CONSTANTS"]
 
     @classmethod
     def setUpClass(cls):
@@ -73,6 +83,33 @@ class StaticTests(StaticLiveServerTestCase):
         """
         # Cornelius opens the homepage
         self.browser.get(self.live_server_url)
+    
+    def navigate_to_choose_image_page(self):
+        # click on the home page Start button
+        start_btn_id = ELEMS["HOME"]["START_BTN"]["ID"]
+        self.browser.find_element_by_id(start_btn_id).click()
+    
+    def navigate_to_set_regions_page(self):
+        # navigate to the choose-image page from the home page
+        self.navigate_to_choose_image_page()
+
+        # arbitrarily use test_png.png as our test image
+        input_id = ELEMS["CHOOSE_IMAGE"]["CHOOSE_IMG_BTN"]["ID"]
+
+        # get the input elements and update with the file path
+        input_elem = self.browser.find_element_by_id(input_id)
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', IMG_FILE)
+        input_elem.send_keys(path)
+
+        # wait a few seconds for the image to render
+        time.sleep(2)
+
+        # click the Next button
+        nxt_btn = self.browser.find_element_by_id(ELEMS["APP"]["NEXT_BTN"]["ID"])
+        nxt_btn.click()
+
+        # wait for the new page to render
+        time.sleep(2)
 
 # -----------------------------------------------------------------------------------------
 
@@ -83,11 +120,11 @@ class DynamicTests(StaticLiveServerTestCase):
     at the beginning of each new test.
     """
     # read in config vars
-    with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
-        CONFIG = load(f)
-        ELEMS = CONFIG["HTML"]
-        PATHS = CONFIG["PATHS"]
-        CONST = CONFIG["CONSTANTS"]
+    # with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
+    #     CONFIG = load(f)
+    #     ELEMS = CONFIG["HTML"]
+    #     PATHS = CONFIG["PATHS"]
+    #     CONST = CONFIG["CONSTANTS"]
     
     def setUp(self):
         """
@@ -102,3 +139,30 @@ class DynamicTests(StaticLiveServerTestCase):
         Close down the browser.
         """
         self.browser.quit()
+    
+    def navigate_to_choose_image_page(self):
+        # click on the home page Start button
+        start_btn_id = ELEMS["HOME"]["START_BTN"]["ID"]
+        self.browser.find_element_by_id(start_btn_id).click()
+    
+    def navigate_to_set_regions_page(self):
+        # navigate to the choose-image page from the home page
+        self.navigate_to_choose_image_page()
+
+        # arbitrarily use test_png.png as our test image
+        input_id = ELEMS["CHOOSE_IMAGE"]["CHOOSE_IMG_BTN"]["ID"]
+
+        # get the input elements and update with the file path
+        input_elem = self.browser.find_element_by_id(input_id)
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', IMG_FILE)
+        input_elem.send_keys(path)
+
+        # wait a few seconds for the image to render
+        time.sleep(2)
+
+        # click the Next button
+        nxt_btn = self.browser.find_element_by_id(ELEMS["APP"]["NEXT_BTN"]["ID"])
+        nxt_btn.click()
+
+        # wait for the new page to render
+        time.sleep(2)

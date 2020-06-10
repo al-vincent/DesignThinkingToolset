@@ -11,7 +11,7 @@ import base64
 from project_tests.functional_tests import base
 
 # arbitrarily use test_png.png as our setup image throughout
-IMG_FILE = "test_jpg.jpg"
+# IMG_FILE = "test_jpg.jpg"
 
 # =========================================================================================
 # STATIC TESTS
@@ -35,23 +35,8 @@ class SetRegionsPageStaticTests(base.StaticTests):
         # call the 'normal' setUp from the base class
         super().setUp()
 
-        # arbitrarily use test_png.png as our test image
-        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
-
-        # get the input elements and update with the file path
-        input_elem = self.browser.find_element_by_id(input_id)
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', IMG_FILE)
-        input_elem.send_keys(path)
-
-        # wait a few seconds for the image to render
-        time.sleep(2)
-
-        # click the Next button
-        nxt_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"])
-        nxt_btn.click()
-
-        # wait for the new page to render
-        time.sleep(2)
+        # navigate to the set-regions page, via home and choose-image
+        self.navigate_to_set_regions_page()
 
     # -------------------------------------------------------------------------------------
     # Page tests
@@ -60,20 +45,20 @@ class SetRegionsPageStaticTests(base.StaticTests):
         """
         Check that the app uses the set-regions.html template.
         """
-        response = self.client.get(reverse(self.ELEMS["SET_REGIONS"]["URL"]))
-        self.assertTemplateUsed(response, self.PATHS["SET_REGIONS"])
+        response = self.client.get(reverse(base.ELEMS["SET_REGIONS"]["URL"]))
+        self.assertTemplateUsed(response, base.PATHS["SET_REGIONS"])
 
     def test_page_has_correct_title(self):
         """
         Ensure that the page title includes the correct text.
         """
-        self.assertIn(self.ELEMS["TITLE"], self.browser.title)
+        self.assertIn(base.ELEMS["TITLE"], self.browser.title)
     
     # -------------------------------------------------------------------------------------
     # Navbar tests
     # -------------------------------------------------------------------------------------
     def test_navbar_is_displayed(self):
-        navbar = self.browser.find_element_by_id(self.ELEMS["BASE"]["NAVBAR"]["ID"])
+        navbar = self.browser.find_element_by_id(base.ELEMS["BASE"]["NAVBAR"]["ID"])
         self.assertTrue(navbar.is_displayed())
 
     def test_navbar_has_logo(self):
@@ -83,12 +68,12 @@ class SetRegionsPageStaticTests(base.StaticTests):
         pass
 
     def test_navbar_items_are_displayed(self):
-        for nav_item in self.ELEMS["BASE"]["NAVBAR"]["PAGES"]:
+        for nav_item in base.ELEMS["BASE"]["NAVBAR"]["PAGES"]:
             link = self.browser.find_element_by_id(nav_item["ID"])
             self.assertTrue(link.is_displayed())
 
     def test_navbar_items_show_correct_text(self):
-        for nav_item in self.ELEMS["BASE"]["NAVBAR"]["PAGES"]:
+        for nav_item in base.ELEMS["BASE"]["NAVBAR"]["PAGES"]:
             element = self.browser.find_element_by_id(nav_item["ID"])
             self.assertEqual(element.get_attribute("innerText"), nav_item["TEXT"])
     
@@ -96,27 +81,27 @@ class SetRegionsPageStaticTests(base.StaticTests):
     # Stepper bar tests
     # -------------------------------------------------------------------------------------
     def test_stepper_bar_is_displayed(self):
-        stepper = self.browser.find_element_by_id(self.ELEMS["APP"]["STEPPER_BAR"]["ID"])
+        stepper = self.browser.find_element_by_id(base.ELEMS["APP"]["STEPPER_BAR"]["ID"])
         self.assertTrue(stepper.is_displayed())
 
     def test_stepper_bar_has_correct_class(self):
-        stepper = self.browser.find_element_by_id(self.ELEMS["APP"]["STEPPER_BAR"]["ID"])
-        intended_class = self.ELEMS["APP"]["STEPPER_BAR"]["CLASS"]
+        stepper = self.browser.find_element_by_id(base.ELEMS["APP"]["STEPPER_BAR"]["ID"])
+        intended_class = base.ELEMS["APP"]["STEPPER_BAR"]["CLASS"]
         self.assertEqual(stepper.get_attribute("class"), intended_class)
 
     def test_stepper_bar_has_correct_number_of_steps(self):
-        stepper = self.browser.find_element_by_id(self.ELEMS["APP"]["STEPPER_BAR"]["ID"])
+        stepper = self.browser.find_element_by_id(base.ELEMS["APP"]["STEPPER_BAR"]["ID"])
         steps = stepper.find_elements_by_tag_name("li")
-        self.assertEqual(len(steps), len(self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]))
+        self.assertEqual(len(steps), len(base.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]))
     
     def test_steps_have_correct_text(self):
-        items = self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]
+        items = base.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]
         for item in items:
             step = self.browser.find_element_by_id(item["ID"])
             self.assertEqual(step.get_attribute("innerText"), item["TEXT"])
     
     def test_correct_steps_are_active(self):
-        items = self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]
+        items = base.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]
         for item in items:
             step = self.browser.find_element_by_id(item["ID"])
             if items.index(item) <= 1:            
@@ -128,27 +113,27 @@ class SetRegionsPageStaticTests(base.StaticTests):
     # Explanatory text tests
     # -------------------------------------------------------------------------------------
     def test_intro_text_is_displayed(self):
-        intro_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["INTRO"]["ID"]
+        intro_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["INTRO"]["ID"]
         intro_txt = self.browser.find_element_by_id(intro_id)
         self.assertTrue(intro_txt.is_displayed())
 
     def test_region_setter_text_is_displayed(self):
-        regions_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGION_SETTING"]["ID"]
+        regions_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGION_SETTING"]["ID"]
         regions_txt = self.browser.find_element_by_id(regions_id)
         self.assertTrue(regions_txt.is_displayed())
 
     def test_regions_modal_is_not_displayed(self):
-        regions_modal_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["ID"]
+        regions_modal_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["ID"]
         regions_modal = self.browser.find_element_by_id(regions_modal_id)        
         self.assertFalse(regions_modal.is_displayed())
     
     def test_object_recognition_modal_is_not_displayed(self):
-        or_modal_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["OBJ_REC_MODAL"]["ID"]
+        or_modal_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["OBJ_REC_MODAL"]["ID"]
         or_modal = self.browser.find_element_by_id(or_modal_id)
         self.assertFalse(or_modal.is_displayed())
     
     def test_region_editor_modal_is_not_displayed(self):
-        re_modal_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REG_EDIT_MODAL"]["ID"]
+        re_modal_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REG_EDIT_MODAL"]["ID"]
         re_modal = self.browser.find_element_by_id(re_modal_id)
         self.assertFalse(re_modal.is_displayed())
 
@@ -156,32 +141,32 @@ class SetRegionsPageStaticTests(base.StaticTests):
     # Find-regions button tests
     # -------------------------------------------------------------------------------------    
     def test_find_regions_button_is_displayed(self):
-        find_rgns_btn = self.browser.find_element_by_id(self.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"])
+        find_rgns_btn = self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"])
         self.assertTrue(find_rgns_btn.is_displayed())
 
     def test_add_region_button_is_enabled(self):
-        find_rgns_btn = self.browser.find_element_by_id(self.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"])
+        find_rgns_btn = self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"])
         self.assertTrue(find_rgns_btn.is_enabled())
 
     def test_add_region_button_has_correct_text(self):
-        find_rgns_btn = self.browser.find_element_by_id(self.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"])
-        intended_text = self.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["TEXT"]
+        find_rgns_btn = self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"])
+        intended_text = base.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["TEXT"]
         self.assertEqual(find_rgns_btn.get_attribute("innerText"), intended_text)
 
     # -------------------------------------------------------------------------------------
     # Add-region button tests
     # -------------------------------------------------------------------------------------    
     def test_add_region_button_is_displayed(self):
-        add_rgn_btn = self.browser.find_element_by_id(self.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"])
+        add_rgn_btn = self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"])
         self.assertTrue(add_rgn_btn.is_displayed())
 
     def test_add_region_button_is_enabled(self):
-        add_rgn_btn = self.browser.find_element_by_id(self.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"])
+        add_rgn_btn = self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"])
         self.assertTrue(add_rgn_btn.is_enabled())
 
     def test_add_region_button_has_correct_text(self):
-        add_rgn_btn = self.browser.find_element_by_id(self.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"])
-        intended_text = self.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["TEXT"]
+        add_rgn_btn = self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"])
+        intended_text = base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["TEXT"]
         self.assertEqual(add_rgn_btn.get_attribute("innerText"), intended_text)
     
     # def test_choose_image_label_has_correct_label_text(self):
@@ -191,7 +176,7 @@ class SetRegionsPageStaticTests(base.StaticTests):
 
     #     The label element has no ID of its own, so use XPath to find / select it.
     #     """
-    #     cfg = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]
+    #     cfg = base.ELEMS["CHOOSE_IMAGE"]["CHOOSE_IMG_BTN"]
     #     input_id = cfg["ID"]
     #     img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')
     #     self.assertEqual(img_label.get_attribute("innerText"), cfg["TEXT"])
@@ -200,11 +185,11 @@ class SetRegionsPageStaticTests(base.StaticTests):
     # Next button tests
     # -------------------------------------------------------------------------------------
     def test_next_button_is_displayed(self):        
-        next_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"])
+        next_btn = self.browser.find_element_by_id(base.ELEMS["APP"]["NEXT_BTN"]["ID"])
         self.assertTrue(next_btn.is_displayed())
 
     def test_next_button_is_enabled(self):        
-        next_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"])
+        next_btn = self.browser.find_element_by_id(base.ELEMS["APP"]["NEXT_BTN"]["ID"])
         self.assertFalse(next_btn.get_attribute("aria-disabled"))
         self.assertNotIn("disabled", next_btn.get_attribute("class"))
 
@@ -212,11 +197,11 @@ class SetRegionsPageStaticTests(base.StaticTests):
     # Previous button tests
     # -------------------------------------------------------------------------------------
     def test_previous_button_is_displayed(self):        
-        prev_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["PREVIOUS_BTN"]["ID"])
+        prev_btn = self.browser.find_element_by_id(base.ELEMS["APP"]["PREVIOUS_BTN"]["ID"])
         self.assertTrue(prev_btn.is_displayed())
 
     def test_previous_button_is_enabled(self):        
-        prev_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["PREVIOUS_BTN"]["ID"])
+        prev_btn = self.browser.find_element_by_id(base.ELEMS["APP"]["PREVIOUS_BTN"]["ID"])
         self.assertFalse(prev_btn.get_attribute("aria-disabled"))
         self.assertNotIn("disabled", prev_btn.get_attribute("class"))
 
@@ -224,15 +209,15 @@ class SetRegionsPageStaticTests(base.StaticTests):
     # Preview pane tests
     # -------------------------------------------------------------------------------------
     def test_image_pane_exists(self):
-        img_pane = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        img_pane = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         self.assertTrue(img_pane)
 
     def test_image_pane_contains_correct_image(self):
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         src = img.get_attribute("src")
 
         # get the sam UTF-8 string from the original image.        
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', IMG_FILE)
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', base.IMG_FILE)
         with open(path, "rb") as f:
             b64_encoded_img = base64.b64encode(f.read())
             b64_msg = b64_encoded_img.decode('utf-8')
@@ -260,23 +245,8 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # call the 'normal' setUp from the base class
         super().setUp()
 
-        # arbitrarily use test_png.png as our test image
-        input_id = self.ELEMS["HOME"]["CHOOSE_IMG_BTN"]["ID"]
-
-        # get the input elements and update with the file path
-        input_elem = self.browser.find_element_by_id(input_id)
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', IMG_FILE)
-        input_elem.send_keys(path)
-
-        # wait a few seconds for the image to render
-        time.sleep(2)
-
-        # click the Next button
-        nxt_btn = self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"])
-        nxt_btn.click()
-
-        # wait for the new page to render
-        time.sleep(2)
+        self.navigate_to_set_regions_page()
+    
 
     # -------------------------------------------------------------------------------------
     # Page tests
@@ -297,13 +267,13 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
 
     def test_clicking_about_takes_user_to_faq_page(self):
         base_url = self.live_server_url
-        page = self.ELEMS["BASE"]["NAVBAR"]["PAGES"][0]        
+        page = base.ELEMS["BASE"]["NAVBAR"]["PAGES"][0]        
         page_elem = self.browser.find_element_by_id(page["ID"]).click()
         self.assertEqual(self.browser.current_url, base_url + reverse(page["URL"]))
 
     def test_clicking_faq_takes_user_to_faq_page(self):
         base_url = self.live_server_url
-        page = self.ELEMS["BASE"]["NAVBAR"]["PAGES"][1]        
+        page = base.ELEMS["BASE"]["NAVBAR"]["PAGES"][1]        
         page_elem = self.browser.find_element_by_id(page["ID"]).click()
         self.assertEqual(self.browser.current_url, base_url + reverse(page["URL"]))
 
@@ -312,10 +282,10 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     def test_returning_to_home_sets_only_step_one_active(self):
         # browse back to the home page
-        self.browser.find_element_by_id(self.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
+        self.browser.find_element_by_id(base.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
 
         # check classes of all stepper bar items
-        items = self.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]
+        items = base.ELEMS["APP"]["STEPPER_BAR"]["ITEMS"]
         for item in items:
             step = self.browser.find_element_by_id(item["ID"])
             if items.index(item) <= 0:            
@@ -328,19 +298,19 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     def test_intro_modal_opens_and_closes_correctly(self):
         # click the <a> tag to open the modal
-        modal_link_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["INTRO"]["MODAL_ID"]
+        modal_link_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["INTRO"]["MODAL_ID"]
         self.browser.find_element_by_id(modal_link_id).click()
 
         # add a brief wait
         time.sleep(2)
 
         # check to see if the modal has appeared
-        modal_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["ID"]
+        modal_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["ID"]
         modal = self.browser.find_element_by_id(modal_id)
         self.assertTrue(modal.is_displayed())
 
         # close the modal
-        modal_close_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["CLOSE_ID"]
+        modal_close_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["CLOSE_ID"]
         self.browser.find_element_by_id(modal_close_id).click()
 
         # add a wait to ensure the modal has closed
@@ -350,7 +320,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.assertFalse(modal.is_displayed())
 
     def test_obj_recog_modal_opens_and_closes_correctly(self):
-        ex_txt = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]
+        ex_txt = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]
 
         # click the <a> tag to open the modal
         self.browser.find_element_by_id(ex_txt["REGION_SETTING"]["OR_MODAL_ID"]).click()
@@ -373,19 +343,19 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
 
     def test_reg_editor_modal_opens_and_closes_correctly(self):
         # click the <a> tag to open the modal
-        modal_link_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGION_SETTING"]["RE_MODAL_ID"]
+        modal_link_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGION_SETTING"]["RE_MODAL_ID"]
         self.browser.find_element_by_id(modal_link_id).click()
 
         # add a brief wait
         time.sleep(2)
 
         # check to see if the modal has appeared
-        modal_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REG_EDIT_MODAL"]["ID"]
+        modal_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REG_EDIT_MODAL"]["ID"]
         modal = self.browser.find_element_by_id(modal_id)
         self.assertTrue(modal.is_displayed())
 
         # close the modal
-        modal_close_id = self.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REG_EDIT_MODAL"]["CLOSE_ID"]
+        modal_close_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REG_EDIT_MODAL"]["CLOSE_ID"]
         self.browser.find_element_by_id(modal_close_id).click()
 
         # add a wait to ensure the modal has closed
@@ -398,7 +368,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     # Add-region button tests
     # -------------------------------------------------------------------------------------    
     # def test_add_region_button_creates_console_msg(self):
-    #     add_rgn_btn = self.browser.find_element_by_id(self.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"])
+    #     add_rgn_btn = self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"])
     #     self.assertTrue(add_rgn_btn.is_displayed())
 
     # -------------------------------------------------------------------------------------
@@ -406,8 +376,8 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     def test_clicking_next_button_takes_user_to_analyse_text_page(self):
         base_url = self.live_server_url        
-        self.browser.find_element_by_id(self.ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
-        expected_url = reverse(self.ELEMS["SET_REGIONS"]["NEXT_BTN"]["URL"])
+        self.browser.find_element_by_id(base.ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
+        expected_url = reverse(base.ELEMS["SET_REGIONS"]["NEXT_BTN"]["URL"])
         self.assertEqual(self.browser.current_url, base_url + expected_url)
 
     # -------------------------------------------------------------------------------------
@@ -415,23 +385,23 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     def test_clicking_previous_button_takes_user_to_choose_image_page(self):
         base_url = self.live_server_url   
-        self.browser.find_element_by_id(self.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
-        expected_url = reverse(self.ELEMS["SET_REGIONS"]["PREVIOUS_BTN"]["URL"])
+        self.browser.find_element_by_id(base.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
+        expected_url = reverse(base.ELEMS["SET_REGIONS"]["PREVIOUS_BTN"]["URL"])
         self.assertEqual(self.browser.current_url, base_url + expected_url)
     
     def test_image_is_displayed_when_user_clicks_back_button(self):
         # browse back to the home page
-        self.browser.find_element_by_id(self.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
+        self.browser.find_element_by_id(base.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
         
         # short wait to ensure the page is rendered
         time.sleep(2)
 
         # get the src data for the image as a UTF-8 string decoded from base64
-        img = self.browser.find_element_by_id(self.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         src_string = img.get_attribute("src")
 
         # get the sam UTF-8 string from the original image.        
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', IMG_FILE)
+        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', base.IMG_FILE)
         with open(path, "rb") as f:
             b64_encoded_img = base64.b64encode(f.read())
             b64_msg = b64_encoded_img.decode('utf-8')

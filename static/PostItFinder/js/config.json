@@ -3,6 +3,7 @@
         "HOME": "PostItFinder/index.html",
         "ABOUT": "PostItFinder/about.html",
         "FAQ": "PostItFinder/faq.html",
+        "CHOOSE_IMAGE": "PostItFinder/choose-image.html",
         "SET_REGIONS": "PostItFinder/set-regions.html",
         "ANALYSE_TEXT": "PostItFinder/analyse-text.html"
     },
@@ -40,7 +41,7 @@
                 "ITEMS": [
                     {
                         "ID": "step1-id",
-                        "TEXT": "SELECT IMAGE",
+                        "TEXT": "CHOOSE IMAGE",
                         "CLASS": ""
                     },
                     {
@@ -50,7 +51,12 @@
                     },
                     {
                         "ID": "step3-id",
-                        "TEXT": "FIND TEXT AND OUTPUT",
+                        "TEXT": "FIND TEXT",
+                        "CLASS": ""
+                    },
+                    {
+                        "ID": "step4-id",
+                        "TEXT": "OUTPUT RESULTS",
                         "CLASS": ""
                     }
                 ]
@@ -80,6 +86,20 @@
         },
         "HOME": {
             "URL": "PostItFinder:index",
+            "START_BTN": {
+                "ID": "start-btn-id",
+                "TEXT": "START",
+                "URL": "PostItFinder:choose_image"
+            }
+        },
+        "ABOUT": {
+            "URL": "PostItFinder:about"
+        },
+        "FAQ": {
+            "URL": "PostItFinder:faq"
+        },
+        "CHOOSE_IMAGE":{
+            "URL": "PostItFinder:choose_image",
             "EXPLAIN_TEXT": {
                 "TEXT": "Choose an image to process from your computer"
             },
@@ -90,12 +110,6 @@
             "NEXT_BTN": {
                 "URL": "PostItFinder:set_regions"
             }
-        },
-        "ABOUT": {
-
-        },
-        "FAQ": {
-
         },
         "SET_REGIONS": {
             "URL": "PostItFinder:set_regions",
@@ -131,7 +145,7 @@
                 "TEXT": "Add Region"
             },
             "PREVIOUS_BTN": {
-                "URL": "PostItFinder:index"
+                "URL": "PostItFinder:choose_image"
             },
             "NEXT_BTN": {
                 "URL": "PostItFinder:analyse_text"

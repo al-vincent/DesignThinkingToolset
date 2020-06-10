@@ -13,8 +13,18 @@ with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r
     HTML = CONFIG["HTML"]
 
 def index(request):
+
+    context = {
+        "title": "Home",
+        "home_content": "Home page",
+        "start_btn": HTML["HOME"]["START_BTN"]
+        }
+
+    return render(request, PATHS["HOME"], context=context)
+
+def choose_image(request):
     # Update config to include the explanatory text for the home page
-    HTML["HOME"]["EXPLAIN_TEXT"]["ID"] = HTML["APP"]["EXPLAIN_TEXT"]["ID"]
+    HTML["CHOOSE_IMAGE"]["EXPLAIN_TEXT"]["ID"] = HTML["APP"]["EXPLAIN_TEXT"]["ID"]
 
     # Update config to set the 'active' class for the stepper bar
     for step in HTML["APP"]["STEPPER_BAR"]["ITEMS"]:
@@ -23,21 +33,21 @@ def index(request):
         else:
             step["CLASS"] = ""
 
-    # Update URL for the 'next' button
-    HTML["HOME"]["NEXT_BTN"]["ID"] = HTML["APP"]["NEXT_BTN"]["ID"]
+    # Set ID for the 'next' button
+    HTML["CHOOSE_IMAGE"]["NEXT_BTN"]["ID"] = HTML["APP"]["NEXT_BTN"]["ID"]
 
     context = {
         "title": HTML["TITLE"],
         "navbar": HTML["BASE"]["NAVBAR"],
         "stepper": HTML["APP"]["STEPPER_BAR"],
-        "explain_text": HTML["HOME"]["EXPLAIN_TEXT"],
-        "next_btn": HTML["HOME"]["NEXT_BTN"],
-        "choose_img_btn": HTML["HOME"]["CHOOSE_IMG_BTN"],
+        "explain_text": HTML["CHOOSE_IMAGE"]["EXPLAIN_TEXT"],
+        "next_btn": HTML["CHOOSE_IMAGE"]["NEXT_BTN"],
+        "choose_img_btn": HTML["CHOOSE_IMAGE"]["CHOOSE_IMG_BTN"],
         "image_pane": HTML["APP"]["IMAGE_PANE"],
         "config": CONFIG,
         }
 
-    return render(request, PATHS["HOME"], context=context)
+    return render(request, PATHS["CHOOSE_IMAGE"], context=context)
 
 def about(request):
     context = {
@@ -64,10 +74,8 @@ def set_regions(request):
         else:
             step["CLASS"] = ""
 
-    # Update URL for the 'previous' button
+    # Set IDs for the 'next' and 'previous' buttons
     HTML["SET_REGIONS"]["PREVIOUS_BTN"]["ID"] = HTML["APP"]["PREVIOUS_BTN"]["ID"]
-
-    # Update URL for the 'next' button
     HTML["SET_REGIONS"]["NEXT_BTN"]["ID"] = HTML["APP"]["NEXT_BTN"]["ID"]
 
     context = {
