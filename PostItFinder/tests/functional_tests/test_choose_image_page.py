@@ -1,4 +1,3 @@
-from selenium.webdriver.support.ui import Select
 from django.conf import settings
 from django.urls import reverse
 
@@ -7,8 +6,7 @@ import os
 from json import load
 import base64
 
-# from functional_tests import base
-from project_tests.functional_tests import base
+from PostItFinder.tests.functional_tests import base
 
 
 # =========================================================================================
@@ -30,8 +28,8 @@ class ChooseImagePageStaticTests(base.StaticTests):
         super().setUp()
 
         # navigate from the home page to the choose-image page
-        self.navigate_to_choose_image_page()
-
+        base.navigate_to_choose_image_page(self.browser)
+        
     # -------------------------------------------------------------------------------------
     # Page tests
     # -------------------------------------------------------------------------------------
@@ -191,7 +189,7 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         super().setUp()
 
         # navigate from the home page to the choose-image page
-        self.navigate_to_choose_image_page()
+        base.navigate_to_choose_image_page(self.browser)
         
     # -------------------------------------------------------------------------------------
     # Page tests

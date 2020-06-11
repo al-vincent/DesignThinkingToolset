@@ -7,11 +7,7 @@ import os
 from json import load
 import base64
 
-# from functional_tests import base
-from project_tests.functional_tests import base
-
-# arbitrarily use test_png.png as our setup image throughout
-# IMG_FILE = "test_jpg.jpg"
+from PostItFinder.tests.functional_tests import base
 
 # =========================================================================================
 # STATIC TESTS
@@ -36,7 +32,7 @@ class SetRegionsPageStaticTests(base.StaticTests):
         super().setUp()
 
         # navigate to the set-regions page, via home and choose-image
-        self.navigate_to_set_regions_page()
+        base.navigate_to_set_regions_page(self.browser)
 
     # -------------------------------------------------------------------------------------
     # Page tests
@@ -245,7 +241,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # call the 'normal' setUp from the base class
         super().setUp()
 
-        self.navigate_to_set_regions_page()
+        base.navigate_to_set_regions_page(self.browser)
     
 
     # -------------------------------------------------------------------------------------

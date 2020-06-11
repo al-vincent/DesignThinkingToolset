@@ -16,6 +16,7 @@ def index(request):
 
     context = {
         "title": "Home",
+        "navbar": HTML["BASE"]["NAVBAR"],
         "home_content": "Home page",
         "start_btn": HTML["HOME"]["START_BTN"]
         }
