@@ -152,7 +152,7 @@
             }
         },
         "ANALYSE_TEXT": {
-
+            "URL": "PostItFinder:analyse_text"
         }
     }
 }
