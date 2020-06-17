@@ -18,7 +18,7 @@
  * @throws: none.
  * @todo: several variables currently declared via 'let'; should be 'const'?
  */
-function createRegion(svg, data) {
+function createRegions(svg, data) {
     // Get constants from config.json
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
     const REGION_CLASS = CONFIG.CONSTANTS.CLASSES.REGION;
@@ -274,6 +274,50 @@ function dragBrHandle(d) {
         .attr("height", d.height);               
 }
 
+
+/** 
+ * @todo: consider - should this (and the two fns above) be moved into the driver function instead?
+ * Arguments both ways I think.
+*/
+function clickAddRegion() {
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    const REGION_CLASS = CONFIG.CONSTANTS.CLASSES.REGION;
+    const DEFAULT_RECT_WIDTH = CONFIG.CONSTANTS.VALUES.DEFAULT_RECT_WIDTH;
+    const DEFAULT_RECT_HEIGHT = CONFIG.CONSTANTS.VALUES.DEFAULT_RECT_HEIGHT;
+
+    // get the new coordinates and create a data object
+    console.log("Click add region");
+    try {
+        const coords = getNewRegionLocation();
+        const newData = {"x": coords[0],
+                        "y": coords[1],
+                        "width": DEFAULT_RECT_WIDTH,
+                        "height": DEFAULT_RECT_HEIGHT
+                        };
+        // add the new data to the existing array
+        const data = d3.selectAll("." + REGION_CLASS).data();
+        data.push(newData);
+
+        /**************************************************************************************
+         * NOTE: the below is not the best way to achieve the goal. It *should* be possible to 
+         * to do this via d3 enter() and exit(), just updating the data; but I can't get it to 
+         * work properly, and does what I want, so...
+         ***************************************************************************************/
+        // delete all existing regions, and recreate them with the new data
+        d3.selectAll("." + REGION_CLASS).remove();
+        createRegions(d3.select("svg"), data);
+    }
+    catch (err) {
+        console.log(err);
+        console.error(err.message + "; coords: (" + err.coords[0] + "," + err.coords[1] + ")");
+        // alert(err.message);
+    }
+}
+
+/****************************************************************************************************
+ * CUSTOM EXCEPTIONS
+ ***************************************************************************************************/
+
 /**
  * @description: exception raised if the user tries to create a new region and there isn't enough
  * space in the image for it.
@@ -288,6 +332,11 @@ function OutOfBoundsException(x,y) {
     this.coords = [x,y];
     this.message = "Out of space - no more regions permitted";
 }
+
+
+/****************************************************************************************************
+ * REGION LOCATION FUNCTIONS
+ ***************************************************************************************************/
 
 /**
  * @description: function to decide on coords for a new region. By default, new regions are placed in 
@@ -374,41 +423,30 @@ function isNewLocationFree(x,y) {
     return locationFree;
 }
 
-/** 
- * @todo: consider - should this (and the two fns above) be moved into the driver function instead?
- * Arguments both ways I think.
-*/
-function clickAddRegion() {
-    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
-    const REGION_CLASS = CONFIG.CONSTANTS.CLASSES.REGION;
-    const DEFAULT_RECT_WIDTH = CONFIG.CONSTANTS.VALUES.DEFAULT_RECT_WIDTH;
-    const DEFAULT_RECT_HEIGHT = CONFIG.CONSTANTS.VALUES.DEFAULT_RECT_HEIGHT;
+// ================================================================================================
+// DATA RESCALE FUNCTIONS
+// ================================================================================================
+function rescaleDataToRelativeCoords(data, imgWidth, imgHeight) {
+    const scaledData = data.map(function(d) {
+        return {"x": d.x / imgWidth,
+                "y": d.y / imgHeight,
+                "width": d.width / imgWidth,
+                "height": d.height / imgHeight
+                };
+    })
 
-    // get the new coordinates and create a data object
-    console.log("Click add region");
-    try {
-        const coords = getNewRegionLocation();
-        const newData = {"x": coords[0],
-                        "y": coords[1],
-                        "width": DEFAULT_RECT_WIDTH,
-                        "height": DEFAULT_RECT_HEIGHT
-                        };
-        // add the new data to the existing array
-        const data = d3.selectAll("." + REGION_CLASS).data();
-        data.push(newData);
+    return scaledData;
+}
 
-        /**************************************************************************************
-         * NOTE: the below is not the best way to achieve the goal. It *should* be possible to 
-         * to do this via d3 enter() and exit(), just updating the data; but I can't get it to 
-         * work properly, and does what I want, so...
-         ***************************************************************************************/
-        // delete all existing regions, and recreate them with the new data
-        d3.selectAll("." + REGION_CLASS).remove();
-        createRegion(d3.select("svg"), data);
-    }
-    catch (err) {
-        console.log(err);
-        console.error(err.message + "; coords: (" + err.coords[0] + "," + err.coords[1] + ")");
-        // alert(err.message);
-    }
+// NOTE: 'data' parameter in the below is rescaled on [0,1]!! <= include in @params
+function rescaleDataToAbsoluteCoords(data, imgWidth, imgHeight) {
+    const scaledData = data.map(function(d) {
+        return {"x": d.x * imgWidth,
+                "y": d.y * imgHeight,
+                "width": d.width * imgWidth,
+                "height": d.height * imgHeight
+                };
+    })
+
+    return scaledData;
 }
