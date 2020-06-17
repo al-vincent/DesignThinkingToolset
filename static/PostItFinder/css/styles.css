@@ -17,12 +17,12 @@
  * Resizable boxes
  * ========================================================================== */
 /* Change the rect and circle colours  */
-.box:hover{
-    fill: red;
-    background-color: red;
+.region-grp:hover{
+    fill: #FF0000;
+    background-color: #FF0000;
 }
 
-.top-left:hover, .bottom-right:hover {
+.top-left-handle:hover, .bottom-right-handle:hover {
     cursor: move;
     /* Resize handles on hover. Won't work on all browsers, and hidden 
     by cursor anyway (unless the radius increases a lot), so commented */

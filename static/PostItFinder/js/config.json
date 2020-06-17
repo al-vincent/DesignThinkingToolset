@@ -8,8 +8,27 @@
         "ANALYSE_TEXT": "PostItFinder/analyse-text.html"
     },
     "CONSTANTS":{
-        "THEME_COLOUR": "#55B776",
-        "DISABLED_COLOUR": "7D7D7D"
+        "COLOURS": {
+            "THEME_COLOUR": "#55B776",
+            "DISABLED_COLOUR": "#7D7D7D",
+            "REGION_COLOUR": "#FFA500",
+            "REGION_EDGE_COLOUR": "#000000",
+            "REGION_HOVER_COLOUR": "#FF0000"
+        },
+        "CLASSES": {
+            "REGION": "region-grp",
+            "HANDLE": "handle-grp",
+            "TOP_LEFT_HANDLE": "top-left-handle",
+            "BOTTOM_RIGHT_HANDLE": "bottom-right-handle"
+        },
+        "VALUES": {
+            "HANDLE_RADIUS": 3,
+            "CORNER_RADIUS": 3,
+            "MIN_RECT_WIDTH": 20,
+            "MIN_RECT_HEIGHT": 20,
+            "DEFAULT_RECT_WIDTH": 60,
+            "DEFAULT_RECT_HEIGHT": 40
+        }
     },
     "HTML": {
         "TITLE": "SNIP",

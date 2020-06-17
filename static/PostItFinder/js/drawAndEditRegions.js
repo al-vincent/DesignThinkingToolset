@@ -1,47 +1,40 @@
 /****************************************************************************************************
- * @name: drawAndEditBoxes.js
- * @description: functions to add a series of resizable boxes to a parent SVG.
+ * @name: drawAndEditRegions.js
+ * @description: functions to add a series of resizable regions to a parent SVG.
  * 
  * These functions are (broadly) intended to be library functions; i.e. freestanding and callable 
  * from 'driver' files.
  ****************************************************************************************************/
 
 
-/** 
- * References to CSS classes
-*/
-const BOX_GROUP = "box"
-const HANDLE_GROUP = "handle-group";
-const TOP_LEFT = "top-left";
-const BOTTOM_RIGHT = "bottom-right";
-
-const HANDLE_RADIUS = 3;
-const CORNER_RADIUS = 3;
-const MIN_RECT_WIDTH = 20;
-const MIN_RECT_HEIGHT = 20;
-const DEFAULT_RECT_WIDTH = 60;
-const DEFAULT_RECT_HEIGHT = 40;
-
-let IMAGE_WIDTH = 0;
-let IMAGE_HEIGHT = 0;
-
 /**
- * @description: adds resizable boxes on the image / SVG, at locations defined by 'data'. 
- * Also sets callbacks for resizing of boxes.
+ * @description: adds resizable regions on the image / SVG, at locations defined by 'data'. 
+ * Also sets callbacks for resizing of regions.
  * @param: 
  *  - svg, object, the parent SVG that the image is appended to.
- *  - data, object array, the data used to position and size each of the boxes. One box is 
+ *  - data, object array, the data used to position and size each of the regions. One region is 
  * created for each object in the array.
  * @returns: none.
  * @throws: none.
  * @todo: several variables currently declared via 'let'; should be 'const'?
  */
 function createRegion(svg, data) {
-    // setup drag behaviour for the rectangle part of the box
+    // Get constants from config.json
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    const REGION_CLASS = CONFIG.CONSTANTS.CLASSES.REGION;
+    const HANDLE_CLASS = CONFIG.CONSTANTS.CLASSES.HANDLE;
+    const TOP_LEFT_CLASS = CONFIG.CONSTANTS.CLASSES.TOP_LEFT_HANDLE;
+    const BOTTOM_RIGHT_CLASS = CONFIG.CONSTANTS.CLASSES.BOTTOM_RIGHT_HANDLE;
+    const HANDLE_RADIUS = CONFIG.CONSTANTS.VALUES.HANDLE_RADIUS;
+    const CORNER_RADIUS = CONFIG.CONSTANTS.VALUES.CORNER_RADIUS;
+    const FILL_COLOUR = CONFIG.CONSTANTS.COLOURS.REGION_COLOUR;
+    const STROKE_COLOUR = CONFIG.CONSTANTS.COLOURS.REGION_EDGE_COLOUR;
+
+    // setup drag behaviour for the rectangle part of the region
     const dragRect = d3.behavior.drag()
         .origin(function(d) { return d; })
         .on("dragstart", dragStarted)
-        .on("drag", dragBox);
+        .on("drag", dragRegion);
     
     // setup drag behaviour for the top-left handle
     const dragTopLeftHandle = d3.behavior.drag()
@@ -55,12 +48,12 @@ function createRegion(svg, data) {
         .on("dragstart", dragStarted)
         .on("drag", dragBrHandle);
 
-    // create the boxes
+    // create the regions
     // https://stackoverflow.com/questions/43297888/d3-js-grouping-with-g-with-the-data-join-enter-update-exit-cycle/43298892
     // let grps = svg.selectAll("g").data(data);
-    let grps = svg.selectAll("." + BOX_GROUP).data(data);
+    let grps = svg.selectAll("." + REGION_CLASS).data(data);
 
-    // create the boxes that will be used to highlight post-it notes; 1 x rect element, 
+    // create the regions that will be used to highlight post-it notes; 1 x rect element, 
     // plus 2 x circle elements as "grab handles" to resize the rect (one circle on 
     // top-left corner, one on bottom-right corner)
     let newGrps = grps.enter();
@@ -68,12 +61,12 @@ function createRegion(svg, data) {
     // contained within the group
     let newGrp = newGrps.append("g")    
                         .attr("stroke-width", 3)
-                        .attr("fill", "orange")
+                        .attr("fill", FILL_COLOUR)
                         .attr("opacity", 0.3)
-                        .attr("stroke", "black")
-                        .attr("class", BOX_GROUP)
+                        .attr("stroke", STROKE_COLOUR)
+                        .attr("class", REGION_CLASS)
                         .on("dblclick", function() {
-                            deleteBoxGrp(this);
+                            deleteRegionGrp(this);
                         });
     
     // add the rect element
@@ -81,9 +74,9 @@ function createRegion(svg, data) {
     // handles are a bit trickier; we want to create a new group (so that we can bind 
     // the resize event to both sets of handles), and have two classes of circle in it,
     // one for the handles on the top-left of rects, and one for bottom-right handles.
-    let handleGrp = newGrp.append("g").attr("class", HANDLE_GROUP); 
-    handleGrp.append("circle").attr("class", TOP_LEFT);
-    handleGrp.append("circle").attr("class", BOTTOM_RIGHT);
+    let handleGrp = newGrp.append("g").attr("class", HANDLE_CLASS); 
+    handleGrp.append("circle").attr("class", TOP_LEFT_CLASS);
+    handleGrp.append("circle").attr("class", BOTTOM_RIGHT_CLASS);
 
     // set attributes for all the SVG shapes
     grps.select("rect")
@@ -96,7 +89,7 @@ function createRegion(svg, data) {
         .call(dragRect);
     
     // set attributes for the top-left set of handles (i.e. circle elements) 
-    grps.select("." + TOP_LEFT)
+    grps.select("." + TOP_LEFT_CLASS)
         .attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; })
         .attr("r", HANDLE_RADIUS )
@@ -104,7 +97,7 @@ function createRegion(svg, data) {
         .call(dragTopLeftHandle);
     
     // set attributes for the bottom-right set of handles (i.e. circle elements) 
-    grps.select("." + BOTTOM_RIGHT)
+    grps.select("." + BOTTOM_RIGHT_CLASS)
         .attr("cx", function(d) { return d.x + d.width; })
         .attr("cy", function(d) { return d.y + d.height; })
         .attr("r", HANDLE_RADIUS )
@@ -117,22 +110,22 @@ function createRegion(svg, data) {
  ***************************************************************************************************/
 
 /**
- * @description: callback that deletes a single resizable box.
- * @param: boxGrp, group of 3 x SVG elements (1 x 'body' rect element and 2 x 'handle' 
+ * @description: callback that deletes a single resizable region.
+ * @param: regionGrp, group of 3 x SVG elements (1 x 'body' rect element and 2 x 'handle' 
  * circle elements) that fired the event; e.g the rect or handle that was double-clicked 
  * by the user.
  * @returns: none.
  * @throws: none.
  * @todo: none.
  */
-function deleteBoxGrp(boxGrp) {
-    console.log("Delete box");
-    d3.select(boxGrp).remove();
+function deleteRegionGrp(regionGroup) {
+    console.log("Delete region");
+    d3.select(regionGroup).remove();
 }
 
 /**
- * @description: callback to drag a resizable box (i.e. rect body and handles). The 
- * box cannot be dragged outside the edges of the image. Callback is bound to the 
+ * @description: callback to drag a resizable region (i.e. rect body and handles). The 
+ * region cannot be dragged outside the edges of the image. Callback is bound to the 
  * rect element.
  * 
  * Inspired by https://bl.ocks.org/Herst/093ff9962405dd564ef58ad8af9544d0, though 
@@ -143,10 +136,20 @@ function deleteBoxGrp(boxGrp) {
  * @throws: none.
  * @todo: consider refactoring so that IMAGE_WIDTH and IMAGE_HEIGHT are parameters.
  */
-function dragBox(d) {        
-    // The Math.min and Math.max prevent the boxes being dragged outside the image
-    d.x = Math.min(Math.max(d3.event.x, 0), IMAGE_WIDTH - d.width);
-    d.y = Math.min(Math.max(d3.event.y, 0), IMAGE_HEIGHT - d.height);
+function dragRegion(d) {    
+    // Get constants from config.json
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    const HANDLE_CLASS = CONFIG.CONSTANTS.CLASSES.HANDLE;
+    const BOTTOM_RIGHT_CLASS = CONFIG.CONSTANTS.CLASSES.BOTTOM_RIGHT_HANDLE;
+    const TOP_LEFT_CLASS = CONFIG.CONSTANTS.CLASSES.TOP_LEFT_HANDLE;
+    
+    const IMG = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);
+    const IMG_WIDTH = IMG.clientWidth;
+    const IMG_HEIGHT = IMG.clientHeight;
+
+    // The Math.min and Math.max prevent the regions being dragged outside the image
+    d.x = Math.min(Math.max(d3.event.x, 0), IMG_WIDTH - d.width);
+    d.y = Math.min(Math.max(d3.event.y, 0), IMG_HEIGHT - d.height);
 
     // start by moving the rect element
     d3.select(this)
@@ -154,15 +157,15 @@ function dragBox(d) {
         .attr("y", d.y);
     
     // get the parent group of the rect element 
-    const boxGroup = d3.select(this).node().parentNode;
+    const regionGroup = d3.select(this).node().parentNode;
 
     // get the bottom-right circle, and set the new coords    
-    d3.select(boxGroup).select("." + HANDLE_GROUP).select("." + BOTTOM_RIGHT)
+    d3.select(regionGroup).select("." + HANDLE_CLASS).select("." + BOTTOM_RIGHT_CLASS)
         .attr("cx", d.x + d.width)
         .attr("cy", d.y + d.height);
     
     // get the bottom-right circle, and set the new coords
-    d3.select(boxGroup).select("." + HANDLE_GROUP).select("." + TOP_LEFT)
+    d3.select(regionGroup).select("." + HANDLE_CLASS).select("." + TOP_LEFT_CLASS)
         .attr("cx", d.x)
         .attr("cy", d.y);    
 }
@@ -182,9 +185,9 @@ function dragStarted() {
 }
 
 /**
- * @description: callback to resize the box when the top-left handle is dragged.
- * The handle cannot be dragged outside the image boundaries, and the box has a
- * minimum width and height (which also prevents "inversions" of the box, where
+ * @description: callback to resize the region when the top-left handle is dragged.
+ * The handle cannot be dragged outside the image boundaries, and the region has a
+ * minimum width and height (which also prevents "inversions" of the region, where
  * the top-left handle could become the bottom-right handle).
  * @param: d, object array, the data bound to the calling element (i.e. the top-left 
  * circle element). 
@@ -194,13 +197,18 @@ function dragStarted() {
  * @todo: none.
  */
 function dragTlHandle(d) {
+    // Get constants from config.json
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    const MIN_RECT_WIDTH = CONFIG.CONSTANTS.VALUES.MIN_RECT_WIDTH;
+    const MIN_RECT_HEIGHT = CONFIG.CONSTANTS.VALUES.MIN_RECT_HEIGHT;
+
     console.log("Dragging top-left"); 
 
     // navigate up the SVG element tree to the top-level group
     const handleGroup = d3.select(this).node().parentNode;
-    const boxGroup = d3.select(handleGroup).node().parentNode;
+    const regionGroup = d3.select(handleGroup).node().parentNode;
     
-    // Ensure the box  doesn't go below the min size, or outside the edges of the image
+    // Ensure the region  doesn't go below the min size, or outside the edges of the image
     const newWidth = Math.min(Math.max(d.width - d3.event.dx, MIN_RECT_WIDTH), d.x + d.width);
     d.x += d.width - newWidth;
     d.width = newWidth;
@@ -215,7 +223,7 @@ function dragTlHandle(d) {
         .attr("cy", d.y); 
 
     // resize the rect element
-    d3.select(boxGroup).select("rect")
+    d3.select(regionGroup).select("rect")
         .attr("x", d.x)
         .attr("y", d.y)
         .attr("width", d.width)
@@ -223,9 +231,9 @@ function dragTlHandle(d) {
 }
 
 /**
- * @description: callback to resize the box when the bottom-right handle is dragged.
- * The handle cannot be dragged outside the image boundaries, and the box has a
- * minimum width and height (which also prevents "inversions" of the box, where
+ * @description: callback to resize the region when the bottom-right handle is dragged.
+ * The handle cannot be dragged outside the image boundaries, and the region has a
+ * minimum width and height (which also prevents "inversions" of the region, where
  * the bottom-right handle could become the top-left handle).
  * @param: d, object array, the data bound to the calling element (i.e. the top-left 
  * circle element). 
@@ -235,16 +243,25 @@ function dragTlHandle(d) {
  * @todo: none.
  */
 function dragBrHandle(d) {
+    // Get constants from config.json
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    const MIN_RECT_WIDTH = CONFIG.CONSTANTS.VALUES.MIN_RECT_WIDTH;
+    const MIN_RECT_HEIGHT = CONFIG.CONSTANTS.VALUES.MIN_RECT_HEIGHT;
+
+    const IMG = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);
+    const IMG_WIDTH = IMG.clientWidth;
+    const IMG_HEIGHT = IMG.clientHeight;
+
     console.log("Dragging bottom-right");       
     
     // navigate up the SVG element tree to the top-level group
     const handleGroup = d3.select(this).node().parentNode;
-    const boxGroup = d3.select(handleGroup).node().parentNode;
+    const regionGroup = d3.select(handleGroup).node().parentNode;
     
-    // Set width and height so that the box doesn't go below the min size, or outside
-    // the edges of the image
-    d.width = Math.min(Math.max(d.width + d3.event.dx, MIN_RECT_WIDTH), IMAGE_WIDTH - d.x);
-    d.height = Math.min(Math.max(d.height + d3.event.dy, MIN_RECT_HEIGHT), IMAGE_HEIGHT - d.y);
+    // Set width and height so that the region doesn't go below the min size, or outside
+    // the edges of the image    
+    d.width = Math.min(Math.max(d.width + d3.event.dx, MIN_RECT_WIDTH), IMG_WIDTH - d.x);
+    d.height = Math.min(Math.max(d.height + d3.event.dy, MIN_RECT_HEIGHT), IMG_HEIGHT - d.y);
     
     // move the handle to the new position 
     d3.select(this)
@@ -252,49 +269,56 @@ function dragBrHandle(d) {
         .attr("cy", d.y + d.height); 
 
     // resize the rect element
-    d3.select(boxGroup).select("rect")
+    d3.select(regionGroup).select("rect")
         .attr("width", d.width)
         .attr("height", d.height);               
 }
 
 /**
- * @description: exception raised if the user tries to create a new box and there isn't enough
+ * @description: exception raised if the user tries to create a new region and there isn't enough
  * space in the image for it.
  * @param: 
- *  - x, number, x-coordinate of the last box created. 
- *  - y, number, y-coordinate of the last box created. 
+ *  - x, number, x-coordinate of the last region created. 
+ *  - y, number, y-coordinate of the last region created. 
  * @returns: none.
  * @throws: none.
  * @todo: none.
  */
 function OutOfBoundsException(x,y) {
     this.coords = [x,y];
-    this.message = "Out of space - no more boxes permitted";
+    this.message = "Out of space - no more regions permitted";
 }
 
 /**
- * @description: function to decide on coords for a new box. By default, new boxes are placed in 
+ * @description: function to decide on coords for a new region. By default, new regions are placed in 
  * the top-left corner of the image, and then tiled horizontally in rows (starting a new row when 
- * the next box would go outside the edge of the image). When the image is completely tiled, an 
+ * the next region would go outside the edge of the image). When the image is completely tiled, an 
  * exception is thrown.
- * A new box cannot be colocated with an existing box.
+ * A new region cannot be colocated with an existing region.
  * @param: none.
  * @returns: [x,y], array of numbers giving the [x,y] coords of the new location IN THE IMAGE 
  * COORDINATE SPACE (i.e. using image coords, NOT whole page coords).
- * @throws: OutOfBoundsException if the image is believed to be full of boxes.
- * @todo: consider adding a control that allows users to set minimum box size.
+ * @throws: OutOfBoundsException if the image is believed to be full of regions.
+ * @todo: consider adding a control that allows users to set minimum region size.
  */
-function getNewBoxLocation() {
-    
+function getNewRegionLocation() {
+    // Get constants from config.json
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    const DEFAULT_RECT_WIDTH = CONFIG.CONSTANTS.VALUES.DEFAULT_RECT_WIDTH;
+    const DEFAULT_RECT_HEIGHT = CONFIG.CONSTANTS.VALUES.DEFAULT_RECT_HEIGHT;
+
+    const IMG = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);
+    const IMG_WIDTH = IMG.clientWidth;
+    const IMG_HEIGHT = IMG.clientHeight;
+
     let x = 0;
     let y = 0;
-
     while(!isNewLocationFree(x, y)) {
         // debugger;
         // Cases:
         // 1. next rect will go over the image edge in x and y: throw exception        
-        if (x + 2 * DEFAULT_RECT_WIDTH > IMAGE_WIDTH) {            
-            if (y + 2 * DEFAULT_RECT_HEIGHT > IMAGE_HEIGHT) {                
+        if (x + 2 * DEFAULT_RECT_WIDTH > IMG_WIDTH) {            
+            if (y + 2 * DEFAULT_RECT_HEIGHT > IMG_HEIGHT) {                
                 throw new OutOfBoundsException(x,y);
             } 
         // 2. next rect will go over image in x, but not y: set x to 0, increment y by rect height
@@ -313,28 +337,37 @@ function getNewBoxLocation() {
 }
 
 /**
- * @description: checks if the proposed new location overlaps with an existing box. Boxes are
+ * @description: checks if the proposed new location overlaps with an existing region. regions are
  * considered to be 'too overlapping' if the difference between the top-left corner of the new
- * box is less than 2 handle-radii from an existing box.
+ * region is less than 2 handle-radii from an existing region.
  * @param: 
- *  - x, number, proposed x-coordinate of the new box. 
- *  - y, number, proposed y-coordinate of the new box. 
+ *  - x, number, proposed x-coordinate of the new region. 
+ *  - y, number, proposed y-coordinate of the new region. 
  * @returns: locationFree, boolean. True if the proposed location is ok, false if not.
  * @throws: custom exceptions.
  * @todo: change exceptions to be functions, as per OutOfBoundsException().
  */
 function isNewLocationFree(x,y) {
+    // Get constants from config.json
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    const HANDLE_RADIUS = CONFIG.CONSTANTS.VALUES.HANDLE_RADIUS;
+
+    const IMG = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);
+    const IMG_WIDTH = IMG.clientWidth;
+    const IMG_HEIGHT = IMG.clientHeight;
+
     // some error checking on the parameters
     if (typeof(x) !== "number" || isNaN(x)) { throw "x coord is not a number"; }
-    if (typeof(x) !== "number" || isNaN(y)) { throw "y coord is not a number"; }
-    if (x < 0 || x > IMAGE_WIDTH) { throw "x coord is outside image bounds"; }
-    if (y < 0 || y > IMAGE_HEIGHT) { throw "y coord is outside image bounds"; }
+    if (typeof(x) !== "number" || isNaN(y)) { throw "y coord is not a number"; }    
+    if (x < 0 || x > IMG_WIDTH) { throw "x coord is outside image bounds"; }
+    if (y < 0 || y > IMG_HEIGHT) { throw "y coord is outside image bounds"; }
 
     // main section of function
     let locationFree = true;
     d3.selectAll("rect").each(function() {
         const rect = d3.select(this);
-        if( (Math.abs(rect.attr("x") - x) <= 2 * HANDLE_RADIUS) && (Math.abs(rect.attr("y") - y) <= 2 * HANDLE_RADIUS) ) {
+        if( (Math.abs(rect.attr("x") - x) <= 2 * HANDLE_RADIUS) && 
+            (Math.abs(rect.attr("y") - y) <= 2 * HANDLE_RADIUS) ) {
             locationFree = false;
         }
     });
@@ -346,17 +379,22 @@ function isNewLocationFree(x,y) {
  * Arguments both ways I think.
 */
 function clickAddRegion() {
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    const REGION_CLASS = CONFIG.CONSTANTS.CLASSES.REGION;
+    const DEFAULT_RECT_WIDTH = CONFIG.CONSTANTS.VALUES.DEFAULT_RECT_WIDTH;
+    const DEFAULT_RECT_HEIGHT = CONFIG.CONSTANTS.VALUES.DEFAULT_RECT_HEIGHT;
+
     // get the new coordinates and create a data object
     console.log("Click add region");
     try {
-        const coords = getNewBoxLocation();
+        const coords = getNewRegionLocation();
         const newData = {"x": coords[0],
                         "y": coords[1],
                         "width": DEFAULT_RECT_WIDTH,
                         "height": DEFAULT_RECT_HEIGHT
                         };
         // add the new data to the existing array
-        const data = d3.selectAll("." + BOX_GROUP).data();
+        const data = d3.selectAll("." + REGION_CLASS).data();
         data.push(newData);
 
         /**************************************************************************************
@@ -364,13 +402,13 @@ function clickAddRegion() {
          * to do this via d3 enter() and exit(), just updating the data; but I can't get it to 
          * work properly, and does what I want, so...
          ***************************************************************************************/
-        // delete all existing boxes, and recreate them with the new data
-        d3.selectAll("." + BOX_GROUP).remove();
+        // delete all existing regions, and recreate them with the new data
+        d3.selectAll("." + REGION_CLASS).remove();
         createRegion(d3.select("svg"), data);
     }
     catch (err) {
         console.log(err);
         console.error(err.message + "; coords: (" + err.coords[0] + "," + err.coords[1] + ")");
-        alert(err.message);
+        // alert(err.message);
     }
 }

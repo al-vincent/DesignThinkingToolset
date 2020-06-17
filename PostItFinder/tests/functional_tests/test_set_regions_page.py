@@ -1,4 +1,7 @@
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.color import Color
+
 from django.conf import settings
 from django.urls import reverse
 
@@ -6,6 +9,7 @@ import time
 import os
 from json import load
 import base64
+import math
 
 from PostItFinder.tests.functional_tests import base
 
@@ -363,9 +367,471 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     # Add-region button tests
     # -------------------------------------------------------------------------------------    
-    # def test_add_region_button_creates_console_msg(self):
-    #     add_rgn_btn = self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"])
-    #     self.assertTrue(add_rgn_btn.is_displayed())
+    def test_add_region_button_creates_new_region(self):
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+
+        # we expect 1 x rect element and 2 x circle elements to be created
+        rects = self.browser.find_elements_by_xpath("//*[local-name()='rect']")
+        self.assertEqual(len(rects), 1)
+
+        circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
+        self.assertEqual(len(circles), 2)
+    
+    def test_new_region_appears_in_top_left_corner(self):
+        pass
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        
+        # we expect 1 x rect element and 2 x circle elements to be created
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        tl_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
+        br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
+        
+        # the rect coordinates will be (0,0), as will be the top-left handle. The bottom-right
+        # handle coords will be rect_width + rect_height
+        self.assertEqual(int(rect.get_attribute("x")), 0)
+        self.assertEqual(int(rect.get_attribute("y")), 0)
+        self.assertEqual(int(tl_handle.get_attribute("cx")), 0)
+        self.assertEqual(int(tl_handle.get_attribute("cy")), 0)
+        self.assertEqual(int(br_handle.get_attribute("cx")), base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"])
+        self.assertEqual(int(br_handle.get_attribute("cy")), base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"])
+
+    def test_regions_and_handles_have_correct_classes(self):
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+
+        # we expect one element with class 'region' (the region group), and one with class
+        # 'handle' (the region-resize handle *group*)
+        regions = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["REGION"])
+        self.assertEqual(len(regions), 1)
+
+        handles = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["HANDLE"])
+        self.assertEqual(len(handles), 1)
+
+        # we expect one element with class 'top-left-handle' , and one with class
+        # 'bottom-right-handle' 
+        tl_handles = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
+        self.assertEqual(len(tl_handles), 1)
+
+        br_handles = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
+        self.assertEqual(len(br_handles), 1)
+    
+    def test_limit_is_applied_to_number_of_new_regions(self):
+        # The total number of regions plotted should be:
+        # floor(image.width / region.width) * floor(image.height / region.height)
+        img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        expected_num_regions = (math.floor(img.size["width"] / base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"]) * 
+                                math.floor(img.size["height"] / base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"]))
+
+        last_count = -1
+        current_count = 0
+        add_rgn_btn = self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"])
+        while last_count != current_count:
+            last_count = current_count
+            # add a new region
+            add_rgn_btn.click()
+            
+            # add a short wait to ensure the region is rendered
+            time.sleep(0.5)
+
+            # get the number of regions
+            current_count = len(self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["REGION"]))
+            
+            # ensure we don't get an infinite loop (no need for an error msg, as the assert
+            # will flag any issues)
+            if current_count > expected_num_regions:
+                break
+        
+        self.assertEqual(expected_num_regions, current_count)
+
+    def test_region_sizes_are_correct(self):
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+
+        # get the rect element
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+
+        # check the width and height of the rect are correct
+        self.assertEqual(int(rect.get_attribute("width")), base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"])
+        self.assertEqual(int(rect.get_attribute("height")), base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"])
+
+    def test_region_colours_are_correct(self):
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+
+        # get the three SVG elements
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
+
+        # check the colours of the SVG elements       
+        expected_fill_colour = base.CONST["COLOURS"]["REGION_COLOUR"]
+        self.assertEqual(expected_fill_colour, 
+                         Color.from_string(rect.value_of_css_property("fill")).hex.upper())        
+        self.assertEqual(expected_fill_colour, 
+                         Color.from_string(circles[0].value_of_css_property("fill")).hex.upper())
+        self.assertEqual(expected_fill_colour, 
+                         Color.from_string(circles[1].value_of_css_property("fill")).hex.upper())
+        
+        expected_stroke_colour = base.CONST["COLOURS"]["REGION_EDGE_COLOUR"]
+        self.assertEqual(expected_stroke_colour, 
+                         Color.from_string(rect.value_of_css_property("stroke")).hex.upper())        
+        self.assertEqual(expected_stroke_colour, 
+                         Color.from_string(circles[0].value_of_css_property("stroke")).hex.upper())
+        self.assertEqual(expected_stroke_colour, 
+                         Color.from_string(circles[1].value_of_css_property("stroke")).hex.upper())
+
+    def test_regions_change_colour_on_mouseover(self):
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+
+        # get the three SVG elements
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
+
+        # mouse-over the region
+        ActionChains(self.browser).move_to_element(rect).perform()
+
+        # check the colours of the SVG elements       
+        expected_colour = base.CONST["COLOURS"]["REGION_HOVER_COLOUR"]
+        self.assertEqual(expected_colour, 
+                         Color.from_string(rect.value_of_css_property("fill")).hex.upper())        
+        self.assertEqual(expected_colour, 
+                         Color.from_string(circles[0].value_of_css_property("fill")).hex.upper())
+        self.assertEqual(expected_colour, 
+                         Color.from_string(circles[1].value_of_css_property("fill")).hex.upper())
+        
+    def test_regions_can_be_moved(self):
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+
+        # get the three SVG elements
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
+
+        # NOTE: start positions of elements are: rect=[0,0]; tl-handle=[0,0]; br-handle=[rect-width, rect-height]
+
+        # drag the region to a new position (old pos + [x_offset, y_offset])
+        x_offset = 20
+        y_offset = 30
+        ActionChains(self.browser).drag_and_drop_by_offset(rect, x_offset, y_offset).perform()
+
+        # get the positions of the elements after the drag
+        rect_end_position = [rect.get_attribute("x"), rect.get_attribute("y")]
+        circle1_end_position = [circles[0].get_attribute("cx"), circles[0].get_attribute("cy")]
+        circle2_end_position = [circles[1].get_attribute("cx"), circles[1].get_attribute("cy")]
+
+        # check that start_pos + offset = end_pos for all elements (both x and y coords)
+        self.assertEqual(x_offset, int(rect_end_position[0]))
+        self.assertEqual(y_offset, int(rect_end_position[1]))
+        self.assertEqual(x_offset, int(circle1_end_position[0]))
+        self.assertEqual(y_offset, int(circle1_end_position[1]))
+        self.assertEqual(base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"] + x_offset, int(circle2_end_position[0]))
+        self.assertEqual(base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"] + y_offset, int(circle2_end_position[1]))
+    
+    def test_regions_cannot_be_moved_outside_left_image_bound(self):
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+
+        # get the three SVG elements
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
+
+        # NOTE: start positions of elements are: rect=[0,0]; tl-handle=[0,0]; br-handle=[rect-width, rect-height]
+
+        # attempt to drag the region to a new position (old pos + [x_offset, y_offset])
+        x_offset = -20
+        y_offset = 0
+        ActionChains(self.browser).drag_and_drop_by_offset(rect, x_offset, y_offset).perform()
+
+        # get the positions of the elements after the drag
+        rect_end_position = [rect.get_attribute("x"), rect.get_attribute("y")]
+        circle1_end_position = [circles[0].get_attribute("cx"), circles[0].get_attribute("cy")]
+        circle2_end_position = [circles[1].get_attribute("cx"), circles[1].get_attribute("cy")]
+
+        # check that the region hasn't moved
+        self.assertEqual(0, int(rect_end_position[0]))
+        self.assertEqual(0, int(rect_end_position[1]))
+        self.assertEqual(0, int(circle1_end_position[0]))
+        self.assertEqual(0, int(circle1_end_position[1]))
+        self.assertEqual(base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"], int(circle2_end_position[0]))
+        self.assertEqual(base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"], int(circle2_end_position[1]))
+
+    def test_regions_cannot_be_moved_outside_top_image_bound(self):
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+
+        # get the three SVG elements
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
+
+        # NOTE: start positions of elements are: rect=[0,0]; tl-handle=[0,0]; br-handle=[rect-width, rect-height]
+
+        # attempt to drag the region out of bounds upwards 
+        x_offset = 0
+        y_offset = -20
+        ActionChains(self.browser).drag_and_drop_by_offset(rect, x_offset, y_offset).perform()
+
+        # get the positions of the elements after the drag
+        rect_end_position = [rect.get_attribute("x"), rect.get_attribute("y")]
+        circle1_end_position = [circles[0].get_attribute("cx"), circles[0].get_attribute("cy")]
+        circle2_end_position = [circles[1].get_attribute("cx"), circles[1].get_attribute("cy")]
+
+        # check that the region hasn't moved
+        self.assertEqual(0, int(rect_end_position[0]))
+        self.assertEqual(0, int(rect_end_position[1]))
+        self.assertEqual(0, int(circle1_end_position[0]))
+        self.assertEqual(0, int(circle1_end_position[1]))
+        self.assertEqual(base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"], int(circle2_end_position[0]))
+        self.assertEqual(base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"], int(circle2_end_position[1]))
+
+    def test_regions_cannot_be_moved_outside_right_image_bound(self):
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+
+        # get the three SVG elements
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
+
+        # NOTE: start positions of elements are: rect=[0,0]; tl-handle=[0,0]; br-handle=[rect-width, rect-height]
+
+        # attempt to drag the region out of bounds to the right
+        img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        x_offset = img.size["width"] + 10   # offset is <width_of_image + anything>
+        y_offset = 0
+        ActionChains(self.browser).drag_and_drop_by_offset(rect, x_offset, y_offset).perform()
+
+        # get the positions of the elements after the drag
+        rect_end_position = [rect.get_attribute("x"), rect.get_attribute("y")]
+        circle1_end_position = [circles[0].get_attribute("cx"), circles[0].get_attribute("cy")]
+        circle2_end_position = [circles[1].get_attribute("cx"), circles[1].get_attribute("cy")]
+
+        # the region should finish in the top-right corner of the image
+        self.assertEqual(img.size["width"] - base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"],
+                        int(rect_end_position[0]))
+        self.assertEqual(0, int(rect_end_position[1]))
+        self.assertEqual(img.size["width"] - base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"], 
+                        int(circle1_end_position[0]))
+        self.assertEqual(0, int(circle1_end_position[1]))
+        self.assertEqual(img.size["width"], int(circle2_end_position[0]))
+        self.assertEqual(base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"], int(circle2_end_position[1]))
+
+    def test_regions_cannot_be_moved_outside_bottom_image_bound(self):
+        # scroll to the bottom of the window (otherwise Selenium throws an off-page exception)
+        self.browser.find_element_by_tag_name('body').send_keys(Keys.END)
+        # brief wait to ensure the scroll has registered
+        time.sleep(1)
+
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+
+        # get the three SVG elements
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
+
+        # NOTE: start positions of elements are: rect=[0,0]; tl-handle=[0,0]; br-handle=[rect-width, rect-height]
+
+        # attempt to drag the region out of bounds to the right
+        img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        x_offset = 0
+        y_offset = img.size["height"] + 10   # offset is <height_of_image + anything>         
+        ActionChains(self.browser).drag_and_drop_by_offset(rect, x_offset, y_offset).perform()
+
+        # get the positions of the elements after the drag
+        rect_end_position = [rect.get_attribute("x"), rect.get_attribute("y")]
+        circle1_end_position = [circles[0].get_attribute("cx"), circles[0].get_attribute("cy")]
+        circle2_end_position = [circles[1].get_attribute("cx"), circles[1].get_attribute("cy")]
+
+        # the region should finish in the top-right corner of the image
+        self.assertEqual(0, int(rect_end_position[0]))
+        self.assertEqual(img.size["height"] - base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"],
+                        int(rect_end_position[1]))
+        self.assertEqual(0, int(circle1_end_position[0]))
+        self.assertEqual(img.size["height"] - base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"], 
+                        int(circle1_end_position[1]))
+        self.assertEqual(base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"], int(circle2_end_position[0]))
+        self.assertEqual(img.size["height"], int(circle2_end_position[1]))
+
+    def test_regions_can_be_resized_using_tl_handle(self):
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        # get the rect element and the top-left handle
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        tl_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
+
+        # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
+
+        # move the rect away from the TL corner, then change the size by clicking and dragging
+        x_offset = 20
+        y_offset = 20
+        (ActionChains(self.browser).drag_and_drop_by_offset(rect, x_offset, y_offset)
+                                   .drag_and_drop_by_offset(tl_handle, x_offset, y_offset)
+                                   .perform())
+
+        # check that the new width and height of the rect element are correct
+        # NOTE: we subtract the offsets here because we're dragging the TL corner down and 
+        # right, i.e. making it smaller
+        self.assertEqual(int(rect.get_attribute("width")), 
+                        base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"] - x_offset)
+        self.assertEqual(int(rect.get_attribute("height")),
+                        base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"] - y_offset)
+
+    def test_regions_can_be_resized_using_br_handle(self):
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        # get the rect element and the bottom-right handle
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
+
+        # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
+         
+        # change the size of the rect by clicking and dragging
+        x_offset = 20
+        y_offset = 20
+        ActionChains(self.browser).drag_and_drop_by_offset(br_handle, x_offset, y_offset).perform()
+
+        # check that the new width and height of the rect element are correct
+        self.assertEqual(int(rect.get_attribute("width")), 
+                        base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"] + x_offset)
+        self.assertEqual(int(rect.get_attribute("height")),
+                        base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"] + y_offset)
+
+    def test_regions_cannot_be_resized_below_min_using_tl_handle(self):
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        # get the rect element and the top-left handle
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        tl_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
+
+        # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
+
+        # change the size of the rect by clicking and dragging the handle. Attempted offsets are
+        # the width & height of the rect (so if the min isn't applied, the region will have size=0)
+        x_offset = base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"]
+        y_offset = base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"]
+        ActionChains(self.browser).drag_and_drop_by_offset(tl_handle, x_offset, y_offset).perform()
+
+        # check that the new width and height of the rect element are the min values
+        self.assertEqual(int(rect.get_attribute("width")), base.CONST["VALUES"]["MIN_RECT_WIDTH"])
+        self.assertEqual(int(rect.get_attribute("height")), base.CONST["VALUES"]["MIN_RECT_HEIGHT"])
+
+    def test_regions_cannot_be_resized_below_min_using_br_handle(self):
+         # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        # get the rect element and the top-left handle
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
+
+        # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
+
+        # change the size of the rect by clicking and dragging the handle. Attempted offsets are
+        # the width & height of the rect (so if the min isn't applied, the region will have size=0).
+        # Offsets are -ve because we want to move the BR-handle up and left, not down and right.
+        x_offset = -base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"]
+        y_offset = -base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"]
+        ActionChains(self.browser).drag_and_drop_by_offset(br_handle, x_offset, y_offset).perform()
+
+        # check that the new width and height of the rect element are the min values
+        self.assertEqual(int(rect.get_attribute("width")), base.CONST["VALUES"]["MIN_RECT_WIDTH"])
+        self.assertEqual(int(rect.get_attribute("height")), base.CONST["VALUES"]["MIN_RECT_HEIGHT"])
+
+
+    def test_regions_cannot_be_resized_outside_top_image_bound(self):
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        # get the rect element and the top-left handle
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        tl_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
+
+        # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
+
+        # change the rect size by clicking and dragging the top-left handle
+        # NOTE: -ve offset because we want to move the handle upwards
+        x_offset = 0
+        y_offset = -20
+        ActionChains(self.browser).drag_and_drop_by_offset(tl_handle, x_offset, y_offset).perform()
+
+        # check that the new width and height of the rect element haven't changed
+        self.assertEqual(int(rect.get_attribute("width")), base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"])
+        self.assertEqual(int(rect.get_attribute("height")), base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"])
+
+    def test_regions_cannot_be_resized_outside_left_image_bound(self):
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        # get the rect element and the top-left handle
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        tl_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
+
+        # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
+
+        # change the rect size by clicking and dragging the top-left handle
+        # NOTE: -ve offset because we want to move the handle upwards
+        x_offset = -20
+        y_offset = 0
+        ActionChains(self.browser).drag_and_drop_by_offset(tl_handle, x_offset, y_offset).perform()
+
+        # check that the new width and height of the rect element haven't changed
+        self.assertEqual(int(rect.get_attribute("width")), base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"])
+        self.assertEqual(int(rect.get_attribute("height")), base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"])
+
+    def test_regions_cannot_be_resized_outside_bottom_image_bound(self):
+        # scroll to the bottom of the window (otherwise Selenium throws an off-page exception)
+        self.browser.find_element_by_tag_name('body').send_keys(Keys.END)
+        time.sleep(1)
+
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        # get the rect element and the top-left handle
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
+
+        # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
+
+        # change the rect size by clicking and dragging the bottom-right handle
+        img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        x_offset = 0
+        y_offset = img.size["height"]
+        ActionChains(self.browser).drag_and_drop_by_offset(br_handle, x_offset, y_offset).perform()
+
+        # time.sleep(3)
+
+        # check that the width of the rect hasn't changed, and that the height is now the height 
+        # of the image
+        self.assertEqual(int(rect.get_attribute("width")), base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"])
+        self.assertEqual(int(rect.get_attribute("height")), img.size["height"])
+
+    def test_regions_cannot_be_resized_outside_right_image_bound(self):
+        # add a new region
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        # get the rect element and the top-left handle
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
+
+        # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
+
+        # change the rect size by clicking and dragging the bottom-right handle
+        img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        x_offset = img.size["width"]
+        y_offset = 0
+        ActionChains(self.browser).drag_and_drop_by_offset(br_handle, x_offset, y_offset).perform()
+
+        # check that the width of the rect hasn't changed, and that the height is now the height 
+        # of the image
+        self.assertEqual(int(rect.get_attribute("width")), img.size["width"])
+        self.assertEqual(int(rect.get_attribute("height")), base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"])
+
+    def test_regions_can_be_deleted(self):
+        # add a new region and get the rect element
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+
+        # double-click the rect to delete the region
+        ActionChains(self.browser).double_click(rect).perform()
+
+        # confirm that there aren't any of either element in the DOM
+        # (If there are no elements then find_elements_by_xpath() will return [], which is False])
+        self.assertFalse(self.browser.find_elements_by_xpath("//*[local-name()='rect']"))
+        self.assertFalse(self.browser.find_elements_by_xpath("//*[local-name()='circles']"))
 
     # -------------------------------------------------------------------------------------
     # Next button tests

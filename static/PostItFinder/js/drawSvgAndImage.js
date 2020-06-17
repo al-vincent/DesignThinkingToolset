@@ -25,7 +25,6 @@
  * @todo - factor out some of the functionality into other functions?
  */
 function previewImage(imgID, fileDataKey, fileNameKey, input) {
-    // debugger;
     // case 1: user selects a file using input
     if (input !== undefined && input.files && input.files[0]) { 
         const reader = new FileReader();
@@ -50,8 +49,8 @@ function previewImage(imgID, fileDataKey, fileNameKey, input) {
             $('#' + imgID).attr('src', storedImg);
             $('#' + imgID).prop('alt', sessionStorage.getItem(fileNameKey));
         }
-        // case 3: user has browsed direct to set-regions or later pages,
-        // so has not selected an image.
+        // case 3: user has browsed direct to set-regions or later pages (e.g. by
+        // typing the URL into the browser directly),so has not selected an image.
         else {
             // ?? Need to redirect the user to home (if not already there); 
             // but how?

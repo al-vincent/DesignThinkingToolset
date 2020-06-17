@@ -11,18 +11,17 @@ window.onload = function() {
         CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_NAME_KEY);
     
     const img = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);
+    // const rect = img.getBoundingClientRect();
     const svg = createSvg(CONFIG.HTML.APP.IMAGE_PANE.CONTAINER.ID, 
         img.clientWidth, 
-        img.clientHeight);    
+        img.clientHeight);
     
-    IMAGE_WIDTH = img.clientWidth;
-    IMAGE_HEIGHT = img.clientHeight;
-    console.log("clientWidth: " + img.clientWidth + ", clientHeight: " + img.clientHeight);
-
     // add click events to buttons
-    const addRgnBtn = document.getElementById(CONFIG.HTML.SET_REGIONS.ADD_REGION_BTN.ID);
-    addRgnBtn.onclick = function() {
-        clickAddRegion();
-    }
+    addClickEventsToButtons(CONFIG);       
 }
 
+function addClickEventsToButtons(config) {
+    // Add click event to the Add Region button
+    const addRgnBtn = document.getElementById(config.HTML.SET_REGIONS.ADD_REGION_BTN.ID);
+    addRgnBtn.onclick = function() { clickAddRegion(); }    
+}
