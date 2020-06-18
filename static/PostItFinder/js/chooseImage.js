@@ -4,11 +4,11 @@
 window.onload = function() {
     // get the contents of the JSON config file
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
-
-    // set the class and ARIA state of the Next button to active
+  
     const nextBtn = document.getElementById(CONFIG.HTML.APP.NEXT_BTN.ID);
-    // first, check whether there's any image data in sessionStorage; if there
-    // is, the button should be enabled
+    
+    // check whether there's any image data in sessionStorage; if there
+    // isn't, the button should be disabled
     if(!sessionStorage.getItem(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_DATA_KEY)) {
         if(!nextBtn.classList.contains("disabled")){
             nextBtn.classList.add("disabled");
@@ -18,12 +18,12 @@ window.onload = function() {
             nextBtn.setAttribute("aria-disabled", true);
         }
     }
-
-    // 
-    previewImage(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID, 
-        CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_DATA_KEY,
-        CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_NAME_KEY);
-    
+    // if there is data in sessionStorage, load the image
+    else {
+        previewImage(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID, 
+            CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_DATA_KEY,
+            CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_NAME_KEY);
+    }
 }
 
 // https://www.w3schools.com/bootstrap4/bootstrap_forms_custom.asp
