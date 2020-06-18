@@ -832,6 +832,40 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # (If there are no elements then find_elements_by_xpath() will return [], which is False])
         self.assertFalse(self.browser.find_elements_by_xpath("//*[local-name()='rect']"))
         self.assertFalse(self.browser.find_elements_by_xpath("//*[local-name()='circles']"))
+    
+    def test_browser_window_resize_changes_region_size_correctly(self):
+        # maximise the browser window
+        self.browser.maximize_window()
+        
+        # scroll to the bottom of the window (otherwise Selenium throws an off-page exception)
+        self.browser.find_element_by_tag_name('body').send_keys(Keys.END)
+        time.sleep(3)
+
+        # create a new region and get rect, bottom-right handle elements
+        self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
+
+        # move the region to pre-set coordinates, and resize the region to a pre-set size
+        drag_br_x = 195 - float(rect.get_attribute("width"))
+        drag_br_y = 175 - float(rect.get_attribute("height"))
+        (ActionChains(self.browser).drag_and_drop_by_offset(rect, 241, 175)
+                                  .drag_and_drop_by_offset(br_handle, drag_br_x, drag_br_y)
+                                  .perform())
+
+        # change the browser width, height to pre-set values
+        self.browser.set_window_size(1075, 786)
+
+        # the original rect is deleted on resize, so get the new one
+        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+
+        # check that the region x, y, width, height match to pre-set values
+        # use assertAlmostEqual to account for float rounding differences
+        self.assertAlmostEqual(float(rect.get_attribute("x")), 201.3835616438356)
+        self.assertAlmostEqual(float(rect.get_attribute("y")), 146.25912408759126)
+        self.assertAlmostEqual(float(rect.get_attribute("width")), 162.94520547945206)
+        self.assertAlmostEqual(float(rect.get_attribute("height")), 146.25912408759126)
+        
 
     # -------------------------------------------------------------------------------------
     # Next button tests

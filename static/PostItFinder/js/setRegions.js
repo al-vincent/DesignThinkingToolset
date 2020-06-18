@@ -31,7 +31,7 @@ window.onresize  = function() {
     const REGION_GRP = CONFIG.CONSTANTS.CLASSES.REGION;
     const IMG = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);
     
-    console.log("Resizing window")
+    console.log("Resizing window: height=" + $(window).height() + ", width=" + $(window).width());
     // get the current data (i.e. x,y,width,height all using image coords)
     const data = d3.selectAll("." + REGION_GRP).data();
     // rescale to put x,y,width,height on scale of [0,1]
