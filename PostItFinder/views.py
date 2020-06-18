@@ -15,13 +15,29 @@ with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r
 def index(request):
 
     context = {
-        "title": "Home",
+        "title": HTML["HOME"]["TITLE"],
         "navbar": HTML["BASE"]["NAVBAR"],
         "home_content": "Home page",
         "start_btn": HTML["HOME"]["START_BTN"]
         }
 
     return render(request, PATHS["HOME"], context=context)
+
+def about(request):
+    context = {
+        "title": HTML["ABOUT"]["TITLE"],
+        "about_content": "some info about the app"
+        }
+    
+    return render(request, PATHS["ABOUT"], context=context)
+
+def faq(request):
+    context = {
+        "title": HTML["FAQ"]["TITLE"],
+        "faq_content": "some frequently asked questions"
+        }
+    
+    return render(request, PATHS["FAQ"], context=context)
 
 def choose_image(request):
     # Update config to include the explanatory text for the home page
@@ -38,7 +54,7 @@ def choose_image(request):
     HTML["CHOOSE_IMAGE"]["NEXT_BTN"]["ID"] = HTML["APP"]["NEXT_BTN"]["ID"]
 
     context = {
-        "title": HTML["TITLE"],
+        "title": HTML["CHOOSE_IMAGE"]["TITLE"],
         "navbar": HTML["BASE"]["NAVBAR"],
         "stepper": HTML["APP"]["STEPPER_BAR"],
         "explain_text": HTML["CHOOSE_IMAGE"]["EXPLAIN_TEXT"],
@@ -49,22 +65,6 @@ def choose_image(request):
         }
 
     return render(request, PATHS["CHOOSE_IMAGE"], context=context)
-
-def about(request):
-    context = {
-        "title": "About",
-        "about_content": "some info about the app"
-        }
-    
-    return render(request, PATHS["ABOUT"], context=context)
-
-def faq(request):
-    context = {
-        "title": "FAQ",
-        "faq_content": "some frequently asked questions"
-        }
-    
-    return render(request, PATHS["FAQ"], context=context)
 
 def set_regions(request):
     
@@ -80,7 +80,7 @@ def set_regions(request):
     HTML["SET_REGIONS"]["NEXT_BTN"]["ID"] = HTML["APP"]["NEXT_BTN"]["ID"]
 
     context = {
-        "title": "Set Regions",
+        "title": HTML["SET_REGIONS"]["TITLE"],
         "navbar": HTML["BASE"]["NAVBAR"],
         "stepper": HTML["APP"]["STEPPER_BAR"],
         "explain_text": HTML["SET_REGIONS"]["EXPLAIN_TEXT"],
@@ -96,7 +96,7 @@ def set_regions(request):
 
 def analyse_text(request):
     context = {
-        "title": "Analyse Text",
+        "title": HTML["ANALYSE_TEXT"]["TITLE"],
         "navbar": HTML["BASE"]["NAVBAR"],
         "stepper": HTML["APP"]["STEPPER_BAR"],
         "explain_text": HTML["APP"]["EXPLAIN_TEXT"],

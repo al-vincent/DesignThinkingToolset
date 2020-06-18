@@ -105,6 +105,7 @@
         },
         "HOME": {
             "URL": "PostItFinder:index",
+            "TITLE": "SNIP",
             "START_BTN": {
                 "ID": "start-btn-id",
                 "TEXT": "START",
@@ -112,13 +113,16 @@
             }
         },
         "ABOUT": {
-            "URL": "PostItFinder:about"
+            "URL": "PostItFinder:about",
+            "TITLE": "SNIP: About"
         },
         "FAQ": {
-            "URL": "PostItFinder:faq"
+            "URL": "PostItFinder:faq",
+            "TITLE": "SNIP: FAQ"
         },
         "CHOOSE_IMAGE":{
             "URL": "PostItFinder:choose_image",
+            "TITLE": "SNIP: Choose Image",
             "EXPLAIN_TEXT": {
                 "TEXT": "Choose an image to process from your computer"
             },
@@ -132,6 +136,7 @@
         },
         "SET_REGIONS": {
             "URL": "PostItFinder:set_regions",
+            "TITLE": "SNIP: Set Regions",
             "EXPLAIN_TEXT": { 
                 "INTRO": {
                     "ID": "intro-id",
@@ -171,7 +176,8 @@
             }
         },
         "ANALYSE_TEXT": {
-            "URL": "PostItFinder:analyse_text"
+            "URL": "PostItFinder:analyse_text",
+            "TITLE": "SNIP: Analyse Text"
         }
     }
 }
