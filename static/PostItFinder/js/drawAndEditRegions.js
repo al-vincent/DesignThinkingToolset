@@ -286,7 +286,7 @@ function clickAddRegion() {
     const DEFAULT_RECT_HEIGHT = CONFIG.CONSTANTS.VALUES.DEFAULT_RECT_HEIGHT;
 
     // get the new coordinates and create a data object
-    console.log("Click add region");
+    console.log("Clicked Add Region");
     try {
         const coords = getNewRegionLocation();
         const newData = {"x": coords[0],
@@ -307,13 +307,29 @@ function clickAddRegion() {
         d3.selectAll("." + REGION_CLASS).remove();
         createRegions(d3.select("svg"), data);
     }
-    catch (err) {
+    catch(err) {
         console.log(err);
         console.error(err.message + "; coords: (" + err.coords[0] + "," + err.coords[1] + ")");
         // alert(err.message);
     }
 }
 
+function clickFindRegions() {
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    const FILE_DATA_KEY = CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_DATA_KEY;
+
+    // get the new coordinates and create a data object
+    console.log("Clicked Find Regions");
+
+    try {
+        const b64start = sessionStorage.getItem(FILE_DATA_KEY).indexOf(",") + 1;    
+        const b64Data = sessionStorage.getItem(FILE_DATA_KEY).slice(b64start);
+        sendImageDataToServer(b64Data);
+    }
+    catch(err) {
+        console.error(err);
+    }    
+}
 /****************************************************************************************************
  * CUSTOM EXCEPTIONS
  ***************************************************************************************************/
@@ -449,4 +465,44 @@ function rescaleDataToAbsoluteCoords(data, imgWidth, imgHeight) {
     })
 
     return scaledData;
+}
+
+// ================================================================================================
+// AJAX REQUESTS
+// ================================================================================================
+function sendImageDataToServer(imageData){
+    
+    // ----------
+    // This section is from the Django docs, to reduce Cross Site Request Forgeries
+    // https://docs.djangoproject.com/en/3.0/ref/csrf/#ajax
+    const csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $.ajaxSetup({
+        beforeSend: function(jqXHR, settings) {
+            // if not safe, set csrftoken
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                jqXHR.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+    // ----------
+
+    // Now make the AJAX POST request and send imageData to the Django server
+    $.ajax({        
+        type: "POST",
+        data: { "data": imageData },
+        dataType: "json",
+        success: function(returnData) {                                
+            console.log(returnData);
+            alert("AJAX RESPONSE RECEIVED: " + returnData);
+        },
+        error: function(jqXHR) {            
+            console.log("AJAX RESPONSE FAILED: " + jqXHR.statusText);
+        }
+    });    
 }

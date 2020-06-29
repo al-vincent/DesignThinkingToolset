@@ -23,7 +23,8 @@ window.onload = function() {
     startHeight = IMG.clientHeight;
     
     // add click events to buttons
-    addClickEventsToButtons(CONFIG);       
+    addClickEventsToButtons(CONFIG); 
+
 }
 
 window.onresize  = function() {
@@ -51,7 +52,12 @@ window.onresize  = function() {
 }
 
 function addClickEventsToButtons(config) {
+    
     // Add click event to the Add Region button
     const addRgnBtn = document.getElementById(config.HTML.SET_REGIONS.ADD_REGION_BTN.ID);
-    addRgnBtn.onclick = function() { clickAddRegion(); }    
+    addRgnBtn.onclick = function() { clickAddRegion(); }
+    
+    // Add click event to the Find Regions button
+    const findRgnsBtn = document.getElementById(config.HTML.SET_REGIONS.FIND_REGIONS_BTN.ID);
+    findRgnsBtn.onclick = function() { clickFindRegions(); }
 }

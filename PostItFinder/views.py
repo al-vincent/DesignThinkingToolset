@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.conf import settings
 from django.urls import reverse
+from django.http import JsonResponse
 
 import os
 from json import load
@@ -67,32 +68,42 @@ def choose_image(request):
     return render(request, PATHS["CHOOSE_IMAGE"], context=context)
 
 def set_regions(request):
-    
-    # Update config to set the 'active' class for the stepper bar
-    for step in HTML["APP"]["STEPPER_BAR"]["ITEMS"]:
-        if step["ID"] == "step1-id" or step["ID"] == "step2-id":
-            step["CLASS"] = "active"
+    if request.method == "POST" and request.is_ajax():
+        data = request.POST.get("data", None) 
+        print(data[0:20])
+        if data is not None:
+            # NEXT STEPS:
+            # 1. Send 'data' to the Azure object detection service for processing
+            # 2. Send the object detection results  back to the client for display
+            return JsonResponse({"status": "SUCCESS!"})
         else:
-            step["CLASS"] = ""
+            return JsonResponse({"status": "FAILED - no data was sent"})
+    else:
+        # Update config to set the 'active' class for the stepper bar
+        for step in HTML["APP"]["STEPPER_BAR"]["ITEMS"]:
+            if step["ID"] == "step1-id" or step["ID"] == "step2-id":
+                step["CLASS"] = "active"
+            else:
+                step["CLASS"] = ""
 
-    # Set IDs for the 'next' and 'previous' buttons
-    HTML["SET_REGIONS"]["PREVIOUS_BTN"]["ID"] = HTML["APP"]["PREVIOUS_BTN"]["ID"]
-    HTML["SET_REGIONS"]["NEXT_BTN"]["ID"] = HTML["APP"]["NEXT_BTN"]["ID"]
+        # Set IDs for the 'next' and 'previous' buttons
+        HTML["SET_REGIONS"]["PREVIOUS_BTN"]["ID"] = HTML["APP"]["PREVIOUS_BTN"]["ID"]
+        HTML["SET_REGIONS"]["NEXT_BTN"]["ID"] = HTML["APP"]["NEXT_BTN"]["ID"]
 
-    context = {
-        "title": HTML["SET_REGIONS"]["TITLE"],
-        "navbar": HTML["BASE"]["NAVBAR"],
-        "stepper": HTML["APP"]["STEPPER_BAR"],
-        "explain_text": HTML["SET_REGIONS"]["EXPLAIN_TEXT"],
-        "find_rgns_btn": HTML["SET_REGIONS"]["FIND_REGIONS_BTN"],
-        "add_rgn_btn": HTML["SET_REGIONS"]["ADD_REGION_BTN"],
-        "next_btn": HTML["SET_REGIONS"]["NEXT_BTN"],
-        "prev_btn": HTML["SET_REGIONS"]["PREVIOUS_BTN"],
-        "image_pane": HTML["APP"]["IMAGE_PANE"],
-        "config": CONFIG,
-        }
+        context = {
+            "title": HTML["SET_REGIONS"]["TITLE"],
+            "navbar": HTML["BASE"]["NAVBAR"],
+            "stepper": HTML["APP"]["STEPPER_BAR"],
+            "explain_text": HTML["SET_REGIONS"]["EXPLAIN_TEXT"],
+            "find_rgns_btn": HTML["SET_REGIONS"]["FIND_REGIONS_BTN"],
+            "add_rgn_btn": HTML["SET_REGIONS"]["ADD_REGION_BTN"],
+            "next_btn": HTML["SET_REGIONS"]["NEXT_BTN"],
+            "prev_btn": HTML["SET_REGIONS"]["PREVIOUS_BTN"],
+            "image_pane": HTML["APP"]["IMAGE_PANE"],
+            "config": CONFIG,
+            }
 
-    return render(request, PATHS["SET_REGIONS"], context=context)
+        return render(request, PATHS["SET_REGIONS"], context=context)
 
 def analyse_text(request):
     context = {

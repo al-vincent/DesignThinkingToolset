@@ -144,16 +144,16 @@
                 },
                 "REGION_SETTING": {
                     "ID": "region-setting-id",
-                    "OR_MODAL_ID": "obj-rec-region-setting-modal-id",
+                    "OD_MODAL_ID": "obj-det-region-setting-modal-id",
                     "RE_MODAL_ID": "reg-edit-region-setting-modal-id"
                 },
                 "REGIONS_MODAL":{
                     "ID": "regions-modal-id",
                     "CLOSE_ID": "regions-modal-close-btn-id"
                 },
-                "OBJ_REC_MODAL":{
-                    "ID": "obj-rec-modal-id",
-                    "CLOSE_ID": "obj-rec-modal-close-btn-id"
+                "OBJ_DET_MODAL":{
+                    "ID": "obj-det-modal-id",
+                    "CLOSE_ID": "obj-det-modal-close-btn-id"
                 },
                 "REG_EDIT_MODAL": {
                     "ID": "reg-edit-modal-id",
