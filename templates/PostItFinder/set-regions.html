@@ -24,8 +24,8 @@
     <div id="{{ explain_text.REGION_SETTING.ID }}" class="col-12 col-lg-8 lead">
       <p>
         Regions can be set in two ways. You can use 
-        <a id="{{ explain_text.REGION_SETTING.OR_MODAL_ID }}" href="#{{ explain_text.OBJ_REC_MODAL.ID }}" data-toggle="modal" data-target="#{{ explain_text.OBJ_REC_MODAL.ID }}">
-        <strong>object recognition</strong></a> to automatically identify shapes in the 
+        <a id="{{ explain_text.REGION_SETTING.OD_MODAL_ID }}" href="#{{ explain_text.OBJ_DET_MODAL.ID }}" data-toggle="modal" data-target="#{{ explain_text.OBJ_DET_MODAL.ID }}">
+        <strong>object detection</strong></a> to automatically identify shapes in the 
         image; and you can use the 
         <a id="{{ explain_text.REGION_SETTING.RE_MODAL_ID }}" href="#{{ explain_text.REG_EDIT_MODAL.ID }}" data-toggle="modal" data-target="#{{ explain_text.REG_EDIT_MODAL.ID }}">
         <strong>region editor</strong></a> to manually set regions.
@@ -74,12 +74,12 @@
   <!-- /regions modal window -->
 
   <!-- object detection modal window -->
-  <div id="{{ explain_text.OBJ_REC_MODAL.ID }}" class="modal fade" tabindex="-1" role="dialog">
+  <div id="{{ explain_text.OBJ_DET_MODAL.ID }}" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Object Recognition</h5>
-          <button id="{{ explain_text.OBJ_REC_MODAL.CLOSE_ID }}" type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <h5 class="modal-title">Object Detection</h5>
+          <button id="{{ explain_text.OBJ_DET_MODAL.CLOSE_ID }}" type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -140,9 +140,12 @@
 {% block image_action_buttons %}
   <div class="row pt-2">
     <div class="col-6">
-      <button id="{{ find_rgns_btn.ID }}" type="button" class="btn btn-block btn-outline-success">
-        {{ find_rgns_btn.TEXT }}
-      </button>
+      <form method="POST" action="">
+        {% csrf_token %}
+        <button id="{{ find_rgns_btn.ID }}" type="submit" class="btn btn-block btn-outline-success">
+          {{ find_rgns_btn.TEXT }}
+        </button>
+      </form>
     </div>
 
     <div class="col-6">

@@ -59,7 +59,6 @@ function previewImage(imgID, fileDataKey, fileNameKey, input) {
     }
 }
 
-
 /**
  * @description - function to create the SVG container.
  * @param {string} svgID - DOM ID of the div that will contain the SVG element (and everything else)

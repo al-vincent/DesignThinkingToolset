@@ -127,10 +127,10 @@ class SetRegionsPageStaticTests(base.StaticTests):
         regions_modal = self.browser.find_element_by_id(regions_modal_id)        
         self.assertFalse(regions_modal.is_displayed())
     
-    def test_object_recognition_modal_is_not_displayed(self):
-        or_modal_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["OBJ_REC_MODAL"]["ID"]
-        or_modal = self.browser.find_element_by_id(or_modal_id)
-        self.assertFalse(or_modal.is_displayed())
+    def test_object_detection_modal_is_not_displayed(self):
+        od_modal_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["OBJ_DET_MODAL"]["ID"]
+        od_modal = self.browser.find_element_by_id(od_modal_id)
+        self.assertFalse(od_modal.is_displayed())
     
     def test_region_editor_modal_is_not_displayed(self):
         re_modal_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REG_EDIT_MODAL"]["ID"]
@@ -319,21 +319,21 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # check that the modal is no longer displayed
         self.assertFalse(modal.is_displayed())
 
-    def test_obj_recog_modal_opens_and_closes_correctly(self):
+    def test_obj_detection_modal_opens_and_closes_correctly(self):
         ex_txt = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]
 
         # click the <a> tag to open the modal
-        self.browser.find_element_by_id(ex_txt["REGION_SETTING"]["OR_MODAL_ID"]).click()
+        self.browser.find_element_by_id(ex_txt["REGION_SETTING"]["OD_MODAL_ID"]).click()
 
         # add a brief wait to ensure the modal has opened
         time.sleep(2)
 
         # check to see if the modal has appeared
-        modal = self.browser.find_element_by_id(ex_txt["OBJ_REC_MODAL"]["ID"])
+        modal = self.browser.find_element_by_id(ex_txt["OBJ_DET_MODAL"]["ID"])
         self.assertTrue(modal.is_displayed())
 
         # close the modal
-        self.browser.find_element_by_id(ex_txt["OBJ_REC_MODAL"]["CLOSE_ID"]).click()
+        self.browser.find_element_by_id(ex_txt["OBJ_DET_MODAL"]["CLOSE_ID"]).click()
 
         # add a wait to ensure the modal has closed
         time.sleep(2)
@@ -341,7 +341,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # check that the modal is no longer displayed
         self.assertFalse(modal.is_displayed())
 
-    def test_reg_editor_modal_opens_and_closes_correctly(self):
+    def test_region_editor_modal_opens_and_closes_correctly(self):
         # click the <a> tag to open the modal
         modal_link_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGION_SETTING"]["RE_MODAL_ID"]
         self.browser.find_element_by_id(modal_link_id).click()

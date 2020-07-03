@@ -28,6 +28,18 @@
             "MIN_RECT_HEIGHT": 20,
             "DEFAULT_RECT_WIDTH": 60,
             "DEFAULT_RECT_HEIGHT": 40
+        },
+        "AZURE": {
+            "OBJ_DET": {
+                "BASE_URL": "snip-object-detection.cognitiveservices.azure.com",
+                "PREDICTION_KEY": "SNIP_OBJ_DET_PRED_KEY",
+                "SUBSCRIPTION_KEY": "SNIP_OBJ_DET_SUBS_KEY",
+                "PROJECT_ID": "SNIP_OBJ_DET_PROJ_ID",
+                "PUBLISHED_NAME": "SNIP_OBJ_DET_PUB_NAME"
+            },
+            "OCR": {
+
+            }
         }
     },
     "HTML": {
@@ -144,16 +156,16 @@
                 },
                 "REGION_SETTING": {
                     "ID": "region-setting-id",
-                    "OR_MODAL_ID": "obj-rec-region-setting-modal-id",
+                    "OD_MODAL_ID": "obj-det-region-setting-modal-id",
                     "RE_MODAL_ID": "reg-edit-region-setting-modal-id"
                 },
                 "REGIONS_MODAL":{
                     "ID": "regions-modal-id",
                     "CLOSE_ID": "regions-modal-close-btn-id"
                 },
-                "OBJ_REC_MODAL":{
-                    "ID": "obj-rec-modal-id",
-                    "CLOSE_ID": "obj-rec-modal-close-btn-id"
+                "OBJ_DET_MODAL":{
+                    "ID": "obj-det-modal-id",
+                    "CLOSE_ID": "obj-det-modal-close-btn-id"
                 },
                 "REG_EDIT_MODAL": {
                     "ID": "reg-edit-modal-id",
