@@ -3,15 +3,18 @@ from django.conf import settings
 from django.urls import reverse
 from django.http import JsonResponse
 
+from PostItFinder.azure_services import ObjectDetector
+
 import os
 from json import load
-
+import base64
 
 # NOTE: can I replace these with the built-in static finders?
 with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
     CONFIG = load(f)
     PATHS = CONFIG["PATHS"]
     HTML = CONFIG["HTML"]
+    CONST = CONFIG["CONSTANTS"]
 
 def index(request):
 
@@ -69,15 +72,41 @@ def choose_image(request):
 
 def set_regions(request):
     if request.method == "POST" and request.is_ajax():
-        data = request.POST.get("data", None) 
-        print(data[0:20])
-        if data is not None:
-            # NEXT STEPS:
-            # 1. Send 'data' to the Azure object detection service for processing
-            # 2. Send the object detection results  back to the client for display
-            return JsonResponse({"status": "SUCCESS!"})
+        data_b64 = request.POST.get("data", None) 
+        if data_b64 is not None:
+            # convert 'b64data' from a base64-encoded string to bytes
+            data_bytes = base64.decodebytes(data_b64.encode('utf-8'))
+            # send the bytes to the Azure object detection service for processing
+            OBJ_DET = CONST["AZURE"]["OBJ_DET"]
+            # obj_det = ObjectDetector(base_url=OBJ_DET["BASE_URL"],
+            #                         data=data_bytes,
+            #                         prediction_key=os.environ.get(OBJ_DET["PREDICTION_KEY"]),
+            #                         subscription_key=os.environ.get(OBJ_DET["SUBSCRIPTION_KEY"]),
+            #                         project_id=os.environ.get(OBJ_DET["PROJECT_ID"]),
+            #                         published_name=os.environ.get(OBJ_DET["PUBLISHED_NAME"]))
+
+            # send the object detection results back to the client for display
+            # image_json = obj_det.analyse_image()
+            # import time
+            # time.sleep(3)
+            # image_json = {
+            #     "status": "SUCCESS",
+            #     "param1": 1,
+            #     "param2": True,
+            #     "param3": [
+            #         {"a": 4},
+            #         {"b": 5},
+            #         {"c": 6},
+            #         {"d": 7}
+            #     ]
+            # }
+            if image_json is not None:
+                print(f"***** SENT JSON RESPONSE *****")
+                return JsonResponse(image_json)
+            else: 
+                return JsonResponse({"status": "FAILED - no data was received from Azure"})
         else:
-            return JsonResponse({"status": "FAILED - no data was sent"})
+            return JsonResponse({"status": "FAILED - no data was sent from client"})
     else:
         # Update config to set the 'active' class for the stepper bar
         for step in HTML["APP"]["STEPPER_BAR"]["ITEMS"]:

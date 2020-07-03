@@ -496,13 +496,17 @@ function sendImageDataToServer(imageData){
     $.ajax({        
         type: "POST",
         data: { "data": imageData },
-        dataType: "json",
+        dataType: "jsonp",
+        timeout: 50000,
         success: function(returnData) {                                
             console.log(returnData);
             alert("AJAX RESPONSE RECEIVED: " + returnData);
         },
         error: function(jqXHR) {            
-            console.log("AJAX RESPONSE FAILED: " + jqXHR.statusText);
+            alert("AJAX RESPONSE FAILED: " + jqXHR.statusText);
+        },
+        complete: function() {
+            alert("AJAX CALL COMPLETE");
         }
     });    
 }
