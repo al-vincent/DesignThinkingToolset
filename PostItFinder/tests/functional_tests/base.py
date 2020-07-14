@@ -30,7 +30,7 @@ def get_webdriver():
     if 'BUILD_ENV' in os.environ:
         from selenium.webdriver.firefox.options import Options
         options = Options()
-        options.add_argument('-headless')
+        # options.add_argument('-headless')
         return webdriver.Firefox(firefox_options=options)
     else:
         return webdriver.Chrome()

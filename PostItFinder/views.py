@@ -9,13 +9,53 @@ import os
 from json import load
 import base64
 
-# NOTE: can I replace these with the built-in static finders?
+
+# ================================================================================================
+# GLOBALS
+# ================================================================================================
+IMAGE_DATA_B64 = None
 with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
     CONFIG = load(f)
     PATHS = CONFIG["PATHS"]
     HTML = CONFIG["HTML"]
     CONST = CONFIG["CONSTANTS"]
+    
 
+
+# ================================================================================================
+# HELPER FUNCTIONS
+# ================================================================================================
+def get_sticky_notes(image_data_b64):
+    results = {"threshold": CONST["AZURE"]["OBJ_DET"]["CONFIDENCE_THRESHOLD"], "data": None}
+    if image_data_b64 is not None:
+        print("***** AJAX POST request includes image data *****")
+        # convert 'b64data' from a base64-encoded string to bytes
+        data_bytes = base64.decodebytes(image_data_b64.encode('utf-8'))
+        # send the bytes to the Azure object detection service for analysis
+        OBJ_DET = CONST["AZURE"]["OBJ_DET"]
+        obj_det = ObjectDetector(base_url=OBJ_DET["BASE_URL"],
+                                image_data=data_bytes,
+                                prediction_key=os.environ.get(OBJ_DET["PREDICTION_KEY"]),
+                                subscription_key=os.environ.get(OBJ_DET["SUBSCRIPTION_KEY"]),
+                                project_id=os.environ.get(OBJ_DET["PROJECT_ID"]),
+                                published_name=os.environ.get(OBJ_DET["PUBLISHED_NAME"]),
+                                confidence_threshold=OBJ_DET["CONFIDENCE_THRESHOLD"])
+        image_json = obj_det.analyse_image()
+
+        # pass the results back to the view
+        if image_json is not None:
+            print(f"***** RECEIVED AZURE RESPONSE *****")
+            results = obj_det.process_output(image_json)
+        else: 
+            print(f"***** AZURE DIDN'T ANALYSE IMAGE SUCCESSFULLY *****")
+    else:
+        print(f"***** NO IMAGE DATA RECEIVED FROM CLIENT *****")
+
+    return results
+
+# ================================================================================================
+# ROUTES
+# ================================================================================================
 def index(request):
 
     context = {
@@ -71,68 +111,43 @@ def choose_image(request):
     return render(request, PATHS["CHOOSE_IMAGE"], context=context)
 
 def set_regions(request):
+    global IMAGE_DATA_B64
     if request.method == "POST" and request.is_ajax():
-        data_b64 = request.POST.get("data", None) 
-        if data_b64 is not None:
-            # convert 'b64data' from a base64-encoded string to bytes
-            data_bytes = base64.decodebytes(data_b64.encode('utf-8'))
-            # send the bytes to the Azure object detection service for processing
-            OBJ_DET = CONST["AZURE"]["OBJ_DET"]
-            # obj_det = ObjectDetector(base_url=OBJ_DET["BASE_URL"],
-            #                         data=data_bytes,
-            #                         prediction_key=os.environ.get(OBJ_DET["PREDICTION_KEY"]),
-            #                         subscription_key=os.environ.get(OBJ_DET["SUBSCRIPTION_KEY"]),
-            #                         project_id=os.environ.get(OBJ_DET["PROJECT_ID"]),
-            #                         published_name=os.environ.get(OBJ_DET["PUBLISHED_NAME"]))
+        IMAGE_DATA_B64 = request.POST.get("data", None)
+        print(f"***** AJAX POST request received at server: {IMAGE_DATA_B64[0:20]}... *****")        
 
-            # send the object detection results back to the client for display
-            # image_json = obj_det.analyse_image()
-            # import time
-            # time.sleep(3)
-            # image_json = {
-            #     "status": "SUCCESS",
-            #     "param1": 1,
-            #     "param2": True,
-            #     "param3": [
-            #         {"a": 4},
-            #         {"b": 5},
-            #         {"c": 6},
-            #         {"d": 7}
-            #     ]
-            # }
-            if image_json is not None:
-                print(f"***** SENT JSON RESPONSE *****")
-                return JsonResponse(image_json)
-            else: 
-                return JsonResponse({"status": "FAILED - no data was received from Azure"})
-        else:
-            return JsonResponse({"status": "FAILED - no data was sent from client"})
+    if IMAGE_DATA_B64 is not None:
+        azure_results = get_sticky_notes(IMAGE_DATA_B64)
     else:
-        # Update config to set the 'active' class for the stepper bar
-        for step in HTML["APP"]["STEPPER_BAR"]["ITEMS"]:
-            if step["ID"] == "step1-id" or step["ID"] == "step2-id":
-                step["CLASS"] = "active"
-            else:
-                step["CLASS"] = ""
+        azure_results = {"threshold": CONST["AZURE"]["OBJ_DET"]["CONFIDENCE_THRESHOLD"],
+                        "data": None}
 
-        # Set IDs for the 'next' and 'previous' buttons
-        HTML["SET_REGIONS"]["PREVIOUS_BTN"]["ID"] = HTML["APP"]["PREVIOUS_BTN"]["ID"]
-        HTML["SET_REGIONS"]["NEXT_BTN"]["ID"] = HTML["APP"]["NEXT_BTN"]["ID"]
+	# Update config to set the 'active' class for the stepper bar
+    for step in HTML["APP"]["STEPPER_BAR"]["ITEMS"]:
+        if step["ID"] == "step1-id" or step["ID"] == "step2-id":
+            step["CLASS"] = "active"
+        else:
+            step["CLASS"] = ""
 
-        context = {
-            "title": HTML["SET_REGIONS"]["TITLE"],
-            "navbar": HTML["BASE"]["NAVBAR"],
-            "stepper": HTML["APP"]["STEPPER_BAR"],
-            "explain_text": HTML["SET_REGIONS"]["EXPLAIN_TEXT"],
-            "find_rgns_btn": HTML["SET_REGIONS"]["FIND_REGIONS_BTN"],
-            "add_rgn_btn": HTML["SET_REGIONS"]["ADD_REGION_BTN"],
-            "next_btn": HTML["SET_REGIONS"]["NEXT_BTN"],
-            "prev_btn": HTML["SET_REGIONS"]["PREVIOUS_BTN"],
-            "image_pane": HTML["APP"]["IMAGE_PANE"],
-            "config": CONFIG,
-            }
-
-        return render(request, PATHS["SET_REGIONS"], context=context)
+	# Set IDs for the 'next' and 'previous' buttons
+    HTML["SET_REGIONS"]["PREVIOUS_BTN"]["ID"] = HTML["APP"]["PREVIOUS_BTN"]["ID"]
+    HTML["SET_REGIONS"]["NEXT_BTN"]["ID"] = HTML["APP"]["NEXT_BTN"]["ID"]
+    
+    context = {
+	    "title": HTML["SET_REGIONS"]["TITLE"],
+	    "navbar": HTML["BASE"]["NAVBAR"],
+	    "stepper": HTML["APP"]["STEPPER_BAR"],
+	    "explain_text": HTML["SET_REGIONS"]["EXPLAIN_TEXT"],
+	    "find_rgns_btn": HTML["SET_REGIONS"]["FIND_REGIONS_BTN"],
+	    "add_rgn_btn": HTML["SET_REGIONS"]["ADD_REGION_BTN"],
+	    "next_btn": HTML["SET_REGIONS"]["NEXT_BTN"],
+	    "prev_btn": HTML["SET_REGIONS"]["PREVIOUS_BTN"],
+	    "image_pane": HTML["APP"]["IMAGE_PANE"],
+	    "config": CONFIG,
+        "azure_obj_det": azure_results
+	    }
+        
+    return render(request, PATHS["SET_REGIONS"], context=context)
 
 def analyse_text(request):
     context = {
@@ -147,3 +162,5 @@ def analyse_text(request):
         }
 
     return render(request, PATHS["ANALYSE_TEXT"], context=context)
+    
+

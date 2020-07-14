@@ -3,13 +3,15 @@ from json import load, loads
 import os
 
 class ObjectDetector:
-    def __init__(self, base_url, data, prediction_key, subscription_key, project_id, published_name):
+    def __init__(self, base_url, image_data, prediction_key, subscription_key, 
+                project_id, published_name, confidence_threshold):
         self.base_url = base_url
-        self.data = data
+        self.image_data = image_data
         self.prediction_key = prediction_key
         self.subscription_key = subscription_key
         self.project_id = project_id
         self.published_name = published_name
+        self.confidence_threshold = confidence_threshold
 
     def analyse_image(self):
         """
@@ -30,21 +32,37 @@ class ObjectDetector:
 
         try:
             conn = http.client.HTTPSConnection(self.base_url)
-            conn.request("POST", f"/customvision/v3.0/Prediction/{self.project_id}/detect/iterations/{self.published_name}/image", self.data, headers)
+            conn.request("POST", f"/customvision/v3.0/Prediction/{self.project_id}/detect/iterations/{self.published_name}/image", self.image_data, headers)
             data = conn.getresponse().read()
             conn.close()
-            json_data = loads(data.decode("utf-8"))
-            if "predictions" in json_data:
-                return json_data
+            results = loads(data.decode("utf-8"))
+            if "predictions" in results:
+                return results
             else:
-                print(f"*** ERROR, analyse_image,  unexpected return: {json_data}")
+                print(f"*** ERROR, analyse_image,  unexpected return: {results}")
                 return None
         except Exception as err:
             print(f"*** ERROR: analyse_image, {err} ***")
             return None
     
-    def process_output(self):
-        pass
+    def process_output(self, azure_results):
+        regions = azure_results.get("predictions", None)
+        if regions is not None:
+            results = []
+            for region in regions:
+                if region["probability"] >= self.confidence_threshold:
+                    results.append({
+                        "x": region["boundingBox"]["left"],
+                        "y": region["boundingBox"]["top"],
+                        "width": region["boundingBox"]["width"],
+                        "height": region["boundingBox"]["height"]
+                    })
+            
+            return {"threshold": self.confidence_threshold, "data": results}
+        else:
+            print("***** ERROR: ObjectDetector.process_output, no data returned *****")
+            {"threshold": self.confidence_threshold, "data": None}
+
 
 def get_image_bytes(image_path):
     # Read the image into a byte array
@@ -83,9 +101,7 @@ def run_image_analysis(image_bytes):
                              published_name=PUBLISHED_NAME)
 
     image_data = obj_det.analyse_image()
-
-    # Set the threshold, i.e. the lowest probability of 'correctness' at which 
-    # images are kept.
+    
     return image_data
 
 def main():

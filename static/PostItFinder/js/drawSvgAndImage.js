@@ -68,12 +68,13 @@ function previewImage(imgID, fileDataKey, fileNameKey, input) {
  * @throws - none.
  * @todo - throw an exception if no element with svgID exists in the DOM.
  */
-function createSvg(svgID, width, height) {
+function createSvg(svgContainerID, svgID, svgClass, width, height) {
     // create svg element:
-    const svg = d3.select("#" + svgID).append("svg")
+    const svg = d3.select("#" + svgContainerID).append("svg")
         .attr("width", width)
         .attr("height", height)
-        .attr("class", "svg-wrapper");
+        .attr("id", svgID)
+        .attr("class", svgClass);
 
     return svg;
 }
