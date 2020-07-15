@@ -125,6 +125,7 @@ function deleteRegionsAndRedraw(extraData) {
             rescaledData.push(elem);
         });
     }
+
     // remove the old SVGs
     d3.selectAll("svg").remove();
     // get the x,y,width,height vals for the new window size
@@ -517,12 +518,11 @@ function sendImageDataToServer(imageData, CONFIG){
     // ----------
 
     // Now make the AJAX POST request and send imageData to the Django server
-    $.ajax({    
-        // async: false,  
+    $.ajax({     
         type: "POST",
         data: { "data": imageData },
-        dataType: "html", //"json",
-        timeout: 60000,
+        dataType: "json",
+        timeout: 10000,
         beforeSend: function(jqXHR, settings) {
             // if not safe, set csrftoken
             if (!csrfSafeMethod(settings.type) && !this.crossDomain) {               
@@ -531,7 +531,8 @@ function sendImageDataToServer(imageData, CONFIG){
         }
     })
     .done(function(returnData) {
-        console.log("AJAX RESPONSE SUCCEEDED");       
+        console.log("AJAX RESPONSE SUCCEEDED"); 
+        deleteRegionsAndRedraw(returnData["data"]);      
     })
     .fail(function(jqXHR) {
         console.log("AJAX RESPONSE FAILED");

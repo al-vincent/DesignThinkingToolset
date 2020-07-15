@@ -9,9 +9,6 @@ window.onload = function() {
     // get the contents of the JSON config file
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
 
-    // get the contents of the Azure Object Detection JSON (if there is any)
-    const AZURE_OD = JSON.parse(document.getElementById("azure-obj-det-id").textContent);
-
     // load the image selected by the user in step 1
     previewImage(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID, 
         CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_DATA_KEY,
@@ -30,14 +27,6 @@ window.onload = function() {
     
     // add click events to buttons
     addClickEventsToButtons(CONFIG);
-
-    // if there's azure data, draw regions
-    console.log("Azure OD data:")
-    console.log(AZURE_OD.data);
-    if(AZURE_OD.data !== null && AZURE_OD.data !== undefined) {
-        console.log("Azure data received");
-        deleteRegionsAndRedraw(AZURE_OD.data);
-    }
 }
 
 window.onresize  = function() {
@@ -60,6 +49,7 @@ function addClickEventsToButtons(config) {
     // Add click event to the Find Regions button
     const findRgnsBtn = document.getElementById(config.HTML.SET_REGIONS.FIND_REGIONS_BTN.ID);
     findRgnsBtn.onclick = function() { 
-        clickFindRegions();        
+        clickFindRegions();
+        return false   
     }
 }

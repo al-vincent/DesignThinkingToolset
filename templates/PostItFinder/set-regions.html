@@ -158,8 +158,6 @@
 
 {% block scripts %}
   {{ block.super }}
-  
-  {{ azure_obj_det|json_script:"azure-obj-det-id" }}
 
   {% load static %}
   <script type="text/javascript" src="{% static 'PostItFinder/js/drawAndEditRegions.js' %}"></script>
