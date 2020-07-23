@@ -358,7 +358,7 @@ function clickFindRegions() {
     try {
         const imageData = sessionStorage.getItem(FILE_DATA_KEY);
         const b64start = imageData.indexOf(",") + 1;        
-        sendImageDataToServer(imageData.slice(b64start), CONFIG);
+        sendImageDataToServer(imageData.slice(b64start));
     }
     catch(err) {
         console.error(err);
@@ -504,7 +504,7 @@ function rescaleDataToAbsoluteCoords(data, imgWidth, imgHeight) {
 // ================================================================================================
 // AJAX REQUESTS
 // ================================================================================================
-function sendImageDataToServer(imageData, CONFIG){
+function sendImageDataToServer(imageData){
     
     // ----------
     // This section is from the Django docs, to reduce Cross Site Request Forgeries
@@ -532,7 +532,7 @@ function sendImageDataToServer(imageData, CONFIG){
     })
     .done(function(returnData) {
         console.log("AJAX RESPONSE SUCCEEDED"); 
-        deleteRegionsAndRedraw(returnData["data"]);      
+        // deleteRegionsAndRedraw(returnData["data"]);  
     })
     .fail(function(jqXHR) {
         console.log("AJAX RESPONSE FAILED");

@@ -54,31 +54,36 @@ def faq(request):
     return render(request, PATHS["FAQ"], context=context)
 
 def choose_image(request):
-    # Update config to include the explanatory text for the home page
-    HTML["CHOOSE_IMAGE"]["EXPLAIN_TEXT"]["ID"] = HTML["APP"]["EXPLAIN_TEXT"]["ID"]
+    if request.method == "POST" and request.is_ajax():
+        image_data_b64 = request.POST.get("data", None)
+        print(f"***** AJAX data received: {image_data_b64[0:20]} *****")
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        # Update config to include the explanatory text for the home page
+        HTML["CHOOSE_IMAGE"]["EXPLAIN_TEXT"]["ID"] = HTML["APP"]["EXPLAIN_TEXT"]["ID"]
 
-    # Update config to set the 'active' class for the stepper bar
-    for step in HTML["APP"]["STEPPER_BAR"]["ITEMS"]:
-        if step["ID"] == "step1-id":
-            step["CLASS"] = "active"
-        else:
-            step["CLASS"] = ""
+        # Update config to set the 'active' class for the stepper bar
+        for step in HTML["APP"]["STEPPER_BAR"]["ITEMS"]:
+            if step["ID"] == "step1-id":
+                step["CLASS"] = "active"
+            else:
+                step["CLASS"] = ""
 
-    # Set ID for the 'next' button
-    HTML["CHOOSE_IMAGE"]["NEXT_BTN"]["ID"] = HTML["APP"]["NEXT_BTN"]["ID"]
+        # Set ID for the 'next' button
+        HTML["CHOOSE_IMAGE"]["NEXT_BTN"]["ID"] = HTML["APP"]["NEXT_BTN"]["ID"]
 
-    context = {
-        "title": HTML["CHOOSE_IMAGE"]["TITLE"],
-        "navbar": HTML["BASE"]["NAVBAR"],
-        "stepper": HTML["APP"]["STEPPER_BAR"],
-        "explain_text": HTML["CHOOSE_IMAGE"]["EXPLAIN_TEXT"],
-        "next_btn": HTML["CHOOSE_IMAGE"]["NEXT_BTN"],
-        "choose_img_btn": HTML["CHOOSE_IMAGE"]["CHOOSE_IMG_BTN"],
-        "image_pane": HTML["APP"]["IMAGE_PANE"],
-        "config": CONFIG,
-        }
+        context = {
+            "title": HTML["CHOOSE_IMAGE"]["TITLE"],
+            "navbar": HTML["BASE"]["NAVBAR"],
+            "stepper": HTML["APP"]["STEPPER_BAR"],
+            "explain_text": HTML["CHOOSE_IMAGE"]["EXPLAIN_TEXT"],
+            "next_btn": HTML["CHOOSE_IMAGE"]["NEXT_BTN"],
+            "choose_img_btn": HTML["CHOOSE_IMAGE"]["CHOOSE_IMG_BTN"],
+            "image_pane": HTML["APP"]["IMAGE_PANE"],
+            "config": CONFIG,
+            }
 
-    return render(request, PATHS["CHOOSE_IMAGE"], context=context)
+        return render(request, PATHS["CHOOSE_IMAGE"], context=context)
 
 def set_regions(request):
 

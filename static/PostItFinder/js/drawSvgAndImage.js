@@ -30,14 +30,17 @@ function previewImage(imgID, fileDataKey, fileNameKey, input) {
         const reader = new FileReader();
         reader.onload = function(myFile) {            
             const img = new Image();
-            img.src = myFile.target.result;            
+            img.src = myFile.target.result;
 
             img.onload = function() {
                 $('#' + imgID).attr('src', this.src);
                 $('#' + imgID).prop('alt', input.files[0].name);
+                // send the image data to the server as an AJAX POST request
+                const b64start = this.src.indexOf(",") + 1;
+                sendImageDataToServer(this.src.slice(b64start));
             }
             sessionStorage.setItem(fileDataKey, myFile.target.result);
-            sessionStorage.setItem(fileNameKey, input.files[0].name);
+            sessionStorage.setItem(fileNameKey, input.files[0].name);            
         };
 
         reader.readAsDataURL(input.files[0]);

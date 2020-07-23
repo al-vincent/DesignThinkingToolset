@@ -34,12 +34,12 @@ $(".custom-file-input").on("change", function() {
     // get the contents of the JSON config file
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
 
-    // preview the image selected by the user
+    // preview the image selected by the user and send data to server via AJAX
     previewImage(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID,
         CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_DATA_KEY,
         CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_NAME_KEY,
         this); 
-    
+
     // set the class and ARIA state of the Next button to active
     const nextBtn = document.getElementById(CONFIG.HTML.APP.NEXT_BTN.ID);
     if(nextBtn.classList.contains("disabled")){

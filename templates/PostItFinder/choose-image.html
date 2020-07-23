@@ -7,19 +7,23 @@
 {% endblock%}
 
 {% block image_action_buttons %}
-  <div class="custom-file">
-    <input type="file" accept=".jpg, .png, .gif, .bmp" 
-          id="{{ choose_img_btn.ID }}"
-          class="custom-file-input">
-    </input>
-    <label class="custom-file-label" for="{{ choose_img_btn.ID }}">
-      {{ choose_img_btn.TEXT }}
-    </label>
-  </div>
+  <form method="POST" action="">
+    {% csrf_token %}
+    <div class="custom-file">
+      <input type="file" accept=".jpg, .png, .gif, .bmp" 
+            id="{{ choose_img_btn.ID }}"
+            class="custom-file-input">
+      </input>
+      <label class="custom-file-label" for="{{ choose_img_btn.ID }}">
+        {{ choose_img_btn.TEXT }}
+      </label>
+    </div>
+  </form>
 {% endblock %}
 
 {% block scripts %}
   {{ block.super }}  
   {% load static %}
+  <script type="text/javascript" src="{% static 'PostItFinder/js/drawAndEditRegions.js' %}"></script>
   <script type="text/javascript" src="{% static 'PostItFinder/js/chooseImage.js' %}"></script>
 {% endblock %}
