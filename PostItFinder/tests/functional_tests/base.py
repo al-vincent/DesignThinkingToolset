@@ -49,8 +49,11 @@ def navigate_to_set_regions_page(browser):
 
     # get the input elements and update with the file path
     input_elem = browser.find_element_by_id(input_id)
-    path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', IMG_FILE)
-    input_elem.send_keys(path)
+    # the below is a bit convoluted, but should guarantee that the images are found correctly
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
+    image_path = os.path.join(test_path, "resources", "test_images", IMG_FILE)
+    input_elem.send_keys(image_path)
 
     # wait a few seconds for the image to render
     time.sleep(2)

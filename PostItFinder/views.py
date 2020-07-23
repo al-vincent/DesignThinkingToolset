@@ -8,6 +8,7 @@ from PostItFinder.azure_services import ObjectDetector
 import os
 from json import load
 import base64
+import logging
 
 
 # ================================================================================================
@@ -18,39 +19,9 @@ with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r
     PATHS = CONFIG["PATHS"]
     HTML = CONFIG["HTML"]
     CONST = CONFIG["CONSTANTS"]
-NULL_RESULT = {"threshold": CONST["AZURE"]["OBJ_DET"]["CONFIDENCE_THRESHOLD"], "data": None}
-
-
-# ================================================================================================
-# HELPER FUNCTIONS
-# ================================================================================================
-def get_sticky_notes(image_data_b64):
-    results = NULL_RESULT
-    if image_data_b64 is not None:
-        print("***** AJAX POST request includes image data *****")
-        # convert 'b64data' from a base64-encoded string to bytes
-        data_bytes = base64.decodebytes(image_data_b64.encode('utf-8'))
-        # send the bytes to the Azure object detection service for analysis
-        OBJ_DET = CONST["AZURE"]["OBJ_DET"]
-        obj_det = ObjectDetector(base_url=OBJ_DET["BASE_URL"],
-                                image_data=data_bytes,
-                                prediction_key=os.environ.get(OBJ_DET["PREDICTION_KEY"]),
-                                subscription_key=os.environ.get(OBJ_DET["SUBSCRIPTION_KEY"]),
-                                project_id=os.environ.get(OBJ_DET["PROJECT_ID"]),
-                                published_name=os.environ.get(OBJ_DET["PUBLISHED_NAME"]),
-                                confidence_threshold=OBJ_DET["CONFIDENCE_THRESHOLD"])
-        image_json = obj_det.analyse_image()
-
-        # pass the results back to the view
-        if image_json is not None:
-            print(f"***** RECEIVED AZURE RESPONSE *****")
-            results = obj_det.process_output(image_json)
-        else: 
-            print(f"***** AZURE DIDN'T ANALYSE IMAGE SUCCESSFULLY *****")
-    else:
-        print(f"***** NO IMAGE DATA RECEIVED FROM CLIENT *****")
-
-    return results
+    
+# Get a logger instance
+logger = logging.getLogger(__name__)
 
 # ================================================================================================
 # ROUTES
@@ -113,15 +84,16 @@ def set_regions(request):
 
     if request.method == "POST" and request.is_ajax():
         image_data_b64 = request.POST.get("data", None)
-        print(f"***** AJAX POST request received at server: {image_data_b64[0:20]}... *****")
-        # processed_data = get_sticky_notes(IMAGE_DATA_B64)
-        processed_data = get_sticky_notes(image_data_b64)
-        if processed_data is not None:
-            print(f"***** Processed data sent to client *****")
+        logger.info(f"AJAX POST request received at server")
+        aod = ObjectDetector(image_data=image_data_b64,                            
+                            confidence_threshold=CONST["AZURE"]["OBJ_DET"]["CONFIDENCE_THRESHOLD"])
+        processed_data = aod.analyse_and_process()
+        if processed_data["data"] is not None:
+            logger.info(f"Azure processing successful, results sent to client")
             return JsonResponse(processed_data, status=200)
         else:
-            print(f"***** Null response sent to client *****")
-            return JsonResponse(NULL_RESULT, status=400)
+            logger.warning(f"Azure processing unsuccessful, null response sent to client")
+            return JsonResponse(processed_data, status=400)
     else:
         # Update config to set the 'active' class for the stepper bar
         for step in HTML["APP"]["STEPPER_BAR"]["ITEMS"]:

@@ -541,5 +541,9 @@ function sendImageDataToServer(imageData, CONFIG){
         console.log("Response type: " + jqXHR.responseType);
         console.log("Response text: " + jqXHR.responseText);
         console.log("Ready state: " + jqXHR.readyState);
+
+        if(jqXHR.statusText === "timeout") {
+            alert("The request timed out");
+        }
     }) 
 }

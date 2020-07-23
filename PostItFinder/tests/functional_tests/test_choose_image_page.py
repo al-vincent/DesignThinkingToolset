@@ -247,7 +247,10 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
+        path = os.path.join(test_path, "resources", "test_images", img_file)
         input_elem.send_keys(path)
         self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
@@ -267,7 +270,10 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
+        path = os.path.join(test_path, "resources", "test_images", img_file)
         input_elem.send_keys(path)
         self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
@@ -287,7 +293,10 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
+        path = os.path.join(test_path, "resources", "test_images", img_file)
         input_elem.send_keys(path)
         self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
@@ -307,7 +316,10 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
+        path = os.path.join(test_path, "resources", "test_images", img_file)
         input_elem.send_keys(path)
         self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
@@ -327,7 +339,10 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
+        path = os.path.join(test_path, "resources", "test_images", img_file)
         input_elem.send_keys(path)
         self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
@@ -347,7 +362,10 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
+        path = os.path.join(test_path, "resources", "test_images", img_file)
         input_elem.send_keys(path)
 
         # wait a few seconds for the image to render
@@ -381,7 +399,10 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
+        path = os.path.join(test_path, "resources", "test_images", img_file)
         input_elem.send_keys(path)
 
         # wait a few seconds for the image to render
@@ -409,17 +430,24 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         input_elem = self.browser.find_element_by_id(input_id)
         img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
+
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
+
         # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img1)
+        path = os.path.join(test_path, "resources", "test_images", img1)
         input_elem.send_keys(path)
 
-        # short wait
+        # short wait to allow image to update
         time.sleep(2)
 
         # update the input with the file path for img2
         img2 = "test_jpg.jpg"
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img2)
+        path = os.path.join(test_path, "resources", "test_images", img2)
         input_elem.send_keys(path)
+
+        # short wait to allow image to update
+        time.sleep(2)
 
         # get the src data for the image as a UTF-8 string decoded from base64
         img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
@@ -453,7 +481,10 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
+        path = os.path.join(test_path, "resources", "test_images", img_file)
         input_elem.send_keys(path)
 
         # wait a few seconds for the image to render

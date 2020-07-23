@@ -50,6 +50,8 @@ function addClickEventsToButtons(config) {
     const findRgnsBtn = document.getElementById(config.HTML.SET_REGIONS.FIND_REGIONS_BTN.ID);
     findRgnsBtn.onclick = function() { 
         clickFindRegions();
-        return false   
+        // NOTE: the line below is *ESSENTIAL*!! It ensures that the AJAX call doesn't 
+        // reload the whole page; it just gets the new data stops there.
+        return false;
     }
 }

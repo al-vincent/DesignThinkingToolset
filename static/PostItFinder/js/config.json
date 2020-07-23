@@ -32,7 +32,6 @@
         },
         "AZURE": {
             "OBJ_DET": {
-                "BASE_URL": "snip-object-detection.cognitiveservices.azure.com",
                 "CONFIDENCE_THRESHOLD": 0.3,
                 "PREDICTION_KEY": "SNIP_OBJ_DET_PRED_KEY",                
                 "PROJECT_ID": "SNIP_OBJ_DET_PROJ_ID",

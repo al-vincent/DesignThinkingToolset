@@ -365,8 +365,46 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.assertFalse(modal.is_displayed())
 
     # -------------------------------------------------------------------------------------
+    # Find-regions button tests
+    # -------------------------------------------------------------------------------------
+    def test_find_regions_button_gets_correct_region(self):
+        # click the Find Regions button
+        find_rgns_id = base.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"]
+        self.browser.find_element_by_id(find_rgns_id).click()
+
+        # add a long sleep, to account for the time taken for Azure to respond
+        time.sleep(10)
+
+        # if successful, a single region should be created at specific points
+        rects = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])  
+        self.assertEqual(len(rects), 1)     
+        # get the rect and ensure that it's x, y, width, height are correct
+        rect = rects[0]
+        
+        # The azure return, when run standalone, return the below (relative coords, range [0,1]):
+        # {'x': 0.290309846, 'y': 0.310755759, 'width': 0.408914924, 'height': 0.355182737}. Need 
+        # to convert these to absolute coords using the width & height of the image.
+
+        # We don't know the image width and height in the browser, so get the image element
+        img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        
+        # Check that the values are correct
+        self.assertAlmostEqual(float(rect.get_attribute("x")), 0.290309846 * img.size["width"])
+        self.assertAlmostEqual(float(rect.get_attribute("y")), 0.310755759 * img.size["height"])
+        self.assertAlmostEqual(float(rect.get_attribute("width")), 0.408914924 * img.size["width"])
+        self.assertAlmostEqual(float(rect.get_attribute("height")), 0.355182737 * img.size["height"])
+
+    def test_find_regions_button_alerts_user_on_timeout(self):
+        # NOTE: how to do this?! 
+        # Detting a sleep won't work; it won't actually make the AJAX request sleep, it just 
+        # makes the browser wait while the AJAX request completes happily in the background.
+        # More Googling required!
+        pass
+
+
+    # -------------------------------------------------------------------------------------
     # Add-region button tests
-    # -------------------------------------------------------------------------------------    
+    # -------------------------------------------------------------------------------------
     def test_add_region_button_creates_new_region(self):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
