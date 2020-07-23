@@ -8,14 +8,24 @@ from PostItFinder.azure_services import ObjectDetector
 import os
 from json import load
 import base64
+import logging
 
-# NOTE: can I replace these with the built-in static finders?
+
+# ================================================================================================
+# GLOBALS
+# ================================================================================================
 with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
     CONFIG = load(f)
     PATHS = CONFIG["PATHS"]
     HTML = CONFIG["HTML"]
     CONST = CONFIG["CONSTANTS"]
+    
+# Get a logger instance
+logger = logging.getLogger(__name__)
 
+# ================================================================================================
+# ROUTES
+# ================================================================================================
 def index(request):
 
     context = {
@@ -71,42 +81,19 @@ def choose_image(request):
     return render(request, PATHS["CHOOSE_IMAGE"], context=context)
 
 def set_regions(request):
-    if request.method == "POST" and request.is_ajax():
-        data_b64 = request.POST.get("data", None) 
-        if data_b64 is not None:
-            # convert 'b64data' from a base64-encoded string to bytes
-            data_bytes = base64.decodebytes(data_b64.encode('utf-8'))
-            # send the bytes to the Azure object detection service for processing
-            OBJ_DET = CONST["AZURE"]["OBJ_DET"]
-            # obj_det = ObjectDetector(base_url=OBJ_DET["BASE_URL"],
-            #                         data=data_bytes,
-            #                         prediction_key=os.environ.get(OBJ_DET["PREDICTION_KEY"]),
-            #                         subscription_key=os.environ.get(OBJ_DET["SUBSCRIPTION_KEY"]),
-            #                         project_id=os.environ.get(OBJ_DET["PROJECT_ID"]),
-            #                         published_name=os.environ.get(OBJ_DET["PUBLISHED_NAME"]))
 
-            # send the object detection results back to the client for display
-            # image_json = obj_det.analyse_image()
-            # import time
-            # time.sleep(3)
-            # image_json = {
-            #     "status": "SUCCESS",
-            #     "param1": 1,
-            #     "param2": True,
-            #     "param3": [
-            #         {"a": 4},
-            #         {"b": 5},
-            #         {"c": 6},
-            #         {"d": 7}
-            #     ]
-            # }
-            if image_json is not None:
-                print(f"***** SENT JSON RESPONSE *****")
-                return JsonResponse(image_json)
-            else: 
-                return JsonResponse({"status": "FAILED - no data was received from Azure"})
+    if request.method == "POST" and request.is_ajax():
+        image_data_b64 = request.POST.get("data", None)
+        logger.info(f"AJAX POST request received at server")
+        aod = ObjectDetector(image_data=image_data_b64,                            
+                            confidence_threshold=CONST["AZURE"]["OBJ_DET"]["CONFIDENCE_THRESHOLD"])
+        processed_data = aod.analyse_and_process()
+        if processed_data["data"] is not None:
+            logger.info(f"Azure processing successful, results sent to client")
+            return JsonResponse(processed_data, status=200)
         else:
-            return JsonResponse({"status": "FAILED - no data was sent from client"})
+            logger.warning(f"Azure processing unsuccessful, null response sent to client")
+            return JsonResponse(processed_data, status=400)
     else:
         # Update config to set the 'active' class for the stepper bar
         for step in HTML["APP"]["STEPPER_BAR"]["ITEMS"]:
@@ -118,7 +105,7 @@ def set_regions(request):
         # Set IDs for the 'next' and 'previous' buttons
         HTML["SET_REGIONS"]["PREVIOUS_BTN"]["ID"] = HTML["APP"]["PREVIOUS_BTN"]["ID"]
         HTML["SET_REGIONS"]["NEXT_BTN"]["ID"] = HTML["APP"]["NEXT_BTN"]["ID"]
-
+        
         context = {
             "title": HTML["SET_REGIONS"]["TITLE"],
             "navbar": HTML["BASE"]["NAVBAR"],
@@ -131,7 +118,7 @@ def set_regions(request):
             "image_pane": HTML["APP"]["IMAGE_PANE"],
             "config": CONFIG,
             }
-
+            
         return render(request, PATHS["SET_REGIONS"], context=context)
 
 def analyse_text(request):
@@ -147,3 +134,5 @@ def analyse_text(request):
         }
 
     return render(request, PATHS["ANALYSE_TEXT"], context=context)
+    
+

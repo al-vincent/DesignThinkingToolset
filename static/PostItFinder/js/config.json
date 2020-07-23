@@ -17,6 +17,7 @@
         },
         "CLASSES": {
             "REGION": "region-grp",
+            "BODY_RECT": "body-rect",
             "HANDLE": "handle-grp",
             "TOP_LEFT_HANDLE": "top-left-handle",
             "BOTTOM_RIGHT_HANDLE": "bottom-right-handle"
@@ -31,11 +32,11 @@
         },
         "AZURE": {
             "OBJ_DET": {
-                "BASE_URL": "snip-object-detection.cognitiveservices.azure.com",
-                "PREDICTION_KEY": "SNIP_OBJ_DET_PRED_KEY",
-                "SUBSCRIPTION_KEY": "SNIP_OBJ_DET_SUBS_KEY",
+                "CONFIDENCE_THRESHOLD": 0.3,
+                "PREDICTION_KEY": "SNIP_OBJ_DET_PRED_KEY",                
                 "PROJECT_ID": "SNIP_OBJ_DET_PROJ_ID",
-                "PUBLISHED_NAME": "SNIP_OBJ_DET_PUB_NAME"
+                "PUBLISHED_NAME": "SNIP_OBJ_DET_PUB_NAME",
+                "SUBSCRIPTION_KEY": "SNIP_OBJ_DET_SUBS_KEY"
             },
             "OCR": {
 
@@ -107,6 +108,10 @@
             "IMAGE_PANE": {
                 "CONTAINER": {
                     "ID": "img-container-id"
+                },
+                "SVG": {
+                    "ID": "svg-wrapper-id",
+                    "CLASS": "svg-wrapper"
                 },
                 "IMAGE": {
                     "ID": "img-pane-id",

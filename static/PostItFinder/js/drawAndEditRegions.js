@@ -7,6 +7,10 @@
  ****************************************************************************************************/
 
 
+// ================================================================================================
+// CREATE AND DESTROY REGIONS
+// ================================================================================================
+
 /**
  * @description: adds resizable regions on the image / SVG, at locations defined by 'data'. 
  * Also sets callbacks for resizing of regions.
@@ -22,6 +26,7 @@ function createRegions(svg, data) {
     // Get constants from config.json
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
     const REGION_CLASS = CONFIG.CONSTANTS.CLASSES.REGION;
+    const BODY_RECT_CLASS = CONFIG.CONSTANTS.CLASSES.BODY_RECT;
     const HANDLE_CLASS = CONFIG.CONSTANTS.CLASSES.HANDLE;
     const TOP_LEFT_CLASS = CONFIG.CONSTANTS.CLASSES.TOP_LEFT_HANDLE;
     const BOTTOM_RIGHT_CLASS = CONFIG.CONSTANTS.CLASSES.BOTTOM_RIGHT_HANDLE;
@@ -70,7 +75,7 @@ function createRegions(svg, data) {
                         });
     
     // add the rect element
-    newGrp.append("rect"); 
+    newGrp.append("rect").attr("class", BODY_RECT_CLASS); 
     // handles are a bit trickier; we want to create a new group (so that we can bind 
     // the resize event to both sets of handles), and have two classes of circle in it,
     // one for the handles on the top-left of rects, and one for bottom-right handles.
@@ -105,9 +110,38 @@ function createRegions(svg, data) {
         .call(dragBottomRightHandle);
 }
 
-/****************************************************************************************************
- * CALLBACKS
- ***************************************************************************************************/
+function deleteRegionsAndRedraw(extraData) {
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    const REGION_GRP = CONFIG.CONSTANTS.CLASSES.REGION;
+    const IMG = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);
+
+    // get the current data (i.e. x,y,width,height all using image coords)
+    const data = d3.selectAll("." + REGION_GRP).data();
+    // rescale to put x,y,width,height on scale of [0,1]
+    const rescaledData = rescaleDataToRelativeCoords(data, startWidth, startHeight);
+    // if there's extra data to add (e.g. from Azure obj detection), append it
+    if(extraData !== undefined) {
+        extraData.forEach( function(elem) { 
+            rescaledData.push(elem);
+        });
+    }
+
+    // remove the old SVGs
+    d3.selectAll("svg").remove();
+    // get the x,y,width,height vals for the new window size
+    const newData = rescaleDataToAbsoluteCoords(rescaledData, IMG.clientWidth, IMG.clientHeight);
+    // regenerate the SVG, image and resizable boxes
+    const svg = createSvg(CONFIG.HTML.APP.IMAGE_PANE.CONTAINER.ID,
+        CONFIG.HTML.APP.IMAGE_PANE.SVG.ID,
+        CONFIG.HTML.APP.IMAGE_PANE.SVG.CLASS,
+        IMG.clientWidth, 
+        IMG.clientHeight);
+    createRegions(svg, newData);
+}
+
+// ================================================================================================
+// CALLBACKS
+// ================================================================================================
 
 /**
  * @description: callback that deletes a single resizable region.
@@ -322,17 +356,17 @@ function clickFindRegions() {
     console.log("Clicked Find Regions");
 
     try {
-        const b64start = sessionStorage.getItem(FILE_DATA_KEY).indexOf(",") + 1;    
-        const b64Data = sessionStorage.getItem(FILE_DATA_KEY).slice(b64start);
-        sendImageDataToServer(b64Data);
+        const imageData = sessionStorage.getItem(FILE_DATA_KEY);
+        const b64start = imageData.indexOf(",") + 1;        
+        sendImageDataToServer(imageData.slice(b64start), CONFIG);
     }
     catch(err) {
         console.error(err);
     }    
 }
-/****************************************************************************************************
- * CUSTOM EXCEPTIONS
- ***************************************************************************************************/
+// ================================================================================================
+// CUSTOM EXCEPTIONS
+// ================================================================================================
 
 /**
  * @description: exception raised if the user tries to create a new region and there isn't enough
@@ -350,9 +384,9 @@ function OutOfBoundsException(x,y) {
 }
 
 
-/****************************************************************************************************
- * REGION LOCATION FUNCTIONS
- ***************************************************************************************************/
+// ================================================================================================
+// REGION LOCATION FUNCTIONS
+// ================================================================================================
 
 /**
  * @description: function to decide on coords for a new region. By default, new regions are placed in 
@@ -470,43 +504,46 @@ function rescaleDataToAbsoluteCoords(data, imgWidth, imgHeight) {
 // ================================================================================================
 // AJAX REQUESTS
 // ================================================================================================
-function sendImageDataToServer(imageData){
+function sendImageDataToServer(imageData, CONFIG){
     
     // ----------
     // This section is from the Django docs, to reduce Cross Site Request Forgeries
     // https://docs.djangoproject.com/en/3.0/ref/csrf/#ajax
-    const csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+    const csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();    
 
     function csrfSafeMethod(method) {
         // these HTTP methods do not require CSRF protection
         return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
     }
-
-    $.ajaxSetup({
-        beforeSend: function(jqXHR, settings) {
-            // if not safe, set csrftoken
-            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                jqXHR.setRequestHeader("X-CSRFToken", csrftoken);
-            }
-        }
-    });
     // ----------
 
     // Now make the AJAX POST request and send imageData to the Django server
-    $.ajax({        
+    $.ajax({     
         type: "POST",
         data: { "data": imageData },
-        dataType: "jsonp",
-        timeout: 50000,
-        success: function(returnData) {                                
-            console.log(returnData);
-            alert("AJAX RESPONSE RECEIVED: " + returnData);
-        },
-        error: function(jqXHR) {            
-            alert("AJAX RESPONSE FAILED: " + jqXHR.statusText);
-        },
-        complete: function() {
-            alert("AJAX CALL COMPLETE");
+        dataType: "json",
+        timeout: 10000,
+        beforeSend: function(jqXHR, settings) {
+            // if not safe, set csrftoken
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {               
+                jqXHR.setRequestHeader("X-CSRFToken", csrftoken);
+            }
         }
-    });    
+    })
+    .done(function(returnData) {
+        console.log("AJAX RESPONSE SUCCEEDED"); 
+        deleteRegionsAndRedraw(returnData["data"]);      
+    })
+    .fail(function(jqXHR) {
+        console.log("AJAX RESPONSE FAILED");
+        console.log("Status: " +  jqXHR.status);
+        console.log("Status text: " + jqXHR.statusText);
+        console.log("Response type: " + jqXHR.responseType);
+        console.log("Response text: " + jqXHR.responseText);
+        console.log("Ready state: " + jqXHR.readyState);
+
+        if(jqXHR.statusText === "timeout") {
+            alert("The request timed out");
+        }
+    }) 
 }

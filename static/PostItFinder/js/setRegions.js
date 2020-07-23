@@ -14,38 +14,27 @@ window.onload = function() {
         CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_DATA_KEY,
         CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_NAME_KEY);
     
+    // create a wrapper SVG, for other SVG elements to sit inside
     const IMG = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);
-    const svg = createSvg(CONFIG.HTML.APP.IMAGE_PANE.CONTAINER.ID, 
+    const svg = createSvg(CONFIG.HTML.APP.IMAGE_PANE.CONTAINER.ID,
+        CONFIG.HTML.APP.IMAGE_PANE.SVG.ID,
+        CONFIG.HTML.APP.IMAGE_PANE.SVG.CLASS,
         IMG.clientWidth, 
         IMG.clientHeight);
-
+    
     startWidth = IMG.clientWidth;
     startHeight = IMG.clientHeight;
     
     // add click events to buttons
-    addClickEventsToButtons(CONFIG); 
-
+    addClickEventsToButtons(CONFIG);
 }
 
 window.onresize  = function() {
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
-    const REGION_GRP = CONFIG.CONSTANTS.CLASSES.REGION;
     const IMG = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);
     
     console.log("Resizing window: height=" + $(window).height() + ", width=" + $(window).width());
-    // get the current data (i.e. x,y,width,height all using image coords)
-    const data = d3.selectAll("." + REGION_GRP).data();
-    // rescale to put x,y,width,height on scale of [0,1]
-    const rescaledData = rescaleDataToRelativeCoords(data, startWidth, startHeight);
-    // remove the old SVGs
-    d3.selectAll("svg").remove();
-    // get the x,y,width,height vals for the new window size
-    const newData = rescaleDataToAbsoluteCoords(rescaledData, IMG.clientWidth, IMG.clientHeight);
-    // regenerate the SVG, image and resizable boxes
-    const svg = createSvg(CONFIG.HTML.APP.IMAGE_PANE.CONTAINER.ID, 
-        IMG.clientWidth, 
-        IMG.clientHeight);
-    createRegions(svg, newData);
+    deleteRegionsAndRedraw();
 
     startWidth = IMG.clientWidth;
     startHeight = IMG.clientHeight;
@@ -59,5 +48,10 @@ function addClickEventsToButtons(config) {
     
     // Add click event to the Find Regions button
     const findRgnsBtn = document.getElementById(config.HTML.SET_REGIONS.FIND_REGIONS_BTN.ID);
-    findRgnsBtn.onclick = function() { clickFindRegions(); }
+    findRgnsBtn.onclick = function() { 
+        clickFindRegions();
+        // NOTE: the line below is *ESSENTIAL*!! It ensures that the AJAX call doesn't 
+        // reload the whole page; it just gets the new data stops there.
+        return false;
+    }
 }

@@ -365,14 +365,52 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.assertFalse(modal.is_displayed())
 
     # -------------------------------------------------------------------------------------
+    # Find-regions button tests
+    # -------------------------------------------------------------------------------------
+    def test_find_regions_button_gets_correct_region(self):
+        # click the Find Regions button
+        find_rgns_id = base.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"]
+        self.browser.find_element_by_id(find_rgns_id).click()
+
+        # add a long sleep, to account for the time taken for Azure to respond
+        time.sleep(10)
+
+        # if successful, a single region should be created at specific points
+        rects = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])  
+        self.assertEqual(len(rects), 1)     
+        # get the rect and ensure that it's x, y, width, height are correct
+        rect = rects[0]
+        
+        # The azure return, when run standalone, return the below (relative coords, range [0,1]):
+        # {'x': 0.290309846, 'y': 0.310755759, 'width': 0.408914924, 'height': 0.355182737}. Need 
+        # to convert these to absolute coords using the width & height of the image.
+
+        # We don't know the image width and height in the browser, so get the image element
+        img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        
+        # Check that the values are correct
+        self.assertAlmostEqual(float(rect.get_attribute("x")), 0.290309846 * img.size["width"])
+        self.assertAlmostEqual(float(rect.get_attribute("y")), 0.310755759 * img.size["height"])
+        self.assertAlmostEqual(float(rect.get_attribute("width")), 0.408914924 * img.size["width"])
+        self.assertAlmostEqual(float(rect.get_attribute("height")), 0.355182737 * img.size["height"])
+
+    def test_find_regions_button_alerts_user_on_timeout(self):
+        # NOTE: how to do this?! 
+        # Detting a sleep won't work; it won't actually make the AJAX request sleep, it just 
+        # makes the browser wait while the AJAX request completes happily in the background.
+        # More Googling required!
+        pass
+
+
+    # -------------------------------------------------------------------------------------
     # Add-region button tests
-    # -------------------------------------------------------------------------------------    
+    # -------------------------------------------------------------------------------------
     def test_add_region_button_creates_new_region(self):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
         # we expect 1 x rect element and 2 x circle elements to be created
-        rects = self.browser.find_elements_by_xpath("//*[local-name()='rect']")
+        rects = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         self.assertEqual(len(rects), 1)
 
         circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
@@ -384,7 +422,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
         
         # we expect 1 x rect element and 2 x circle elements to be created
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         tl_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
         br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
         
@@ -450,7 +488,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
         # get the rect element
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
 
         # check the width and height of the rect are correct
         self.assertEqual(int(rect.get_attribute("width")), base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"])
@@ -461,7 +499,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
         # get the three SVG elements
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
 
         # check the colours of the SVG elements       
@@ -486,7 +524,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
         # get the three SVG elements
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
 
         # mouse-over the region
@@ -506,7 +544,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
         # get the three SVG elements
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
 
         # NOTE: start positions of elements are: rect=[0,0]; tl-handle=[0,0]; br-handle=[rect-width, rect-height]
@@ -534,7 +572,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
         # get the three SVG elements
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
 
         # NOTE: start positions of elements are: rect=[0,0]; tl-handle=[0,0]; br-handle=[rect-width, rect-height]
@@ -562,7 +600,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
         # get the three SVG elements
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
 
         # NOTE: start positions of elements are: rect=[0,0]; tl-handle=[0,0]; br-handle=[rect-width, rect-height]
@@ -590,7 +628,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
         # get the three SVG elements
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
 
         # NOTE: start positions of elements are: rect=[0,0]; tl-handle=[0,0]; br-handle=[rect-width, rect-height]
@@ -607,13 +645,18 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         circle2_end_position = [circles[1].get_attribute("cx"), circles[1].get_attribute("cy")]
 
         # the region should finish in the top-right corner of the image
-        self.assertEqual(img.size["width"] - base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"],
+        # *****
+        # NOTE: for this test and the one below, math.ceil() is used because the image size may
+        # be a floating point number, but the value returned by clientWidth and clientHeight
+        # will ALWAYS be rounded up to an int. I'm comfortable with this.
+        # *****
+        self.assertEqual(math.ceil(img.size["width"] - base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"]),
                         int(rect_end_position[0]))
         self.assertEqual(0, int(rect_end_position[1]))
-        self.assertEqual(img.size["width"] - base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"], 
+        self.assertEqual(math.ceil(img.size["width"] - base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"]), 
                         int(circle1_end_position[0]))
         self.assertEqual(0, int(circle1_end_position[1]))
-        self.assertEqual(img.size["width"], int(circle2_end_position[0]))
+        self.assertEqual(math.ceil(img.size["width"]), int(circle2_end_position[0]))
         self.assertEqual(base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"], int(circle2_end_position[1]))
 
     def test_regions_cannot_be_moved_outside_bottom_image_bound(self):
@@ -626,12 +669,12 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
         # get the three SVG elements
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
 
         # NOTE: start positions of elements are: rect=[0,0]; tl-handle=[0,0]; br-handle=[rect-width, rect-height]
 
-        # attempt to drag the region out of bounds to the right
+        # attempt to drag the region out of bounds to the bottom
         img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         x_offset = 0
         y_offset = img.size["height"] + 10   # offset is <height_of_image + anything>         
@@ -642,21 +685,22 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         circle1_end_position = [circles[0].get_attribute("cx"), circles[0].get_attribute("cy")]
         circle2_end_position = [circles[1].get_attribute("cx"), circles[1].get_attribute("cy")]
 
-        # the region should finish in the top-right corner of the image
+        # the region should finish in the bottom-left corner of the image
         self.assertEqual(0, int(rect_end_position[0]))
-        self.assertEqual(img.size["height"] - base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"],
+        self.assertEqual(math.ceil(img.size["height"] - base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"]),
                         int(rect_end_position[1]))
         self.assertEqual(0, int(circle1_end_position[0]))
-        self.assertEqual(img.size["height"] - base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"], 
+        self.assertEqual(math.ceil(img.size["height"] - base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"]), 
                         int(circle1_end_position[1]))
         self.assertEqual(base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"], int(circle2_end_position[0]))
-        self.assertEqual(img.size["height"], int(circle2_end_position[1]))
+        self.assertEqual(math.ceil(img.size["height"]), int(circle2_end_position[1]))
 
     def test_regions_can_be_resized_using_tl_handle(self):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        time.sleep(2)
         # get the rect element and the top-left handle
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         tl_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
 
         # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
@@ -670,7 +714,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
 
         # check that the new width and height of the rect element are correct
         # NOTE: we subtract the offsets here because we're dragging the TL corner down and 
-        # right, i.e. making it smaller
+        # right by using positive offsets, i.e. making the rect smaller
         self.assertEqual(int(rect.get_attribute("width")), 
                         base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"] - x_offset)
         self.assertEqual(int(rect.get_attribute("height")),
@@ -680,7 +724,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
         # get the rect element and the bottom-right handle
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
 
         # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
@@ -700,7 +744,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
         # get the rect element and the top-left handle
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         tl_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
 
         # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
@@ -719,7 +763,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
          # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
         # get the rect element and the top-left handle
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
 
         # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
@@ -740,7 +784,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
         # get the rect element and the top-left handle
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         tl_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
 
         # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
@@ -759,7 +803,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
         # get the rect element and the top-left handle
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         tl_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
 
         # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
@@ -782,7 +826,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
         # get the rect element and the top-left handle
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
 
         # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
@@ -793,18 +837,20 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         y_offset = img.size["height"]
         ActionChains(self.browser).drag_and_drop_by_offset(br_handle, x_offset, y_offset).perform()
 
-        # time.sleep(3)
-
         # check that the width of the rect hasn't changed, and that the height is now the height 
         # of the image
+        # ***** 
+        # NOTE: as with the move-region-down and move-region-right tests, using math.ceil here
+        # to avoid errors between an int region-size and a potentially float image-size
+        # *****
         self.assertEqual(int(rect.get_attribute("width")), base.CONST["VALUES"]["DEFAULT_RECT_WIDTH"])
-        self.assertEqual(int(rect.get_attribute("height")), img.size["height"])
+        self.assertEqual(int(rect.get_attribute("height")), math.ceil(img.size["height"]))
 
     def test_regions_cannot_be_resized_outside_right_image_bound(self):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
         # get the rect element and the top-left handle
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
 
         # NOTE: the initial size of the rect is known (and tested) to be the default width, height from config.js
@@ -817,20 +863,20 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
 
         # check that the width of the rect hasn't changed, and that the height is now the height 
         # of the image
-        self.assertEqual(int(rect.get_attribute("width")), img.size["width"])
+        self.assertEqual(int(rect.get_attribute("width")), math.ceil(img.size["width"]))
         self.assertEqual(int(rect.get_attribute("height")), base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"])
 
     def test_regions_can_be_deleted(self):
         # add a new region and get the rect element
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
 
         # double-click the rect to delete the region
         ActionChains(self.browser).double_click(rect).perform()
 
         # confirm that there aren't any of either element in the DOM
         # (If there are no elements then find_elements_by_xpath() will return [], which is False])
-        self.assertFalse(self.browser.find_elements_by_xpath("//*[local-name()='rect']"))
+        self.assertFalse(self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"]))
         self.assertFalse(self.browser.find_elements_by_xpath("//*[local-name()='circles']"))
     
     def test_browser_window_resize_changes_region_size_correctly(self):
@@ -843,7 +889,8 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
 
         # create a new region and get rect, bottom-right handle elements
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        time.sleep(2)
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
 
         # move the region to pre-set coordinates, and resize the region to a pre-set size
@@ -853,11 +900,13 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
                                   .drag_and_drop_by_offset(br_handle, drag_br_x, drag_br_y)
                                   .perform())
 
-        # change the browser width, height to pre-set values
+        # change the browser width, height to pre-set values and ensure the window is scrolled-down
         self.browser.set_window_size(1075, 786)
+        self.browser.find_element_by_tag_name('body').send_keys(Keys.END)
+        time.sleep(3)
 
         # the original rect is deleted on resize, so get the new one
-        rect = self.browser.find_element_by_xpath("//*[local-name()='rect']")
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
 
         # check that the region x, y, width, height match to pre-set values
         # use assertAlmostEqual to account for float rounding differences

@@ -97,23 +97,21 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [STATIC_DIR, ]
 
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
+
 if 'DJANGO_DEBUG_FALSE' in os.environ:  
     DEBUG = False
     SECRET_KEY = os.environ['DJANGO_SECRET_KEY']  
@@ -124,3 +122,56 @@ else:
     SECRET_KEY = 'insecure-key-for-dev'
     ALLOWED_HOSTS = []
     STATIC = STATIC_DIR
+
+# Override the default max data upload value
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 4194304
+
+# Azure settings - Custom Vision Object Detection
+
+OBJ_DET_PREDICTION_KEY = os.environ['SNIP_OBJ_DET_PRED_KEY']
+OBJ_DET_PROJECT_ID = os.environ['SNIP_OBJ_DET_PROJ_ID']
+OBJ_DET_PUBLISHED_NAME = os.environ['SNIP_OBJ_DET_PUB_NAME']
+OBJ_DET_BASE_URL = 'snip-object-detection.cognitiveservices.azure.com'
+OBJ_DET_API_URL = f'/customvision/v3.0/Prediction/{OBJ_DET_PROJECT_ID}/detect/iterations/{OBJ_DET_PUBLISHED_NAME}/image'
+OK_IMAGE_TYPES = ['jpeg', 'bmp', 'png', 'gif']
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': ' {levelname} {name} {funcName} {message}',
+            'style': '{'
+        },
+        'file': {
+            'format': '{asctime} {name} {levelname} {message}',
+            'style': '{'
+        }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
+            'formatter': 'console'
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'formatter': 'file',
+            'filename': os.path.join(BASE_DIR, 'snip_debug.log'),
+            'maxBytes': 1024*1024*20, # Logfile size: 20MB
+        }
+    },
+    'root': {
+        'level': 'DEBUG',
+        'handlers': ['console', 'file']
+    },
+    'loggers': {
+        'django': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'file']
+        }
+    }
+}
