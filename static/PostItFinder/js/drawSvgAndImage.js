@@ -24,7 +24,7 @@
  * @todo - add code to final else{} clause - may be better to handle in Django?
  * @todo - factor out some of the functionality into other functions?
  */
-function previewImage(imgID, fileDataKey, fileNameKey, input) {
+function previewImage(imgID, fileData, input) {
     // case 1: user selects a file using input
     if (input !== undefined && input.files && input.files[0]) { 
         const reader = new FileReader();
@@ -36,21 +36,17 @@ function previewImage(imgID, fileDataKey, fileNameKey, input) {
                 $('#' + imgID).attr('src', this.src);
                 $('#' + imgID).prop('alt', input.files[0].name);
                 // send the image data to the server as an AJAX POST request
-                const b64start = this.src.indexOf(",") + 1;
-                sendImageDataToServer(this.src.slice(b64start));
-            }
-            sessionStorage.setItem(fileDataKey, myFile.target.result);
-            sessionStorage.setItem(fileNameKey, input.files[0].name);            
+                sendImageDataToServer(this.src, input.files[0].name);
+            }                       
         };
 
         reader.readAsDataURL(input.files[0]);
     } 
     else {
-        const storedImg = sessionStorage.getItem(fileDataKey);
-        // case 2: user has previously selected a file 
-        if (storedImg) {        
-            $('#' + imgID).attr('src', storedImg);
-            $('#' + imgID).prop('alt', sessionStorage.getItem(fileNameKey));
+        if (fileData !== undefined && fileData !== null) {
+            // case 2: user has previously selected a file 
+            $('#' + imgID).attr('src', fileData.data);
+            $('#' + imgID).prop('alt', fileData.name);
         }
         // case 3: user has browsed direct to set-regions or later pages (e.g. by
         // typing the URL into the browser directly),so has not selected an image.

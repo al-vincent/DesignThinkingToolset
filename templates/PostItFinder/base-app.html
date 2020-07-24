@@ -91,9 +91,11 @@
 {% block scripts %}
     <!-- pass data to javascript as JSON -->
     {{ config|json_script:"config-id" }}
+    {{ image_data|json_script:"image-data-id" }}
 
     <!-- load JavaScript files -->
     {% load static %}
     <script type="text/javascript" src="{% static 'PostItFinder/js/d3.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'PostItFinder/js/drawAndEditRegions.js' %}"></script>
     <script type="text/javascript" src="{% static 'PostItFinder/js/drawSvgAndImage.js' %}"></script>
 {% endblock %}

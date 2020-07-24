@@ -504,7 +504,7 @@ function rescaleDataToAbsoluteCoords(data, imgWidth, imgHeight) {
 // ================================================================================================
 // AJAX REQUESTS
 // ================================================================================================
-function sendImageDataToServer(imageData){
+function sendImageDataToServer(imageData, imageName){
     
     // ----------
     // This section is from the Django docs, to reduce Cross Site Request Forgeries
@@ -520,7 +520,7 @@ function sendImageDataToServer(imageData){
     // Now make the AJAX POST request and send imageData to the Django server
     $.ajax({     
         type: "POST",
-        data: { "data": imageData },
+        data: { "data": imageData, "name": imageName},
         dataType: "json",
         timeout: 10000,
         beforeSend: function(jqXHR, settings) {
@@ -532,7 +532,6 @@ function sendImageDataToServer(imageData){
     })
     .done(function(returnData) {
         console.log("AJAX RESPONSE SUCCEEDED"); 
-        // deleteRegionsAndRedraw(returnData["data"]);  
     })
     .fail(function(jqXHR) {
         console.log("AJAX RESPONSE FAILED");

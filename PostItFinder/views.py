@@ -55,14 +55,15 @@ def faq(request):
 
 def choose_image(request):
     if request.method == "POST" and request.is_ajax():
-        image_data_b64 = request.POST.get("data", None)
-        print(f"***** AJAX data received: {image_data_b64[0:20]} *****")
-        request.session["image_data"] = image_data_b64
+        image_data = request.POST.get("data", None)
+        image_name = request.POST.get("name", None)
+        logger.info(f"AJAX data received at server: filename={image_name}, filedata={image_data[0:20]}")
+        request.session[settings.IMAGE_KEY] = {"data": image_data, "name": image_name}
         return JsonResponse({"status": "success"}, status=200)
     else:
-        session_data = request.session.get('image_data', ["No session data to view"])
-        if session_data is not None:
-            print(f"***** Session data: {session_data[0:20]} *****")
+        # get session data if available
+        image_data = request.session.get(settings.IMAGE_KEY, None)
+        
         # Update config to include the explanatory text for the home page
         HTML["CHOOSE_IMAGE"]["EXPLAIN_TEXT"]["ID"] = HTML["APP"]["EXPLAIN_TEXT"]["ID"]
 
@@ -85,6 +86,7 @@ def choose_image(request):
             "choose_img_btn": HTML["CHOOSE_IMAGE"]["CHOOSE_IMG_BTN"],
             "image_pane": HTML["APP"]["IMAGE_PANE"],
             "config": CONFIG,
+            "image_data": image_data,
             }
 
         return render(request, PATHS["CHOOSE_IMAGE"], context=context)
@@ -104,6 +106,9 @@ def set_regions(request):
             logger.warning(f"Azure processing unsuccessful, null response sent to client")
             return JsonResponse(processed_data, status=400)
     else:
+        # get session data if available
+        image_data = request.session.get(settings.IMAGE_KEY, None)
+
         # Update config to set the 'active' class for the stepper bar
         for step in HTML["APP"]["STEPPER_BAR"]["ITEMS"]:
             if step["ID"] == "step1-id" or step["ID"] == "step2-id":
@@ -126,6 +131,7 @@ def set_regions(request):
             "prev_btn": HTML["SET_REGIONS"]["PREVIOUS_BTN"],
             "image_pane": HTML["APP"]["IMAGE_PANE"],
             "config": CONFIG,
+            "image_data": image_data
             }
             
         return render(request, PATHS["SET_REGIONS"], context=context)

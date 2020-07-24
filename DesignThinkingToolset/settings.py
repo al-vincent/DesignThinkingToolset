@@ -68,6 +68,7 @@ WSGI_APPLICATION = 'DesignThinkingToolset.wsgi.application'
 # Set session info to write to file, instead of db
 SESSION_ENGINE = 'django.contrib.sessions.backends.file' 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+IMAGE_KEY = "image_info"
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases

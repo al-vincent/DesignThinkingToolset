@@ -8,11 +8,10 @@ let startWidth = 0, startHeight = 0;
 window.onload = function() {    
     // get the contents of the JSON config file
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    const IMAGE_DATA = JSON.parse(document.getElementById("image-data-id").textContent);
 
     // load the image selected by the user in step 1
-    previewImage(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID, 
-        CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_DATA_KEY,
-        CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_NAME_KEY);
+    previewImage(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID, IMAGE_DATA);
     
     // create a wrapper SVG, for other SVG elements to sit inside
     const IMG = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);
