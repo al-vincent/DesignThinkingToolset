@@ -176,7 +176,7 @@ class ObjectDetector:
                 sticky_notes = self.analyse_image()
 
                 if sticky_notes is not None:                
-                    logger.info(f"Receieved response from Azure")
+                    logger.info(f"Received response from Azure")
                 else:
                     logger.error(f"Azure did not process image successfully")
             else:

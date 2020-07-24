@@ -50,7 +50,10 @@ function addClickEventsToButtons(config) {
     findRgnsBtn.onclick = function() { 
         clickFindRegions();
         // NOTE: the line below is *ESSENTIAL*!! It ensures that the AJAX call doesn't 
-        // reload the whole page; it just gets the new data stops there.
+        // reload the whole page; it just gets the new data and stops there.
+        
+        // *** AV: the above applied when using a PSOT request; does it still apply
+        // *** with a GET request?
         return false;
     }
 }

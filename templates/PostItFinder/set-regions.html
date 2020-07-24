@@ -140,8 +140,7 @@
 {% block image_action_buttons %}
   <div class="row pt-2">
     <div class="col-6">
-      <form method="POST" action="">
-        {% csrf_token %}
+      <form method="GET" action="">
         <button id="{{ find_rgns_btn.ID }}" type="submit" class="btn btn-block btn-outline-success">
           {{ find_rgns_btn.TEXT }}
         </button>

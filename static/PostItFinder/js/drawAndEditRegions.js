@@ -344,25 +344,13 @@ function clickAddRegion() {
     catch(err) {
         console.log(err);
         console.error(err.message + "; coords: (" + err.coords[0] + "," + err.coords[1] + ")");
-        // alert(err.message);
     }
 }
 
-function clickFindRegions() {
-    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
-    const FILE_DATA_KEY = CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_DATA_KEY;
-
-    // get the new coordinates and create a data object
+function clickFindRegions() {    
+    // send a GET request to the server for the Azure object detection results
     console.log("Clicked Find Regions");
-
-    try {
-        const imageData = sessionStorage.getItem(FILE_DATA_KEY);
-        const b64start = imageData.indexOf(",") + 1;        
-        sendImageDataToServer(imageData.slice(b64start));
-    }
-    catch(err) {
-        console.error(err);
-    }    
+    getRegionDataFromServer();   
 }
 // ================================================================================================
 // CUSTOM EXCEPTIONS
@@ -530,7 +518,7 @@ function sendImageDataToServer(imageData, imageName){
             }
         }
     })
-    .done(function(returnData) {
+    .done(function() {
         console.log("AJAX RESPONSE SUCCEEDED"); 
     })
     .fail(function(jqXHR) {
@@ -542,7 +530,37 @@ function sendImageDataToServer(imageData, imageName){
         console.log("Ready state: " + jqXHR.readyState);
 
         if(jqXHR.statusText === "timeout") {
-            alert("The request timed out");
+            alert("The request timed out; please try again.");
+        }
+    }) 
+}
+
+function getRegionDataFromServer(){
+    /** 
+     * NOTE: a GET request doesn't require CSRF protection, so the Django 
+     * boilerplate used above is removed here.
+    */    
+
+    // Make the AJAX POST request and send imageData to the Django server
+    $.ajax({     
+        type: "GET",
+        dataType: "json",
+        timeout: 20000  // Longer timeout as dependent on Azure response time
+    })
+    .done(function(returnData) {
+        console.log("AJAX RESPONSE SUCCEEDED"); 
+        deleteRegionsAndRedraw(returnData["data"]); 
+    })
+    .fail(function(jqXHR) {
+        console.log("AJAX RESPONSE FAILED");
+        console.log("Status: " +  jqXHR.status);
+        console.log("Status text: " + jqXHR.statusText);
+        console.log("Response type: " + jqXHR.responseType);
+        console.log("Response text: " + jqXHR.responseText);
+        console.log("Ready state: " + jqXHR.readyState);
+
+        if(jqXHR.statusText === "timeout") {
+            alert("The request timed out. The Azure server may be experiencing issues; please try again later.");
         }
     }) 
 }
