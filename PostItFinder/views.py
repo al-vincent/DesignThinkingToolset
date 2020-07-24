@@ -57,8 +57,12 @@ def choose_image(request):
     if request.method == "POST" and request.is_ajax():
         image_data_b64 = request.POST.get("data", None)
         print(f"***** AJAX data received: {image_data_b64[0:20]} *****")
+        request.session["image_data"] = image_data_b64
         return JsonResponse({"status": "success"}, status=200)
     else:
+        session_data = request.session.get('image_data', ["No session data to view"])
+        if session_data is not None:
+            print(f"***** Session data: {session_data[0:20]} *****")
         # Update config to include the explanatory text for the home page
         HTML["CHOOSE_IMAGE"]["EXPLAIN_TEXT"]["ID"] = HTML["APP"]["EXPLAIN_TEXT"]["ID"]
 

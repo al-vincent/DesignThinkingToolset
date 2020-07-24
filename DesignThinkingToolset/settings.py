@@ -62,6 +62,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'DesignThinkingToolset.wsgi.application'
 
+# Sessions
+# https://docs.djangoproject.com/en/3.0/topics/http/sessions/ 
+
+# Set session info to write to file, instead of db
+SESSION_ENGINE = 'django.contrib.sessions.backends.file' 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
