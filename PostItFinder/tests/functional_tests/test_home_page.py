@@ -11,7 +11,7 @@ from PostItFinder.tests.functional_tests import base
 # =========================================================================================
 # STATIC TESTS
 # =========================================================================================
-class ChooseImagePageStaticTests(base.StaticTests):
+class HomePageStaticTests(base.StaticTests):
     """
     Tests to check whether the main page elements exist and render correctly when the 
     user first browses to the page.
@@ -92,7 +92,7 @@ class ChooseImagePageStaticTests(base.StaticTests):
 # =========================================================================================
 # DYNAMIC TESTS
 # =========================================================================================
-class ChooseImagePageDynamicTests(base.DynamicTests):
+class HomePageDynamicTests(base.DynamicTests):
     """
     Tests to check whether the interactive elements of the page work as expected; e.g. button-
     clicks, selections etc.
@@ -131,11 +131,6 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         self.assertEqual(self.browser.current_url, base_url + reverse(page["URL"]))
 
     # -------------------------------------------------------------------------------------
-    # Stepper bar tests
-    # -------------------------------------------------------------------------------------
-    # None
-
-    # -------------------------------------------------------------------------------------
     # Explanatory text tests
     # -------------------------------------------------------------------------------------
     # None
@@ -148,3 +143,25 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         self.browser.find_element_by_id(base.ELEMS["HOME"]["START_BTN"]["ID"]).click()
         expected_url = reverse(base.ELEMS["HOME"]["START_BTN"]["URL"])
         self.assertEqual(self.browser.current_url, base_url + expected_url)
+
+class HomePageExceptionTests(base.ExceptionTests):
+    """
+    These dynamic tests inherit from a slightly different class, as they
+    need some extra options configured.
+    """
+ 
+    def test_clicking_start_with_cookies_disabled_fires_alert(self):
+        from selenium.webdriver.support.ui import WebDriverWait
+        from selenium.webdriver.support import expected_conditions as EC
+        from selenium.common.exceptions import TimeoutException
+
+        # click the Start button
+        self.browser.find_element_by_id(base.ELEMS["HOME"]["START_BTN"]["ID"]).click()
+
+        try: 
+            WebDriverWait(self.browser, 3).until(EC.alert_is_present(),
+                                   "Timed out waiting for alert to appear.")
+            alert = self.browser.switch_to.alert
+            alert.accept()            
+        except TimeoutException:
+            self.fail("ERROR - alert was not fired")

@@ -7,7 +7,9 @@
  * i.e. freestanding and callable from 'driver' files.
  ****************************************************************************************************/
 
+
 "use strict";
+
 
 /**
  * Displays an image selected by a user from the local filesystem via an 
@@ -24,30 +26,29 @@
  * @todo - add code to final else{} clause - may be better to handle in Django?
  * @todo - factor out some of the functionality into other functions?
  */
-function previewImage(imgID, fileDataKey, fileNameKey, input) {
+function previewImage(imgID, fileData, input) {
     // case 1: user selects a file using input
     if (input !== undefined && input.files && input.files[0]) { 
         const reader = new FileReader();
         reader.onload = function(myFile) {            
             const img = new Image();
-            img.src = myFile.target.result;            
+            img.src = myFile.target.result;
 
             img.onload = function() {
                 $('#' + imgID).attr('src', this.src);
                 $('#' + imgID).prop('alt', input.files[0].name);
-            }
-            sessionStorage.setItem(fileDataKey, myFile.target.result);
-            sessionStorage.setItem(fileNameKey, input.files[0].name);
+                // send the image data to the server as an AJAX POST request
+                sendDataToServer({"data": this.src, "name": input.files[0].name}, 10000);
+            }                       
         };
 
         reader.readAsDataURL(input.files[0]);
     } 
     else {
-        const storedImg = sessionStorage.getItem(fileDataKey);
-        // case 2: user has previously selected a file 
-        if (storedImg) {        
-            $('#' + imgID).attr('src', storedImg);
-            $('#' + imgID).prop('alt', sessionStorage.getItem(fileNameKey));
+        if (fileData !== undefined && fileData !== null) {
+            // case 2: user has previously selected a file 
+            $('#' + imgID).attr('src', fileData.data);
+            $('#' + imgID).prop('alt', fileData.name);
         }
         // case 3: user has browsed direct to set-regions or later pages (e.g. by
         // typing the URL into the browser directly),so has not selected an image.

@@ -1,6 +1,8 @@
 from selenium import webdriver
+
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.conf import settings
+
 import os
 from json import load
 import time
@@ -20,7 +22,7 @@ with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r
     PATHS = CONFIG["PATHS"]
     CONST = CONFIG["CONSTANTS"]
 
-def get_webdriver():
+def get_webdriver(no_cookies=False):
     """
     Choose the webdriver to use, based on the test environment.
     Chromedriver is fast and effective on Windows / local machine, but *very* fiddly to set
@@ -30,10 +32,26 @@ def get_webdriver():
     if 'BUILD_ENV' in os.environ:
         from selenium.webdriver.firefox.options import Options
         options = Options()
-        # options.add_argument('-headless')
-        return webdriver.Firefox(firefox_options=options)
+        options.add_argument('-headless')
+
+        # this and the below temporarily block all cookies in the browser. 
+        # Taken from https://stackoverflow.com/a/32381986
+        if no_cookies:
+            fp = webdriver.FirefoxProfile()
+            fp.set_preference("network.cookie.cookieBehavior", 2)
+        return webdriver.Firefox(firefox_options=options, firefox_profile=fp)
     else:
-        return webdriver.Chrome()
+        if no_cookies:
+            co = webdriver.ChromeOptions()
+            co.add_experimental_option("prefs", {"profile.default_content_setting_values.cookies": 2})
+            return  webdriver.Chrome(chrome_options=co)
+        else:
+            return webdriver.Chrome()
+
+def get_image_file_path(file_name):
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
+    return os.path.join(test_path, "resources", "test_images", file_name)
 
 def navigate_to_choose_image_page(browser):
     # click on the home page Start button
@@ -50,9 +68,7 @@ def navigate_to_set_regions_page(browser):
     # get the input elements and update with the file path
     input_elem = browser.find_element_by_id(input_id)
     # the below is a bit convoluted, but should guarantee that the images are found correctly
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
-    image_path = os.path.join(test_path, "resources", "test_images", IMG_FILE)
+    image_path = get_image_file_path(IMG_FILE)
     input_elem.send_keys(image_path)
 
     # wait a few seconds for the image to render
@@ -186,3 +202,26 @@ class DynamicTests(StaticLiveServerTestCase):
 
     #     # wait for the new page to render
     #     time.sleep(2)
+
+# -----------------------------------------------------------------------------------------
+
+class ExceptionTests(StaticLiveServerTestCase):
+    """
+    These dynamic tests cannot use the standard boilerplate setUp and tearDown
+    form base.py, as they need some extra options configured.
+    """
+        
+    def setUp(self):
+        """
+        Set options
+        """        
+        self.browser = get_webdriver(no_cookies=True)
+        self.browser.get(self.live_server_url)
+
+        # Cornelius opens the homepage
+    
+    def tearDown(self):
+        """
+        Close down the browser.
+        """
+        self.browser.quit()

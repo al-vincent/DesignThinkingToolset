@@ -1,5 +1,6 @@
 "use strict";
 
+
 // AFAIK, the *only* way to do the resize correctly is to use variables with 
 // global scope :-(  
 // [Could potentially use sessionStorage or similar, but that's surely overkill]
@@ -8,11 +9,10 @@ let startWidth = 0, startHeight = 0;
 window.onload = function() {    
     // get the contents of the JSON config file
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    const IMAGE_DATA = JSON.parse(document.getElementById("image-data-id").textContent);
 
     // load the image selected by the user in step 1
-    previewImage(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID, 
-        CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_DATA_KEY,
-        CONFIG.HTML.APP.IMAGE_PANE.IMAGE.FILE_NAME_KEY);
+    previewImage(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID, IMAGE_DATA);
     
     // create a wrapper SVG, for other SVG elements to sit inside
     const IMG = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);
@@ -51,7 +51,10 @@ function addClickEventsToButtons(config) {
     findRgnsBtn.onclick = function() { 
         clickFindRegions();
         // NOTE: the line below is *ESSENTIAL*!! It ensures that the AJAX call doesn't 
-        // reload the whole page; it just gets the new data stops there.
+        // reload the whole page; it just gets the new data and stops there.
+        
+        // *** AV: the above applied when using a PSOT request; does it still apply
+        // *** with a GET request?
         return false;
     }
 }

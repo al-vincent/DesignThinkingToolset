@@ -62,6 +62,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'DesignThinkingToolset.wsgi.application'
 
+# Sessions
+# https://docs.djangoproject.com/en/3.0/topics/http/sessions/ 
+
+# Set session info to write to file, instead of db
+SESSION_ENGINE = 'django.contrib.sessions.backends.file' 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+IMAGE_KEY = "image_info"
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
@@ -165,12 +172,12 @@ LOGGING = {
         }
     },
     'root': {
-        'level': 'DEBUG',
+        'level': 'INFO',
         'handlers': ['console', 'file']
     },
     'loggers': {
         'django': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'handlers': ['console', 'file']
         }
     }

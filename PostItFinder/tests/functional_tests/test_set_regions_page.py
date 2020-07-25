@@ -217,7 +217,8 @@ class SetRegionsPageStaticTests(base.StaticTests):
         src = img.get_attribute("src")
 
         # get the sam UTF-8 string from the original image.        
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', base.IMG_FILE)
+        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', base.IMG_FILE)
+        path = base.get_image_file_path(base.IMG_FILE)
         with open(path, "rb") as f:
             b64_encoded_img = base64.b64encode(f.read())
             b64_msg = b64_encoded_img.decode('utf-8')
@@ -945,8 +946,9 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         src_string = img.get_attribute("src")
 
-        # get the sam UTF-8 string from the original image.        
-        path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', base.IMG_FILE)
+        # get the same UTF-8 string from the original image.        
+        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', base.IMG_FILE)
+        path = base.get_image_file_path(base.IMG_FILE)
         with open(path, "rb") as f:
             b64_encoded_img = base64.b64encode(f.read())
             b64_msg = b64_encoded_img.decode('utf-8')

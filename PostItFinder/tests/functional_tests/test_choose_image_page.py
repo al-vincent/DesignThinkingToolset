@@ -353,43 +353,6 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         self.assertIn("#", img.get_attribute("src"))
 
-    def test_file_info_put_in_sessionStorage(self):    
-        img_file = "test_jpg.jpg"
-        input_id = base.ELEMS["CHOOSE_IMAGE"]["CHOOSE_IMG_BTN"]["ID"]
-
-        # get the input and label elements
-        input_elem = self.browser.find_element_by_id(input_id)
-        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
-        
-        # update the input directly with the file path
-        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
-        path = os.path.join(test_path, "resources", "test_images", img_file)
-        input_elem.send_keys(path)
-
-        # wait a few seconds for the image to render
-        time.sleep(3)
-
-        # check whether the base64-encoded string of the image held in sessionStorage 
-        # is correct 
-        # encode the image in base64 and convert to utf-8
-        with open(path, "rb") as f:
-            b64_encoded_img = base64.b64encode(f.read())
-            b64_msg = b64_encoded_img.decode('utf-8')
-
-        # get the file encoding from sessionStorage
-        data_key = base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["FILE_DATA_KEY"]
-        script = f"return sessionStorage.getItem('{data_key}');"
-        # compare the two (with short string added to start of python encoding)
-        self.assertEqual(self.browser.execute_script(script), 
-                        f"data:image/jpeg;base64,{b64_msg}")
-
-        # check whether the file name is in sessionStorage
-        name_key = base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["FILE_NAME_KEY"]
-        script = f"return sessionStorage.getItem('{name_key}');"
-        self.assertEqual(self.browser.execute_script(script), img_file)
-
     def test_image_src_updates_correctly(self):
         img_file = "test_jpg.jpg"
         input_id = base.ELEMS["CHOOSE_IMAGE"]["CHOOSE_IMG_BTN"]["ID"]
@@ -408,8 +371,7 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         # wait a few seconds for the image to render
         time.sleep(3)
 
-        # check whether the base64-encoded string of the image held in sessionStorage 
-        # is correct 
+        # check whether the base64-encoded string of the image is correct 
         # encode the image in base64 and convert to utf-8
         with open(path, "rb") as f:
             b64_encoded_img = base64.b64encode(f.read())
@@ -459,14 +421,6 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         
         # compare the string for img2 to the src for the current image
         self.assertEqual(src_string, f"data:image/jpeg;base64,{b64_msg}")
-
-        # get the encoding from sessionStorage
-        data_key = base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["FILE_DATA_KEY"]
-        script = f"return sessionStorage.getItem('{data_key}');"
-
-        # compare the two (with short string added to start of python encoding)
-        self.assertEqual(self.browser.execute_script(script), 
-                        f"data:image/jpeg;base64,{b64_msg}")
 
     # -------------------------------------------------------------------------------------
     # Next button tests
