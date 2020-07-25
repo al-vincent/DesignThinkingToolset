@@ -89,8 +89,10 @@
 {% endblock %}
 
 {% block scripts %}
+    <!-- Inherit from base.html -->
+    {{ block.super }} 
+
     <!-- pass data to javascript as JSON -->
-    {{ config|json_script:"config-id" }}
     {{ image_data|json_script:"image-data-id" }}
 
     <!-- load JavaScript files -->

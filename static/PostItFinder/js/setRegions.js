@@ -1,5 +1,6 @@
 "use strict";
 
+
 // AFAIK, the *only* way to do the resize correctly is to use variables with 
 // global scope :-(  
 // [Could potentially use sessionStorage or similar, but that's surely overkill]

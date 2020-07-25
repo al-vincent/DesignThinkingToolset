@@ -7,7 +7,9 @@
  * i.e. freestanding and callable from 'driver' files.
  ****************************************************************************************************/
 
+
 "use strict";
+
 
 /**
  * Displays an image selected by a user from the local filesystem via an 
@@ -36,7 +38,7 @@ function previewImage(imgID, fileData, input) {
                 $('#' + imgID).attr('src', this.src);
                 $('#' + imgID).prop('alt', input.files[0].name);
                 // send the image data to the server as an AJAX POST request
-                sendImageDataToServer(this.src, input.files[0].name);
+                sendDataToServer({"data": this.src, "name": input.files[0].name}, 10000);
             }                       
         };
 

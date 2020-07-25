@@ -127,6 +127,10 @@
                 "ID": "start-btn-id",
                 "TEXT": "START",
                 "URL": "PostItFinder:choose_image"
+            },
+            "ERROR_MESSAGE": {
+                "ID": "error-message-id",
+                "TEXT": "Cookies are not enabled on your browser. The app won't work without them; please enable cookies and try again."
             }
         },
         "ABOUT": {

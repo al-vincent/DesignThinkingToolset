@@ -7,6 +7,9 @@
  ****************************************************************************************************/
 
 
+"use strict";
+
+
 // ================================================================================================
 // CREATE AND DESTROY REGIONS
 // ================================================================================================
@@ -492,7 +495,9 @@ function rescaleDataToAbsoluteCoords(data, imgWidth, imgHeight) {
 // ================================================================================================
 // AJAX REQUESTS
 // ================================================================================================
-function sendImageDataToServer(imageData, imageName){
+
+
+function sendDataToServer(data, timeout){
     
     // ----------
     // This section is from the Django docs, to reduce Cross Site Request Forgeries
@@ -508,9 +513,9 @@ function sendImageDataToServer(imageData, imageName){
     // Now make the AJAX POST request and send imageData to the Django server
     $.ajax({     
         type: "POST",
-        data: { "data": imageData, "name": imageName},
+        data: data,
         dataType: "json",
-        timeout: 10000,
+        timeout: timeout,
         beforeSend: function(jqXHR, settings) {
             // if not safe, set csrftoken
             if (!csrfSafeMethod(settings.type) && !this.crossDomain) {               

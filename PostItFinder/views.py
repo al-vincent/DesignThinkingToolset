@@ -75,7 +75,8 @@ def index(request):
         "title": HTML["HOME"]["TITLE"],
         "navbar": HTML["BASE"]["NAVBAR"],
         "home_content": "Home page",
-        "start_btn": HTML["HOME"]["START_BTN"]
+        "start_btn": HTML["HOME"]["START_BTN"],
+        "config": CONFIG,
         }
 
     return render(request, PATHS["HOME"], context=context)
@@ -97,7 +98,7 @@ def faq(request):
     return render(request, PATHS["FAQ"], context=context)
 
 def choose_image(request):
-    if request.method == "POST" and request.is_ajax():
+    if request.is_ajax() and request.method == "POST":
         set_session_data(request)
         return JsonResponse({"status": "success"}, status=200)
     else:

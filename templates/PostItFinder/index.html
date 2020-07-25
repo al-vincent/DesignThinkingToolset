@@ -6,11 +6,18 @@
     {{ home_content }}
     <div class="row">
         <div class="mx-auto">
-            <div class="col-4">
+            <div class="col-4">                
                 <a id="{{ start_btn.ID}}" href="{% url start_btn.URL %}" role="button" class="btn btn-success btn-lg rounded-circle">
                     <p class="display-4">{{ start_btn.TEXT }}</p>
                 </a>
             </div>        
         </div>
     </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }} 
+    
+    {% load static %}
+    <script type="text/javascript" src="{% static 'PostItFinder/js/index.js' %}"></script>
 {% endblock %}
