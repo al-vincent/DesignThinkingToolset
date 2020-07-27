@@ -350,11 +350,7 @@ function clickAddRegion() {
     }
 }
 
-function clickFindRegions() {    
-    // send a GET request to the server for the Azure object detection results
-    console.log("Clicked Find Regions");
-    getRegionDataFromServer();   
-}
+
 // ================================================================================================
 // CUSTOM EXCEPTIONS
 // ================================================================================================
