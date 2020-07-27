@@ -155,6 +155,15 @@
   </div>
 {% endblock %}
 
+{% block next_button %}
+  <form method="POST" action="">
+    {% csrf_token %}
+    <a id="{{ next_btn.ID}}" href="{% url next_btn.URL %}" role="button" class="btn btn-success btn-lg rounded-circle">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </form>
+{% endblock%}
+
 {% block scripts %}
   {{ block.super }}
 

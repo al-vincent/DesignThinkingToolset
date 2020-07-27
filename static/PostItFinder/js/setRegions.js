@@ -49,12 +49,24 @@ function addClickEventsToButtons(config) {
     // Add click event to the Find Regions button
     const findRgnsBtn = document.getElementById(config.HTML.SET_REGIONS.FIND_REGIONS_BTN.ID);
     findRgnsBtn.onclick = function() { 
-        clickFindRegions();
+        getRegionDataFromServer();
         // NOTE: the line below is *ESSENTIAL*!! It ensures that the AJAX call doesn't 
         // reload the whole page; it just gets the new data and stops there.
         
         // *** AV: the above applied when using a PSOT request; does it still apply
         // *** with a GET request?
         return false;
+    }
+
+    // Add click event to the Next anchor tag
+    const nextBtn = document.getElementById(config.HTML.APP.NEXT_BTN.ID);
+    nextBtn.onclick = function() {
+        // get region data as object array
+        const data = d3.selectAll("." + config.CONSTANTS.CLASSES.REGION).data();
+        // send region data to server as AJAX POST request
+        sendDataToServer({"data": JSON.stringify(data)}, 10000);
+        console.log(data);
+
+        return true;
     }
 }

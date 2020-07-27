@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 # ================================================================================================
 # HELPER FUNCTIONS
 # ================================================================================================
-def set_session_data(request):
+def set_session_image_data(request):
     image_data = request.POST.get("data", None)
     image_name = request.POST.get("name", None)
 
@@ -39,6 +39,16 @@ def set_session_data(request):
         logger.error(f"Data sent from client does not contain the 'name' key")
         
     request.session[settings.IMAGE_KEY] = {"data": image_data, "name": image_name}
+
+def set_session_region_data(request):
+    regions = request.POST.get("data", None)
+
+    logger.info(f"AJAX POST data received at server: regions={regions}")
+    
+    if regions is None: 
+        logger.info(f"Data sent from client does not contain the 'data' key - no regions selected?")
+        
+    request.session[settings.REGION_KEY] = regions
     
 def get_regions(input_str):
     if input_str is not None:
@@ -99,7 +109,7 @@ def faq(request):
 
 def choose_image(request):
     if request.is_ajax() and request.method == "POST":
-        set_session_data(request)
+        set_session_image_data(request)
         return JsonResponse({"status": "success"}, status=200)
     else:
         # get session data if available
@@ -141,6 +151,10 @@ def set_regions(request):
         else:
             logger.warning(f"Azure processing unsuccessful, null response sent to client")
             return JsonResponse(processed_data, status=400)
+    elif request.is_ajax() and request.method == "POST":
+        logger.info(f"AJAX POST request received at server")        
+        set_session_region_data(request)
+        return JsonResponse({"status": "success"}, status=200)
     else:
         # Update config to set the 'active' class for the stepper bar
         stepper_bar = get_stepper_bar_active_states(2)
