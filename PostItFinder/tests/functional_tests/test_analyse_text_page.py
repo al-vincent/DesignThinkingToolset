@@ -35,9 +35,10 @@ class DynamicTests(base.DynamicTests):
         super().setUp()
         base.navigate_to_analyse_text_page(self.browser)
 
-    # -------------------------------------------------------------------------------------
-    # Page tests
-    # -------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
+# Page tests
+# -------------------------------------------------------------------------------------
+class TestPage(DynamicTests):
     def test_page_uses_app_template(self):
         """
         Check that the app uses the set-regions.html template.
@@ -59,9 +60,10 @@ class DynamicTests(base.DynamicTests):
     #     """
     #     pass
     
-    # -------------------------------------------------------------------------------------
-    # Navbar tests
-    # -------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
+# Navbar tests
+# -------------------------------------------------------------------------------------
+class TestNavbar(DynamicTests):
     def test_navbar_is_displayed(self):
         navbar = self.browser.find_element_by_id(base.ELEMS["BASE"]["NAVBAR"]["ID"])
         self.assertTrue(navbar.is_displayed())
@@ -97,9 +99,10 @@ class DynamicTests(base.DynamicTests):
         page_elem = self.browser.find_element_by_id(page["ID"]).click()
         self.assertEqual(self.browser.current_url, base_url + reverse(page["URL"]))
     
-    # -------------------------------------------------------------------------------------
-    # Stepper bar tests
-    # -------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
+# Stepper bar tests
+# -------------------------------------------------------------------------------------
+class TestStepperBar(DynamicTests):
     def test_stepper_bar_is_displayed(self):
         stepper = self.browser.find_element_by_id(base.ELEMS["APP"]["STEPPER_BAR"]["ID"])
         self.assertTrue(stepper.is_displayed())
@@ -142,9 +145,10 @@ class DynamicTests(base.DynamicTests):
             else:
                 self.assertNotIn("active", step.get_attribute("class"))
 
-    # -------------------------------------------------------------------------------------
-    # Explanatory text tests
-    # -------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
+# Explanatory text tests
+# -------------------------------------------------------------------------------------
+class TestExplanatoryText(DynamicTests):
     def test_intro_text_is_displayed(self):
         intro_id = base.ELEMS["ANALYSE_TEXT"]["EXPLAIN_TEXT"]["INTRO"]["ID"]
         intro_txt = self.browser.find_element_by_id(intro_id)
@@ -183,22 +187,24 @@ class DynamicTests(base.DynamicTests):
 
         # check that the modal is no longer displayed
         self.assertFalse(modal.is_displayed())
-    
-    # -------------------------------------------------------------------------------------
-    # Analyse Text button tests
-    # -------------------------------------------------------------------------------------
-    # def test_find_regions_button_is_displayed(self):
-    #     find_rgns_btn = self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"])
-    #     self.assertTrue(find_rgns_btn.is_displayed())
 
-    # def test_add_region_button_is_enabled(self):
-    #     find_rgns_btn = self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"])
-    #     self.assertTrue(find_rgns_btn.is_enabled())
 
-    # def test_add_region_button_has_correct_text(self):
-    #     find_rgns_btn = self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"])
-    #     intended_text = base.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["TEXT"]
-    #     self.assertEqual(find_rgns_btn.get_attribute("innerText"), intended_text)
+# -------------------------------------------------------------------------------------
+# Analyse Text button tests
+# -------------------------------------------------------------------------------------
+class TestAnalyseTextButton(DynamicTests):
+    def test_analyse_text_button_is_displayed(self):
+        analyse_txt_btn = self.browser.find_element_by_id(base.ELEMS["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"]["ID"])
+        self.assertTrue(analyse_txt_btn.is_displayed())
+
+    def test_analyse_text_button_is_enabled(self):
+        analyse_txt_btn = self.browser.find_element_by_id(base.ELEMS["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"]["ID"])
+        self.assertTrue(analyse_txt_btn.is_enabled())
+
+    def test_analyse_text_button_has_correct_text(self):
+        analyse_txt_btn = self.browser.find_element_by_id(base.ELEMS["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"]["ID"])
+        intended_text = base.ELEMS["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"]["TEXT"]
+        self.assertEqual(analyse_txt_btn.get_attribute("innerText"), intended_text)
 
     # def test_find_regions_button_gets_correct_region(self):
     #     # click the Find Regions button
