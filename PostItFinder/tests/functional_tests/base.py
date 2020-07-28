@@ -1,4 +1,7 @@
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.conf import settings
@@ -8,12 +11,15 @@ from json import load
 import time
 
 
+# -----------------------------------------------------------------------------------------
+# CONSTANTS
+# -----------------------------------------------------------------------------------------
+
+# set the maximum waiting time
+MAX_WAIT = 30
+
 # arbitrarily use test_png.png as our setup image throughout
 IMG_FILE = "test_jpg.jpg"
-
-# -----------------------------------------------------------------------------------------
-# HELPER FUNCTIONS
-# -----------------------------------------------------------------------------------------
 
 # read in config vars
 with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r") as f:
@@ -21,6 +27,10 @@ with open(os.path.join(settings.STATIC, 'PostItFinder', 'js', 'config.json'), "r
     ELEMS = CONFIG["HTML"]
     PATHS = CONFIG["PATHS"]
     CONST = CONFIG["CONSTANTS"]
+
+# -----------------------------------------------------------------------------------------
+# HELPER FUNCTIONS
+# -----------------------------------------------------------------------------------------
 
 def get_webdriver(no_cookies=False):
     """
@@ -75,12 +85,22 @@ def navigate_to_set_regions_page(browser):
     time.sleep(2)
 
     # click the Next button
-    nxt_btn = browser.find_element_by_id(ELEMS["APP"]["NEXT_BTN"]["ID"])
-    nxt_btn.click()
+    browser.find_element_by_id(ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
+    
+def navigate_to_analyse_text_page(browser):
+    # navigate to the set-regions page
+    navigate_to_set_regions_page(browser)
 
-    # wait for the new page to render
-    time.sleep(2)
+    # add a single region, via the Add Regions button
+    browser.find_element_by_id(ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
+    # wait for the results to be returned
+    WebDriverWait(browser, MAX_WAIT).until(
+        EC.visibility_of_element_located((By.CLASS_NAME, CONST["CLASSES"]["REGION"]))
+    )
+
+    # click the Next button
+    browser.find_element_by_id(ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
 
 
 # -----------------------------------------------------------------------------------------

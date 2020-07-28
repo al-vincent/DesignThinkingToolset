@@ -2,6 +2,61 @@
 
 {% block title %}{{ title }}{% endblock %}
 
-{% block image_action_buttons %}
-  
+{% block explain_text %}
+  <!-- ocr intro paragraph -->
+  <div class="row">
+    <div class="col-lg-2"></div>
+    <div id="{{ explain_text.INTRO.ID }}" class="col-12 col-lg-8 lead">
+      <p>
+        Next, find text in the image and 
+        <a id="{{ explain_text.INTRO.MODAL_ID }}" href="#{{ explain_text.OCR_MODAL.ID }}" data-toggle="modal" data-target="#{{ explain_text.OCR_MODAL.ID }}">
+        <b>extract it</b></a>. All words in the same region will be grouped together; text 
+        not in a region will be discovered and grouped where possible.
+      </p>
+    </div>
+    <div class="col-lg-2"></div>
+  </div>
+  <!-- /ocr intro paragraph -->
+
+  <!-- ocr modal window -->
+  <div id="{{ explain_text.OCR_MODAL.ID }}" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Text Discovery and Analysis</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>
+            Text is discovered and analysed using a Machine Learning technique
+            called <b>Optical Character Recognition (OCR)</b>.
+          </p>
+
+          <p>
+            OCR looks in an image for any shapes that look like letters, and extracts 
+            them. It then groups letters into words if they're close together in the 
+            image, and groups words into sentences.
+          </p>
+
+          <p>
+            OCR is good at finding and analysing text, but it's not perfect. It may 
+            get some words wrong, and even miss some words altogether. 
+          </p>
+
+          <p>
+            For this 
+            reason, it's important to check the results against the original image.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button id="{{ explain_text.OCR_MODAL.CLOSE_ID }}" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /ocr modal window -->
 {% endblock %}
+
+{% block image_action_buttons %}{% endblock %}

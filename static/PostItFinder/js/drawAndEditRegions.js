@@ -546,7 +546,7 @@ function getRegionDataFromServer(){
     $.ajax({     
         type: "GET",
         dataType: "json",
-        timeout: 20000  // Longer timeout as dependent on Azure response time
+        timeout: 30000  // Longer timeout as dependent on Azure response time
     })
     .done(function(returnData) {
         console.log("AJAX RESPONSE SUCCEEDED"); 

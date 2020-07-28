@@ -11,7 +11,7 @@ from PostItFinder.tests.functional_tests import base
 # =========================================================================================
 # STATIC TESTS
 # =========================================================================================
-class HomePageStaticTests(base.StaticTests):
+class StaticTests(base.StaticTests):
     """
     Tests to check whether the main page elements exist and render correctly when the 
     user first browses to the page.
@@ -41,7 +41,7 @@ class HomePageStaticTests(base.StaticTests):
         """
         Ensure that the page title includes the correct text.
         """
-        self.assertIn(base.ELEMS["TITLE"], self.browser.title)
+        self.assertEqual(base.ELEMS["HOME"]["TITLE"], self.browser.title)
     
     # -------------------------------------------------------------------------------------
     # Navbar tests
@@ -92,7 +92,7 @@ class HomePageStaticTests(base.StaticTests):
 # =========================================================================================
 # DYNAMIC TESTS
 # =========================================================================================
-class HomePageDynamicTests(base.DynamicTests):
+class DynamicTests(base.DynamicTests):
     """
     Tests to check whether the interactive elements of the page work as expected; e.g. button-
     clicks, selections etc.
@@ -144,7 +144,7 @@ class HomePageDynamicTests(base.DynamicTests):
         expected_url = reverse(base.ELEMS["HOME"]["START_BTN"]["URL"])
         self.assertEqual(self.browser.current_url, base_url + expected_url)
 
-class HomePageExceptionTests(base.ExceptionTests):
+class ExceptionTests(base.ExceptionTests):
     """
     These dynamic tests inherit from a slightly different class, as they
     need some extra options configured.
