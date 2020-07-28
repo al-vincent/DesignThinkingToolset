@@ -181,22 +181,26 @@ def set_regions(request):
 
 def analyse_text(request):
 
-    # Update config to set the 'active' class for the stepper bar
-    stepper_bar = get_stepper_bar_active_states(3)
+    if request.is_ajax() and request.method == "GET": 
+        return JsonResponse({"status": "SUCCESS"})
+    else:
+        # Update config to set the 'active' class for the stepper bar
+        stepper_bar = get_stepper_bar_active_states(3)
+        
+        context = {
+            "title": HTML["ANALYSE_TEXT"]["TITLE"],
+            "navbar": HTML["BASE"]["NAVBAR"],
+            "stepper": stepper_bar,
+            "explain_text": HTML["ANALYSE_TEXT"]["EXPLAIN_TEXT"],
+            "next_btn": HTML["APP"]["NEXT_BTN"],
+            "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
+            "analyse_txt_btn": HTML["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"],
+            "image_pane": HTML["APP"]["IMAGE_PANE"],
+            "config": CONFIG,
+            "image_data": request.session.get(settings.IMAGE_KEY, None),
+            "region_data": request.session.get(settings.REGION_KEY, None),
+            }
 
-
-
-    context = {
-        "title": HTML["ANALYSE_TEXT"]["TITLE"],
-        "navbar": HTML["BASE"]["NAVBAR"],
-        "stepper": stepper_bar,
-        "explain_text": HTML["ANALYSE_TEXT"]["EXPLAIN_TEXT"],
-        "next_btn": HTML["APP"]["NEXT_BTN"],
-        "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
-        "image_pane": HTML["APP"]["IMAGE_PANE"],
-        "config": CONFIG,
-        }
-
-    return render(request, PATHS["ANALYSE_TEXT"], context=context)
+        return render(request, PATHS["ANALYSE_TEXT"], context=context)
     
 

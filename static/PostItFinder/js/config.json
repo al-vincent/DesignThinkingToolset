@@ -5,7 +5,8 @@
         "FAQ": "PostItFinder/faq.html",
         "CHOOSE_IMAGE": "PostItFinder/choose-image.html",
         "SET_REGIONS": "PostItFinder/set-regions.html",
-        "ANALYSE_TEXT": "PostItFinder/analyse-text.html"
+        "ANALYSE_TEXT": "PostItFinder/analyse-text.html",
+        "OUTPUT_RESULTS": "PostItFinder/output-results.html"
     },
     "CONSTANTS":{
         "COLOURS": {
@@ -204,7 +205,21 @@
                     "ID": "ocr-modal-id",
                     "CLOSE_ID": "ocr-modal-close-btn-id"
                 }
+            },
+            "ANALYSE_TEXT_BTN" :{
+                "ID": "analyse-text-btn-id",
+                "TEXT": "Analyse Text"
+            },
+            "PREVIOUS_BTN": {
+                "URL": "PostItFinder:set_regions"
+            },
+            "NEXT_BTN": {
+                "URL": "PostItFinder:output_results"
             }
+        },
+        "OUTPUT_RESULTS": {
+            "URL": "PostItFinder:output_results",
+            "TITLE": "SNIP: Output Results"
         }
     }
 }
