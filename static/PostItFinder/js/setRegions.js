@@ -61,12 +61,9 @@ function addClickEventsToButtons(config) {
     // Add click event to the Next anchor tag
     const nextBtn = document.getElementById(config.HTML.APP.NEXT_BTN.ID);
     nextBtn.onclick = function() {
-        // get region data as object array
+        // get region data, send to server in POST request, browse to next page
         const data = d3.selectAll("." + config.CONSTANTS.CLASSES.REGION).data();
-        // send region data to server as AJAX POST request
         sendDataToServer({"data": JSON.stringify(data)}, 10000);
-        console.log(data);
-
         return true;
     }
 }

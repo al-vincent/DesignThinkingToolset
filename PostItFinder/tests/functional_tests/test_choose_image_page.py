@@ -12,7 +12,7 @@ from PostItFinder.tests.functional_tests import base
 # =========================================================================================
 # STATIC TESTS
 # =========================================================================================
-class ChooseImagePageStaticTests(base.StaticTests):
+class StaticTests(base.StaticTests):
     """
     Tests to check whether the main page elements exist and render correctly when the 
     user first browses to the page.
@@ -49,7 +49,7 @@ class ChooseImagePageStaticTests(base.StaticTests):
         """
         Ensure that the page title includes the correct text.
         """
-        self.assertIn(base.ELEMS["TITLE"], self.browser.title)
+        self.assertEqual(base.ELEMS["CHOOSE_IMAGE"]["TITLE"], self.browser.title)
     
     # -------------------------------------------------------------------------------------
     # Navbar tests
@@ -176,7 +176,7 @@ class ChooseImagePageStaticTests(base.StaticTests):
 # =========================================================================================
 # DYNAMIC TESTS
 # =========================================================================================
-class ChooseImagePageDynamicTests(base.DynamicTests):
+class DynamicTests(base.DynamicTests):
     """
     Tests to check whether the interactive elements of the page work as expected; e.g. button-
     clicks, selections etc.
@@ -392,7 +392,6 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
         input_elem = self.browser.find_element_by_id(input_id)
         img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
-
         current_dir = os.path.dirname(os.path.abspath(__file__))
         test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
 
@@ -402,6 +401,16 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
 
         # short wait to allow image to update
         time.sleep(2)
+
+        # get the src data for the image as a UTF-8 string decoded from base64
+        img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        src_string = img.get_attribute("src")
+
+        with open(path, "rb") as f:
+            b64_encoded_img = base64.b64encode(f.read())
+            b64_msg = b64_encoded_img.decode('utf-8')
+
+        self.assertEqual(src_string, f"data:image/png;base64,{b64_msg}")
 
         # update the input with the file path for img2
         img2 = "test_jpg.jpg"
@@ -453,4 +462,4 @@ class ChooseImagePageDynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     # Previous button tests
     # -------------------------------------------------------------------------------------
-    # None
+    # None; Previous button is not displayed

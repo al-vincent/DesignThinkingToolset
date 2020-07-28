@@ -30,7 +30,7 @@ def set_session_image_data(request):
     image_data = request.POST.get("data", None)
     image_name = request.POST.get("name", None)
 
-    logger.info(f"AJAX POST data received at server: filename={image_name}, filedata={image_data[0:20]}")
+    logger.info(f"AJAX POST data received at server: filename={image_name}, filedata={image_data[0:40]}...")
     
     if image_data is None: 
         logger.critical(f"Data sent from client does not contain the 'data' key - CANNOT CONTINUE!")
@@ -184,11 +184,13 @@ def analyse_text(request):
     # Update config to set the 'active' class for the stepper bar
     stepper_bar = get_stepper_bar_active_states(3)
 
+
+
     context = {
         "title": HTML["ANALYSE_TEXT"]["TITLE"],
         "navbar": HTML["BASE"]["NAVBAR"],
         "stepper": stepper_bar,
-        "explain_text": HTML["APP"]["EXPLAIN_TEXT"],
+        "explain_text": HTML["ANALYSE_TEXT"]["EXPLAIN_TEXT"],
         "next_btn": HTML["APP"]["NEXT_BTN"],
         "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
         "image_pane": HTML["APP"]["IMAGE_PANE"],

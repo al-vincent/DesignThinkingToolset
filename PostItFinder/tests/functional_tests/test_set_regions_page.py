@@ -1,3 +1,6 @@
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.color import Color
@@ -16,7 +19,7 @@ from PostItFinder.tests.functional_tests import base
 # =========================================================================================
 # STATIC TESTS
 # =========================================================================================
-class SetRegionsPageStaticTests(base.StaticTests):
+class StaticTests(base.StaticTests):
     """
     Tests to check whether the main page elements exist and render correctly when the 
     user first browses to the page.
@@ -52,7 +55,7 @@ class SetRegionsPageStaticTests(base.StaticTests):
         """
         Ensure that the page title includes the correct text.
         """
-        self.assertIn(base.ELEMS["TITLE"], self.browser.title)
+        self.assertEqual(base.ELEMS["SET_REGIONS"]["TITLE"], self.browser.title)
     
     # -------------------------------------------------------------------------------------
     # Navbar tests
@@ -230,7 +233,7 @@ class SetRegionsPageStaticTests(base.StaticTests):
 # =========================================================================================
 # DYNAMIC TESTS
 # =========================================================================================
-class SetRegionsPageDynamicTests(base.DynamicTests):
+class DynamicTests(base.DynamicTests):
     """
     Tests to check whether the interactive elements of the page work as expected; e.g. button-
     clicks, selections etc.
@@ -245,7 +248,6 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         """
         # call the 'normal' setUp from the base class
         super().setUp()
-
         base.navigate_to_set_regions_page(self.browser)
     
 
@@ -281,7 +283,7 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     # Stepper bar tests
     # -------------------------------------------------------------------------------------
-    def test_returning_to_home_sets_only_step_one_active(self):
+    def test_returning_to_choose_image_sets_only_step_one_active(self):
         # browse back to the home page
         self.browser.find_element_by_id(base.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
 
@@ -302,8 +304,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         modal_link_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["INTRO"]["MODAL_ID"]
         self.browser.find_element_by_id(modal_link_id).click()
 
-        # add a brief wait
-        time.sleep(2)
+        # wait until the modal is visible
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.ID, 
+                base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["ID"]))
+        )
 
         # check to see if the modal has appeared
         modal_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["ID"]
@@ -314,8 +319,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         modal_close_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["CLOSE_ID"]
         self.browser.find_element_by_id(modal_close_id).click()
 
-        # add a wait to ensure the modal has closed
-        time.sleep(2)
+        # wait until the modal has closed
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.invisibility_of_element_located((By.ID, 
+                base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGIONS_MODAL"]["ID"]))
+        )
 
         # check that the modal is no longer displayed
         self.assertFalse(modal.is_displayed())
@@ -326,8 +334,10 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # click the <a> tag to open the modal
         self.browser.find_element_by_id(ex_txt["REGION_SETTING"]["OD_MODAL_ID"]).click()
 
-        # add a brief wait to ensure the modal has opened
-        time.sleep(2)
+        # wait until the modal is visible
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.ID, ex_txt["OBJ_DET_MODAL"]["ID"]))
+        )
 
         # check to see if the modal has appeared
         modal = self.browser.find_element_by_id(ex_txt["OBJ_DET_MODAL"]["ID"])
@@ -337,7 +347,9 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.browser.find_element_by_id(ex_txt["OBJ_DET_MODAL"]["CLOSE_ID"]).click()
 
         # add a wait to ensure the modal has closed
-        time.sleep(2)
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.invisibility_of_element_located((By.ID, ex_txt["OBJ_DET_MODAL"]["ID"]))
+        )
 
         # check that the modal is no longer displayed
         self.assertFalse(modal.is_displayed())
@@ -347,11 +359,13 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         modal_link_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REGION_SETTING"]["RE_MODAL_ID"]
         self.browser.find_element_by_id(modal_link_id).click()
 
-        # add a brief wait
-        time.sleep(2)
+        modal_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REG_EDIT_MODAL"]["ID"]
+        # wait until the modal has appeared
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.ID, modal_id))
+        )
 
         # check to see if the modal has appeared
-        modal_id = base.ELEMS["SET_REGIONS"]["EXPLAIN_TEXT"]["REG_EDIT_MODAL"]["ID"]
         modal = self.browser.find_element_by_id(modal_id)
         self.assertTrue(modal.is_displayed())
 
@@ -360,7 +374,9 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.browser.find_element_by_id(modal_close_id).click()
 
         # add a wait to ensure the modal has closed
-        time.sleep(2)
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.invisibility_of_element_located((By.ID, modal_id))
+        )
 
         # check that the modal is no longer displayed
         self.assertFalse(modal.is_displayed())
@@ -374,7 +390,10 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.browser.find_element_by_id(find_rgns_id).click()
 
         # add a long sleep, to account for the time taken for Azure to respond
-        time.sleep(10)
+        # wait for the results to be returned
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["REGION"]))
+        )
 
         # if successful, a single region should be created at specific points
         rects = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])  
@@ -410,6 +429,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+
         # we expect 1 x rect element and 2 x circle elements to be created
         rects = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         self.assertEqual(len(rects), 1)
@@ -418,10 +442,14 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.assertEqual(len(circles), 2)
     
     def test_new_region_appears_in_top_left_corner(self):
-        pass
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
         
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+
         # we expect 1 x rect element and 2 x circle elements to be created
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         tl_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
@@ -439,6 +467,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     def test_regions_and_handles_have_correct_classes(self):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
 
         # we expect one element with class 'region' (the region group), and one with class
         # 'handle' (the region-resize handle *group*)
@@ -488,6 +521,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+
         # get the rect element
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
 
@@ -498,6 +536,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     def test_region_colours_are_correct(self):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
 
         # get the three SVG elements
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
@@ -524,6 +567,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+
         # get the three SVG elements
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
@@ -543,6 +591,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     def test_regions_can_be_moved(self):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
 
         # get the three SVG elements
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
@@ -572,6 +625,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+
         # get the three SVG elements
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
@@ -600,6 +658,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+        
         # get the three SVG elements
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
@@ -627,6 +690,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     def test_regions_cannot_be_moved_outside_right_image_bound(self):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
 
         # get the three SVG elements
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
@@ -669,6 +737,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
 
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+
         # get the three SVG elements
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         circles = self.browser.find_elements_by_xpath("//*[local-name()='circle']")
@@ -699,7 +772,12 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     def test_regions_can_be_resized_using_tl_handle(self):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
-        time.sleep(2)
+        
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+
         # get the rect element and the top-left handle
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         tl_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
@@ -724,6 +802,12 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     def test_regions_can_be_resized_using_br_handle(self):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+        
         # get the rect element and the bottom-right handle
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
@@ -744,6 +828,12 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     def test_regions_cannot_be_resized_below_min_using_tl_handle(self):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+        
         # get the rect element and the top-left handle
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         tl_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
@@ -763,6 +853,12 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     def test_regions_cannot_be_resized_below_min_using_br_handle(self):
          # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+        
         # get the rect element and the top-left handle
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
@@ -784,6 +880,12 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     def test_regions_cannot_be_resized_outside_top_image_bound(self):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+        
         # get the rect element and the top-left handle
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         tl_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
@@ -803,6 +905,12 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     def test_regions_cannot_be_resized_outside_left_image_bound(self):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+        
         # get the rect element and the top-left handle
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         tl_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["TOP_LEFT_HANDLE"])
@@ -826,6 +934,12 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
 
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+        
         # get the rect element and the top-left handle
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
@@ -850,6 +964,12 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
     def test_regions_cannot_be_resized_outside_right_image_bound(self):
         # add a new region
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+        
         # get the rect element and the top-left handle
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
@@ -868,8 +988,15 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         self.assertEqual(int(rect.get_attribute("height")), base.CONST["VALUES"]["DEFAULT_RECT_HEIGHT"])
 
     def test_regions_can_be_deleted(self):
-        # add a new region and get the rect element
+        # add a new region 
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
+        
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+        
+        # get the rect element
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
 
         # double-click the rect to delete the region
@@ -890,7 +1017,10 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
 
         # create a new region and get rect, bottom-right handle elements
         self.browser.find_element_by_id(base.ELEMS["SET_REGIONS"]["ADD_REGION_BTN"]["ID"]).click()
-        time.sleep(2)
+        # wait for the region to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
         br_handle = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BOTTOM_RIGHT_HANDLE"])
 
@@ -904,9 +1034,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # change the browser width, height to pre-set values and ensure the window is scrolled-down
         self.browser.set_window_size(1075, 786)
         self.browser.find_element_by_tag_name('body').send_keys(Keys.END)
-        time.sleep(3)
 
         # the original rect is deleted on resize, so get the new one
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
         rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
 
         # check that the region x, y, width, height match to pre-set values
@@ -939,9 +1071,11 @@ class SetRegionsPageDynamicTests(base.DynamicTests):
         # browse back to the home page
         self.browser.find_element_by_id(base.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
         
-        # short wait to ensure the page is rendered
-        time.sleep(2)
-
+        # wait for the page to render
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.title_is(base.ELEMS["CHOOSE_IMAGE"]["TITLE"])
+        )
+        
         # get the src data for the image as a UTF-8 string decoded from base64
         img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         src_string = img.get_attribute("src")
