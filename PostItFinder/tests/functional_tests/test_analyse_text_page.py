@@ -290,25 +290,28 @@ class TestAnalyseTextButton(DynamicTests):
     #     # compare the two strings
     #     self.assertEqual(src_string, f"data:image/jpeg;base64,{b64_msg}")
 
-    # -------------------------------------------------------------------------------------
-    # Preview pane tests
-    # -------------------------------------------------------------------------------------
-    # def test_image_pane_exists(self):
-    #     img_pane = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
-    #     self.assertTrue(img_pane)
+# -------------------------------------------------------------------------------------
+# Image pane tests
+# -------------------------------------------------------------------------------------
+class TestImagePane(DynamicTests):
+    def test_image_pane_exists(self):
+        img_pane = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        self.assertTrue(img_pane)
 
-    # def test_image_pane_contains_correct_image(self):
-    #     img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
-    #     src = img.get_attribute("src")
+    def test_image_pane_contains_correct_image(self):
+        img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        src = img.get_attribute("src")
 
-    #     # get the sam UTF-8 string from the original image.        
-    #     # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', base.IMG_FILE)
-    #     path = base.get_image_file_path(base.IMG_FILE)
-    #     with open(path, "rb") as f:
-    #         b64_encoded_img = base64.b64encode(f.read())
-    #         b64_msg = b64_encoded_img.decode('utf-8')
+        # get the sam UTF-8 string from the original image.                
+        path = base.get_image_file_path(base.IMG_FILE)
+        with open(path, "rb") as f:
+            b64_encoded_img = base64.b64encode(f.read())
+            b64_msg = b64_encoded_img.decode('utf-8')
 
-    #     # compare the two strings
-    #     self.assertEqual(src, f"data:image/jpeg;base64,{b64_msg}")
+        # compare the two strings
+        self.assertEqual(src, f"data:image/jpeg;base64,{b64_msg}")
+    
+    def test_image_pane_renders_region_correctly(self):
+        pass
 
 
