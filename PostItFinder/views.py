@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from PostItFinder.azure_services import ObjectDetector
 
 import os
-from json import load
+from json import load, loads
 import base64
 import logging
 
@@ -27,6 +27,9 @@ logger = logging.getLogger(__name__)
 # HELPER FUNCTIONS
 # ================================================================================================
 def set_session_image_data(request):
+    # clear any regions session data, to prevent crossover between regions
+    request.session[settings.REGION_KEY] = None
+
     image_data = request.POST.get("data", None)
     image_name = request.POST.get("name", None)
 
@@ -41,7 +44,8 @@ def set_session_image_data(request):
     request.session[settings.IMAGE_KEY] = {"data": image_data, "name": image_name}
 
 def set_session_region_data(request):
-    regions = request.POST.get("data", None)
+    # Regions data is stringified in the JS; convert it to a JSON structure
+    regions = loads(request.POST.get("data", None))
 
     logger.info(f"AJAX POST data received at server: regions={regions}")
     
@@ -174,7 +178,8 @@ def set_regions(request):
             "prev_btn": HTML["SET_REGIONS"]["PREVIOUS_BTN"],
             "image_pane": HTML["APP"]["IMAGE_PANE"],
             "config": CONFIG,
-            "image_data": image_data
+            "image_data": image_data,
+            "region_data": request.session.get(settings.REGION_KEY, None),
             }
             
         return render(request, PATHS["SET_REGIONS"], context=context)

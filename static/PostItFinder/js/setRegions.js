@@ -10,6 +10,7 @@ window.onload = function() {
     // get the contents of the JSON config file
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
     const IMAGE_DATA = JSON.parse(document.getElementById("image-data-id").textContent);
+    const REGION_DATA = JSON.parse(document.getElementById("region-data-id").textContent);
 
     // load the image selected by the user in step 1
     previewImage(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID, IMAGE_DATA);
@@ -25,6 +26,14 @@ window.onload = function() {
     startWidth = IMG.clientWidth;
     startHeight = IMG.clientHeight;
     
+    // draw the regions
+    if(REGION_DATA !== null && REGION_DATA !== undefined) {
+        createRegions(svg, REGION_DATA);
+    }
+    else {
+        console.log("No regions found");
+    }
+
     // add click events to buttons
     addClickEventsToButtons(CONFIG);
 }

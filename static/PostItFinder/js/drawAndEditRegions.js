@@ -25,7 +25,7 @@
  * @throws: none.
  * @todo: several variables currently declared via 'let'; should be 'const'?
  */
-function createRegions(svg, data) {
+function createRegions(svg, data, isStatic) {
     // Get constants from config.json
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
     const REGION_CLASS = CONFIG.CONSTANTS.CLASSES.REGION;
@@ -39,11 +39,12 @@ function createRegions(svg, data) {
     const STROKE_COLOUR = CONFIG.CONSTANTS.COLOURS.REGION_EDGE_COLOUR;
 
     // setup drag behaviour for the rectangle part of the region
-    const dragRect = d3.behavior.drag()
+    let dragRect = d3.behavior.drag()
         .origin(function(d) { return d; })
         .on("dragstart", dragStarted)
         .on("drag", dragRegion);
-    
+    if (isStatic) { dragRect = function(){}; }  // do nothing
+
     // setup drag behaviour for the top-left handle
     const dragTopLeftHandle = d3.behavior.drag()
         .origin(function(d) { return d; })
@@ -74,7 +75,7 @@ function createRegions(svg, data) {
                         .attr("stroke", STROKE_COLOUR)
                         .attr("class", REGION_CLASS)
                         .on("dblclick", function() {
-                            deleteRegionGrp(this);
+                            if(!isStatic) { deleteRegionGrp(this); }
                         });
     
     // add the rect element
@@ -82,9 +83,11 @@ function createRegions(svg, data) {
     // handles are a bit trickier; we want to create a new group (so that we can bind 
     // the resize event to both sets of handles), and have two classes of circle in it,
     // one for the handles on the top-left of rects, and one for bottom-right handles.
-    let handleGrp = newGrp.append("g").attr("class", HANDLE_CLASS); 
-    handleGrp.append("circle").attr("class", TOP_LEFT_CLASS);
-    handleGrp.append("circle").attr("class", BOTTOM_RIGHT_CLASS);
+    if(!isStatic) {
+        let handleGrp = newGrp.append("g").attr("class", HANDLE_CLASS); 
+        handleGrp.append("circle").attr("class", TOP_LEFT_CLASS);
+        handleGrp.append("circle").attr("class", BOTTOM_RIGHT_CLASS);
+    }
 
     // set attributes for all the SVG shapes
     grps.select("rect")
@@ -96,21 +99,23 @@ function createRegions(svg, data) {
         .on("click", function(d) { console.log(d); })
         .call(dragRect);
     
-    // set attributes for the top-left set of handles (i.e. circle elements) 
-    grps.select("." + TOP_LEFT_CLASS)
-        .attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; })
-        .attr("r", HANDLE_RADIUS )
-        .on("click", function(d) { console.log(d); })
-        .call(dragTopLeftHandle);
-    
-    // set attributes for the bottom-right set of handles (i.e. circle elements) 
-    grps.select("." + BOTTOM_RIGHT_CLASS)
-        .attr("cx", function(d) { return d.x + d.width; })
-        .attr("cy", function(d) { return d.y + d.height; })
-        .attr("r", HANDLE_RADIUS )
-        .on("click", function(d) { console.log(d); })
-        .call(dragBottomRightHandle);
+    if(!isStatic) {
+        // set attributes for the top-left set of handles (i.e. circle elements) 
+        grps.select("." + TOP_LEFT_CLASS)
+            .attr("cx", function(d) { return d.x; })
+            .attr("cy", function(d) { return d.y; })
+            .attr("r", HANDLE_RADIUS )
+            .on("click", function(d) { console.log(d); })
+            .call(dragTopLeftHandle);
+        
+        // set attributes for the bottom-right set of handles (i.e. circle elements) 
+        grps.select("." + BOTTOM_RIGHT_CLASS)
+            .attr("cx", function(d) { return d.x + d.width; })
+            .attr("cy", function(d) { return d.y + d.height; })
+            .attr("r", HANDLE_RADIUS )
+            .on("click", function(d) { console.log(d); })
+            .call(dragBottomRightHandle);
+    }
 }
 
 function deleteRegionsAndRedraw(extraData) {
@@ -550,7 +555,12 @@ function getRegionDataFromServer(){
     })
     .done(function(returnData) {
         console.log("AJAX RESPONSE SUCCEEDED"); 
-        deleteRegionsAndRedraw(returnData["data"]); 
+        if(returnData !== null && returnData !== undefined) {
+            deleteRegionsAndRedraw(returnData["data"]); 
+        }
+        else {
+            alert("The object detection algorithm did not find any sticky notes.");
+        }
     })
     .fail(function(jqXHR) {
         console.log("AJAX RESPONSE FAILED");

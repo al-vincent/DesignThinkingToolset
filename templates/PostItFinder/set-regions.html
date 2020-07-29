@@ -167,6 +167,9 @@
 {% block scripts %}
   {{ block.super }}
 
+  <!-- pass data to javascript as JSON -->
+  {{ region_data|json_script:"region-data-id" }}
+
   {% load static %}
   <script type="text/javascript" src="{% static 'PostItFinder/js/setRegions.js' %}"></script>
 {% endblock %}

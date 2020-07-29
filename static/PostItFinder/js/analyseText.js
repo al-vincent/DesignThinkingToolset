@@ -21,6 +21,15 @@ window.onload = function() {
     startWidth = IMG.clientWidth;
     startHeight = IMG.clientHeight;
     
+    // draw the regions
+    if(REGION_DATA !== null && REGION_DATA !== undefined) {
+        console.log(REGION_DATA);
+        createRegions(svg, REGION_DATA, true);
+    }
+    else {
+        console.log("No regions found");
+    }
+
     // add click events to buttons
     addClickEventsToButtons(CONFIG);
 }
