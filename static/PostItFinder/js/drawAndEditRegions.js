@@ -538,7 +538,7 @@ function sendDataToServer(data, timeout){
         if(jqXHR.statusText === "timeout") {
             alert("The request timed out; please try again.");
         }
-    }) 
+    })
 }
 
 function getRegionDataFromServer(){
