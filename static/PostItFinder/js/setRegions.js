@@ -71,7 +71,7 @@ function addClickEventsToButtons(config) {
     nextBtn.onclick = function() {
         // get region data, send to server in POST request, browse to next page
         const data = d3.selectAll("." + config.CONSTANTS.CLASSES.REGION).data();
-        sendDataToServer({"data": JSON.stringify(data)}, 10000);
+        sendDataToServer({"data": JSON.stringify(data)}, 10000);        
         return true;
     }
 }
