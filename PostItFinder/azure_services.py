@@ -339,7 +339,7 @@ class TextAnalyser(BasisFunctions):
                         pass
                 # At this point, processed_results could be an empty list. If so,
                 # return None (we're not interested if there're no results).
-                return processed_results if processed_results else None
+                return {"data": processed_results} if processed_results else None
             # In this case, no actual OCR data (i.e. lines of text) have been returned
             else:
                 return None
@@ -398,9 +398,7 @@ class TextAnalyser(BasisFunctions):
             assert len(bounding_coords) == 8, f"bounding_coords should have 8 elements; it has {len(bounding_coords)} elements"
             assert max_width > 0, f"max_width={max_width}, which is <= 0"
             assert max_height > 0, f"max_height={max_height}, which is <= 0"
-            assert all(i >= 0 for i in bounding_coords), f"One of bounding_coords < 0: {bounding_coords}"
-            assert all(i <= max_width for i in bounding_coords), f"One of bounding_coords > max_width; bounding_coords: {bounding_coords}, max_width: {max_width}"
-            assert all(i <= max_height for i in bounding_coords),f"One of bounding_coords > max_height; bounding_coords: {bounding_coords}, max_height: {max_height}"
+            assert all(i >= 0 for i in bounding_coords), f"One of bounding_coords < 0: {bounding_coords}"            
         except AssertionError as err:
             logger.error(err)
             return None
@@ -415,10 +413,19 @@ class TextAnalyser(BasisFunctions):
             all_x = [i for i in bounding_coords[::2]]
             all_y = [i for i in bounding_coords[1::2]]
 
+            assert all(i <= max_width for i in all_x), f"Some of all_x > max_width; all_x: {all_x}, max_width: {max_width}"
+            assert all(i <= max_height for i in all_y), f"Some of all_y > max_height; all_y: {all_y}, max_height: {max_height}"
+
             x = min(all_x) / max_width
             y = min(all_y) / max_height
             width = (max(all_x) - min(all_x)) / max_width
             height = (max(all_y) - min(all_y)) / max_height
+        except AssertionError as err:
+            logger.error(err)
+            return None
+        except TypeError as err:
+            logger.error(err)
+            return None
         except Exception as err:
             logger.error(err)
             return None

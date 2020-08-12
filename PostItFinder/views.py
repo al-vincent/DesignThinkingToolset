@@ -3,7 +3,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.http import JsonResponse
 
-from PostItFinder.azure_services import ObjectDetector
+from PostItFinder.azure_services import ObjectDetector, TextAnalyser
 
 import os
 from json import load, loads
@@ -63,6 +63,21 @@ def get_regions(input_str):
             aod = ObjectDetector(image_data=image_data_b64,                            
                             confidence_threshold=CONST["AZURE"]["OBJ_DET"]["CONFIDENCE_THRESHOLD"])
             return aod.analyse_and_process()
+        except ValueError as err:
+            logger.error(f"input_str, {input_str}, does not contain a comma. Sys error: {err}")
+    else:
+        logger.warning(f"input_str is None; is this expected?")
+    return None
+
+def get_text(input_str):
+    if input_str is not None:
+        try:
+            start_img_str = input_str.index(",") + 1
+            image_data_b64 = input_str[start_img_str:]
+            ta = TextAnalyser(image_data=image_data_b64,
+                            subscription_key=settings.OCR_SUBSCRIPTION_KEY,
+                            api_url=settings.OCR_API_URL)
+            return ta.analyse_and_process()
         except ValueError as err:
             logger.error(f"input_str, {input_str}, does not contain a comma. Sys error: {err}")
     else:
@@ -186,9 +201,18 @@ def set_regions(request):
         return render(request, PATHS["SET_REGIONS"], context=context)
 
 def analyse_text(request):
+    # get session data
+    image_data = request.session.get(settings.IMAGE_KEY, None)
 
     if request.is_ajax() and request.method == "GET": 
-        return JsonResponse({"status": "SUCCESS"})
+        # return JsonResponse({"status": "SUCCESS"})
+        processed_data = get_text(image_data.get("data", None))
+        if processed_data is not None:
+            logger.info(f"Azure processing successful, results sent to client")
+            return JsonResponse(processed_data, status=200)
+        else:
+            logger.warning(f"Azure processing unsuccessful, null response sent to client")
+            return JsonResponse(processed_data, status=400)
     else:
         # Update config to set the 'active' class for the stepper bar
         stepper_bar = get_stepper_bar_active_states(3)
@@ -203,7 +227,7 @@ def analyse_text(request):
             "analyse_txt_btn": HTML["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"],
             "image_pane": HTML["APP"]["IMAGE_PANE"],
             "config": CONFIG,
-            "image_data": request.session.get(settings.IMAGE_KEY, None),
+            "image_data": image_data, 
             "region_data": request.session.get(settings.REGION_KEY, None),
             }
 

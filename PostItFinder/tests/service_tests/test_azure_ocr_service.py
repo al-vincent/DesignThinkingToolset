@@ -464,23 +464,23 @@ class TestConvertBounds(unittest.TestCase):
         max_width = 10
         max_height = 10
         self.assertIsNotNone(self.ta.convert_bounds(bbox, max_width, max_height))
-
-    def test_bounding_coords_element_greater_than_max_width_returns_none(self):
-        bbox = [1,2,3,4,5,6,7,0]
-        max_width = 3
-        max_height = 8
-        self.assertIsNone(self.ta.convert_bounds(bbox, max_width, max_height))
-
-    def test_bounding_coords_element_greater_than_max_height_returns_none(self):
-        bbox = [1,2,3,4,5,6,7,0]
-        max_width = 3
-        max_height = 8
-        self.assertIsNone(self.ta.convert_bounds(bbox, max_width, max_height))
-
+    
     def test_bounding_coords_has_non_numeric_element_returns_none(self):
         bbox = [1,2,3,4,5,6,7,"a"]
         max_width = 3
         max_height = 8
+        self.assertIsNone(self.ta.convert_bounds(bbox, max_width, max_height))
+
+    def test_x_coords_element_greater_than_max_width_returns_none(self):
+        bbox = [1,2,3,4,5,6,7,0]
+        max_width = 3
+        max_height = 8
+        self.assertIsNone(self.ta.convert_bounds(bbox, max_width, max_height))
+
+    def test_y_coords_element_greater_than_max_height_returns_none(self):
+        bbox = [1,2,3,4,5,6,7,0]
+        max_width = 8
+        max_height = 3
         self.assertIsNone(self.ta.convert_bounds(bbox, max_width, max_height))
 
     # --------------------------------------------------------------------

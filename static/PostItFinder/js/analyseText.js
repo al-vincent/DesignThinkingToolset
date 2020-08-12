@@ -33,11 +33,17 @@ function addClickEventsToButtons(config) {
         $.ajax({     
             type: "GET",
             dataType: "json",
-            timeout: 5000
+            timeout: 30000
         })
         .done(function(returnData) {
             console.log("AJAX RESPONSE SUCCEEDED"); 
             console.log(returnData);
+            if(returnData !== null && returnData !== undefined) {
+                deleteRegionsAndRedraw(returnData["data"]); 
+            }
+            else {
+                alert("The object detection algorithm did not find any sticky notes.");
+            }
         })
         .fail(function(jqXHR) {
             console.log("AJAX RESPONSE FAILED");
