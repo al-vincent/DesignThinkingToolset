@@ -18,31 +18,40 @@
  * https://stackoverflow.com/questions/922057/is-it-possible-to-preview-local-images-before-uploading-them-via-a-form,
  * https://stackoverflow.com/a/20535454 
  * @param {string} imgID - the ID of the HTML <img> element that will display the image
- * @param {string} fileDataKey - the key for the image data string in sessionStorage
- * @param {string} fileNameKey - the key for the image file name in sessionStorage
+ * @param {object} fileData - a key/value pair of the form 
+ *      {"data": <str, base64 encoding of image bytes>,
+ *       "name": <str, name of the file>}
  * @param {object} input - the HTML input control that was clicked
- * @todo - add checks to see if sessionStorage can be used
+ * @param {number} maxImageSize - the maximum allowed file size, in bytes
  * @todo - add .onerror events for reader, img (in addition to the .onloads)
  * @todo - add code to final else{} clause - may be better to handle in Django?
  * @todo - factor out some of the functionality into other functions?
  */
-function previewImage(imgID, fileData, input) {
+function previewImage(imgID, fileData, maxImageSize, input) {
     // case 1: user selects a file using input
-    if (input !== undefined && input.files && input.files[0]) { 
-        const reader = new FileReader();
-        reader.onload = function(myFile) {            
-            const img = new Image();
-            img.src = myFile.target.result;
+    if (input !== undefined && input.files && input.files[0]) {
+        const fileSize = input.files[0].size;
+        if(fileSize <= maxImageSize) {
+            const reader = new FileReader();
+            reader.onload = function(myFile) {            
+                const img = new Image();
+                img.src = myFile.target.result;
 
-            img.onload = function() {
-                $('#' + imgID).attr('src', this.src);
-                $('#' + imgID).prop('alt', input.files[0].name);
-                // send the image data to the server as an AJAX POST request
-                sendDataToServer({"data": this.src, "name": input.files[0].name}, 10000);
-            }                       
-        };
+                img.onload = function() {
+                    $('#' + imgID).attr('src', this.src);
+                    $('#' + imgID).prop('alt', input.files[0].name);
+                    // send the image data to the server as an AJAX POST request
+                    sendDataToServer({"data": this.src, "name": input.files[0].name}, 10000);
+                }                       
+            };
 
-        reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(input.files[0]);
+        }
+        else {
+            const fileSizeMB = Number.parseFloat(fileSize / (1024 * 1024)).toFixed(1);
+            const maxImageSizeMB = Number.parseFloat(maxImageSize / (1024 * 1024)).toFixed(1);
+            alert("The file selected is " +  fileSizeMB + "MB. The max file size for image processing is " + maxImageSizeMB + "MB.");
+        }
     } 
     else {
         if (fileData !== undefined && fileData !== null) {

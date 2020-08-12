@@ -7,7 +7,9 @@ window.onload = function() {
     const REGION_DATA = JSON.parse(document.getElementById("region-data-id").textContent);
 
     // load the image selected by the user in step 1
-    previewImage(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID, IMAGE_DATA);
+    previewImage(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID, 
+                IMAGE_DATA,
+                CONFIG.CONSTANTS.VALUES.MAX_IMAGE_SIZE);
     
     // create a wrapper SVG, for other SVG elements to sit inside
     const IMG = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);

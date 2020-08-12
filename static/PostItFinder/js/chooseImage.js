@@ -22,7 +22,9 @@ window.onload = function() {
     }
     // if there is data in sessionStorage, load the image
     else {
-        previewImage(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID, IMAGE_DATA);
+        previewImage(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID, 
+                    IMAGE_DATA,
+                    CONFIG.CONSTANTS.VALUES.MAX_IMAGE_SIZE);
     }
 }
 
@@ -36,7 +38,10 @@ $(".custom-file-input").on("change", function() {
     const IMAGE_DATA = JSON.parse(document.getElementById("image-data-id").textContent);
 
     // preview the image selected by the user and send data to server via AJAX
-    previewImage(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID, IMAGE_DATA, this); 
+    previewImage(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID, 
+                IMAGE_DATA, 
+                CONFIG.CONSTANTS.VALUES.MAX_IMAGE_SIZE,
+                this);
 
     // set the class and ARIA state of the Next button to active
     const nextBtn = document.getElementById(CONFIG.HTML.APP.NEXT_BTN.ID);

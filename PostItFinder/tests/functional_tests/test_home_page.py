@@ -159,7 +159,7 @@ class ExceptionTests(base.ExceptionTests):
         self.browser.find_element_by_id(base.ELEMS["HOME"]["START_BTN"]["ID"]).click()
 
         try: 
-            WebDriverWait(self.browser, 3).until(EC.alert_is_present(),
+            WebDriverWait(self.browser, base.MAX_WAIT).until(EC.alert_is_present(),
                                    "Timed out waiting for alert to appear.")
             alert = self.browser.switch_to.alert
             alert.accept()            
