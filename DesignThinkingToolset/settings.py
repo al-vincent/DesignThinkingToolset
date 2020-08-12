@@ -132,17 +132,26 @@ else:
     STATIC = STATIC_DIR
 
 # Override the default max data upload value
-
-DATA_UPLOAD_MAX_MEMORY_SIZE = 4194304
+# NOTE: this is quite a bit larger than the images which will actually be processed.
+# This is because it applies to the whole data packet, not just the file itself; so 
+# a 3MB file could easily trip a 4MB limit (and did in testing). MAX_IMAGE_SIZE below
+# is for the actual image size (and ultimately, Azure will reject any images outside
+# its limits).
+DATA_UPLOAD_MAX_MEMORY_SIZE = 8388608
 
 # Azure settings - Custom Vision Object Detection
 
 OBJ_DET_PREDICTION_KEY = os.environ['SNIP_OBJ_DET_PRED_KEY']
 OBJ_DET_PROJECT_ID = os.environ['SNIP_OBJ_DET_PROJ_ID']
 OBJ_DET_PUBLISHED_NAME = os.environ['SNIP_OBJ_DET_PUB_NAME']
-OBJ_DET_BASE_URL = 'snip-object-detection.cognitiveservices.azure.com'
-OBJ_DET_API_URL = f'/customvision/v3.0/Prediction/{OBJ_DET_PROJECT_ID}/detect/iterations/{OBJ_DET_PUBLISHED_NAME}/image'
-OK_IMAGE_TYPES = ['jpeg', 'bmp', 'png', 'gif']
+OBJ_DET_API_URL = f'https://snip-object-detection.cognitiveservices.azure.com/customvision/v3.0/Prediction/{OBJ_DET_PROJECT_ID}/detect/iterations/{OBJ_DET_PUBLISHED_NAME}/image'
+OK_IMAGE_TYPES = ['jpeg', 'bmp', 'png']
+MAX_IMAGE_SIZE = 4194304
+
+# Azure settings - Computer Vision Read API (OCR)
+
+OCR_SUBSCRIPTION_KEY = os.environ["SNIP_OCR_SUBS_KEY"]
+OCR_API_URL = "https://snip-ocr.cognitiveservices.azure.com/vision/v3.0/read/analyze"
 
 # Logging configuration
 LOGGING = {

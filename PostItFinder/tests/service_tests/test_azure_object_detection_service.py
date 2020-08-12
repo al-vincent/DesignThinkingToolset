@@ -1,9 +1,8 @@
 from django.conf import settings
 from PostItFinder import azure_services
+import PostItFinder.tests.resources.test_results.azure_services_results as RESULTS
 import unittest
 import os
-from json import load
-import base64
 
 # ================================================================================================
 # HELPER FUNCTIONS
@@ -16,124 +15,13 @@ def get_file_path(file_name):
 # ================================================================================================
 # TEST CLASSES
 # ================================================================================================
-class TestGetImageData(unittest.TestCase):
-    def setUp(self):       
-        self.image_path = get_file_path("test_jpg.jpg")
-        self.img_bytes = azure_services.get_file_bytes(self.image_path)
-        self.confidence_threshold = 0.3
-        self.aod = azure_services.ObjectDetector(image_data=self.img_bytes,                                            
-                                            confidence_threshold=self.confidence_threshold)
-
-    def tearDown(self):
-        pass
-
-    def test_b64_encoded_img_correctly_converted_to_bytes(self):
-        # get the image as base64-encoded bytes
-        with open(self.image_path, "rb") as f:
-            img_bytes = f.read()
-            img_str = base64.b64encode(img_bytes).decode("utf-8")
-        
-        # make sure that the image is actually a str (otherwise the test won't mean anything)
-        self.assertTrue(isinstance(img_str, str))
-        
-        # convert the str to bytes and check the return type is correct
-        encoded_bytes = self.aod.get_image_data(img_str)
-        self.assertTrue(isinstance(encoded_bytes, bytes))
-
-        # finally, make sure that the bytes returned are correct by comparing the output of the 
-        # function to the output of file.read() as binary
-        self.assertEqual(img_bytes, encoded_bytes)
-    
-    def test_non_b64_encoded_str_returns_none(self):
-        random_str = "Hello world"
-        encoded_bytes = self.aod.get_image_data(random_str)
-        self.assertIsNone(encoded_bytes)
-    
-    def test_incomplete_b64_encoded_str_returns_none(self):
-        """
-        NOTE: this test is slightly rigged, in that it slices off 5 characters from 
-        the end of the input string. HOWEVER, if the number of characters sliced off
-        is a multiple of 4 then None *WILL NOT* be returned.
-        """
-        with open(self.image_path, "rb") as f:
-            img_str = base64.b64encode(f.read()).decode("utf-8")
-        self.assertIsNone(self.aod.get_image_data(img_str[:-5]))
-
-    def test_bytestream_input_is_returned_unchanged(self):
-        # first run the test with image bytes as the input
-        with open(self.image_path, "rb") as f:
-            img_bytes = f.read()
-        self.assertEqual(img_bytes, self.aod.get_image_data(img_bytes))
-
-        # now rerun with text bytes as input
-        with open(get_file_path("test_file.txt"), "rb") as f:
-            txt_bytes = f.read()
-        self.assertEqual(txt_bytes, self.aod.get_image_data(txt_bytes))
-
-    def test_non_str_or_bytes_input_returns_none(self):
-        # provide a range of data types
-        for input in [1, {"a": 123, "b": 456}, ["a", "b", "c"], None]:
-            self.assertIsNone(self.aod.get_image_data(input))
-    
-    # def test_non_image_b64_encoded_str_returns_none(self):
-    #     """
-    #     The get_image_data method makes no distinction between an image file and any other form 
-    #     of base64-encoded binary data (provided the encoding is correct), so the 
-    #     """
-    #     with open(get_file_path("test_file.txt"), "rb") as f:
-    #         txt_str = base64.b64encode(f.read()).decode("utf-8")
-        
-    #     # make sure that the image is actually a str (otherwise the test won't mean anything)
-    #     self.assertTrue(isinstance(txt_str, str))
-
-    #     # finally, check that get_image_data correctly spots that the input is not an image,
-    #     # and returns None
-    #     self.assertIsNone(self.aod.get_image_data(txt_str))
-
-# ------------------------------------
-
-class TestImageDataIsValid(unittest.TestCase):
-    def setUp(self):      
-        self.image_path = get_file_path("test_jpg.jpg")
-        self.img_bytes = azure_services.get_file_bytes(self.image_path)
-        self.confidence_threshold = 0.3
-        self.aod = azure_services.ObjectDetector(image_data=self.img_bytes,                                            
-                                            confidence_threshold=self.confidence_threshold)
-
-    def tearDown(self):
-        pass
-
-    def test_acceptable_image_validates_correctly(self):
-        with open(self.image_path, "rb") as f:
-            img_bytes = f.read()
-    
-        self.assertTrue(self.aod.image_data_is_valid(img_bytes))
-
-    def test_too_large_image_is_invalid(self):
-        with open(get_file_path("test_gif.gif"), "rb") as f:
-            img_bytes = f.read()
-
-        self.assertFalse(self.aod.image_data_is_valid(img_bytes))
-
-    def test_non_image_is_invalid(self):
-        pass
-    
-    def test_wrong_image_type_is_invalid(self):
-        pass
-
-    # ...Anything else??!
-
-# ------------------------------------
-
 class TestAnalyseImage(unittest.TestCase):
     def setUp(self):       
         self.image_path = get_file_path("test_jpg.jpg")
         self.img_bytes = azure_services.get_file_bytes(self.image_path)
-        self.confidence_threshold = 0.3
 
     def tearDown(self):
-        # del(IMG_PATH, self.image_path)
-        pass    
+        del(self.image_path, self.image_path)
 
     def test_get_file_bytes_correct_path_returns_bytes(self):
         """
@@ -153,11 +41,16 @@ class TestAnalyseImage(unittest.TestCase):
         """
         Check that analyse_image returns the correct results when provided the correct arguments 
         """
+        # get actual results from Azure service
         aod = azure_services.ObjectDetector(image_data=self.img_bytes)
         results = aod.analyse_image()
+        # get expected results from features file
+        expected_results = RESULTS.OBJ_DET_RESULTS
 
-        expected_bbox = {'left': 0.0130759329, 'top': 0.00716819149, 'width': 0.0930388942, 'height': 0.0273961946}
-        self.assertDictEqual(results["predictions"][0]["boundingBox"], expected_bbox)
+        # we cannot compare the two at the top level, because the results 
+        # include timestamps, UUIDs etc. that will differ. But the predictions
+        # should be the same.
+        self.assertListEqual(results["predictions"], expected_results["predictions"])
     
     def test_analyse_image_returns_none_with_bad_image_path(self):
         """
@@ -182,32 +75,17 @@ class TestAnalyseImage(unittest.TestCase):
         results = aod.analyse_image()
         self.assertIsNone(results)
 
-    def test_analyse_image_returns_none_with_bad_base_url(self):
-        """
-        Check that analyse_image returns None when project_id == None
-        """
-        aod = azure_services.ObjectDetector(image_data=self.img_bytes,
-                                            base_url="www.invalid_base_url.com")
-        results = aod.analyse_image()
-        self.assertIsNone(results)
     
     def test_analyse_image_returns_none_with_bad_api_url(self):
         """
-        Check that analyse_image returns None when published_name == None
+        Check that analyse_image returns None when obj_det_url is invalid
         """
+        # slice the last digit off the actual API URL
+        invalid_url = settings.OBJ_DET_API_URL[:-1]
         aod = azure_services.ObjectDetector(image_data=self.img_bytes,
-                                            obj_det_url="invalid/api/url")
+                                            obj_det_url=invalid_url)
         results = aod.analyse_image()
         self.assertIsNone(results)
-
-    def test_analyse_image_returns_none_with_no_predictions_in_results(self):
-        # NOTE: I can't think of any way to test this?! The 'predictions' key in the
-        # json is part of the Azure results, and handled within analyse_image - I 
-        # can'tprovide a way of malforming the input to replicate this (should never 
-        # happen, but 'should' != 'will'...)
-        pass
-
-
 
 # ------------------------------------
 
@@ -216,6 +94,9 @@ class TestProcessOutput(unittest.TestCase):
         self.image_path = get_file_path("test_jpg.jpg")
         self.img_bytes = azure_services.get_file_bytes(self.image_path)
         self.aod = azure_services.ObjectDetector(image_data=self.img_bytes)
+    
+    def tearDown(self):
+        del(self.image_path, self.img_bytes, self.aod, self.results)
 
     def test_process_output_provides_correct_results(self):
         """
@@ -419,7 +300,3 @@ class TestProcessOutput(unittest.TestCase):
 
 
 # ------------------------------------
-        
-
-
-    

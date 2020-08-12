@@ -29,7 +29,8 @@
             "MIN_RECT_WIDTH": 20,
             "MIN_RECT_HEIGHT": 20,
             "DEFAULT_RECT_WIDTH": 60,
-            "DEFAULT_RECT_HEIGHT": 40
+            "DEFAULT_RECT_HEIGHT": 40,
+            "MAX_IMAGE_SIZE": 4194304
         },
         "AZURE": {
             "OBJ_DET": {
