@@ -83,12 +83,12 @@ class BasisFunctions:
 # AZURE OBJECT DETECTION
 # ================================================================================================
 class ObjectDetector(BasisFunctions):
-    def __init__(self, image_data, confidence_threshold=0.3, prediction_key=None, obj_det_url=None):
+    def __init__(self, image_data, prediction_key, obj_det_url, confidence_threshold=0.3):
         super().__init__()
         self.image_data = self.get_image_data(image_data)    
         self.confidence_threshold = confidence_threshold    
-        self.PREDICTION_KEY = prediction_key if prediction_key is not None else settings.OBJ_DET_PREDICTION_KEY
-        self.OBJ_DET_URL = obj_det_url if obj_det_url is not None else settings.OBJ_DET_API_URL
+        self.prediction_key = prediction_key
+        self.obj_det_url = obj_det_url
 
     def analyse_image(self, image_data=None):
         """
@@ -107,12 +107,12 @@ class ObjectDetector(BasisFunctions):
 
         headers = {
             # Request headers
-            'Prediction-Key': self.PREDICTION_KEY,
+            'Prediction-Key': self.prediction_key,
             'Content-Type': 'application/octet-stream',
         }
 
         try:
-            response = requests.post(self.OBJ_DET_URL, headers=headers, data=image_data)
+            response = requests.post(self.obj_det_url, headers=headers, data=image_data)
             response.raise_for_status()
         except Exception as err:
             logger.error(f"Exception raised; sys error message: {err}")
@@ -166,7 +166,7 @@ class ObjectDetector(BasisFunctions):
                                 "height": region["boundingBox"]["height"]
                             })
                         except Exception as err:
-                            logger.warn(f"An exception occurred; region={region}, error={err}")
+                            logger.warning(f"An exception occurred; region={region}, error={err}")
                 else:
                     logger.error(f"Input data does not contain required keys")        
 
@@ -206,13 +206,14 @@ class TextAnalyser(BasisFunctions):
     # https://westcentralus.dev.cognitive.microsoft.com/docs/services/computer-vision-v3-ga/operations/5d9869604be85dee480c8750
     # Example:
     # https://docs.microsoft.com/en-gb/azure/cognitive-services/computer-vision/quickstarts/python-hand-text
-    def __init__(self, image_data, subscription_key, api_url):
+    def __init__(self, image_data, subscription_key, api_url, use_words=True):
         super().__init__()
         self.image_data = self.get_image_data(image_data)    
         self.subscription_key = subscription_key
         self.api_url = api_url
         self.headers = {"Ocp-Apim-Subscription-Key": self.subscription_key,
                         "Content-Type": "application/octet-stream"}
+        self.use_words = use_words
     
     def submit_image_for_processing(self):
         """
@@ -272,15 +273,15 @@ class TextAnalyser(BasisFunctions):
                 return (results, False)
             # in this case, the analysis has completed but failed to work
             elif results["status"] == "failed":
-                logger.warn("The Azure service failed to return any results.")
+                logger.warning("The Azure service failed to return any results.")
                 return (None, False)
         else:
-            logger.warn(f"Azure results missing expected key 'status': {results}")
+            logger.warning(f"Azure results missing expected key 'status': {results}")
             return (None, False)
 
         # in this case it's taken too long for the service to work, so exit
         if time_elapsed >= max_time:
-            logger.warn("The Azure OCR service exceeded the max response time.")
+            logger.warning("The Azure OCR service exceeded the max response time.")
             return (None, False)            
 
         # Otherwise, we're still waiting
@@ -295,11 +296,16 @@ class TextAnalyser(BasisFunctions):
 
     def process_output(self, azure_results):
         if azure_results is not None:
-            # if any of these entries are missing, the analysis has failed; return None
+            # if any of these entries are missing, the analysis has failed; return None.
             try:
                 results_pages = azure_results["analyzeResult"]["readResults"]
+                # Key assumption - the [0] index below is a ref to the page analysed.
+                # This is relevant for PDF docs, which can be multi-page; but not for
+                # the images we're processing, which will only ever be one page long.
                 results_page = results_pages[0]
                 lines = results_page["lines"]
+                width = results_page["width"]
+                height = results_page["height"]
             except KeyError as k:
                 logger.error(f"Azure OCR results do not contain the key {k}.")
                 return None
@@ -310,55 +316,75 @@ class TextAnalyser(BasisFunctions):
                 logger.error(f"Another error occurred: {err}")
                 return None
 
-            # Key assumption - the [0] index below is a ref to the page analysed.
-            # This is relevant for PDF docs, which can be multi-page; but not for
-            # the images we're processing, which will only ever be one page long.
+            # process the lines or words (depending on whether the user has provided
+            # any regions)
             processed_results = []
             if len(lines) > 0:
                 for line in lines:
-                    if "words" in line:
-                        for word in line["words"]:
-                            try:
-                                w = self.convert_bounds(bounding_coords=word["boundingBox"], 
-                                                        max_width=results_page["width"], 
-                                                        max_height=results_page["height"]) 
-                                if w is not None:
-                                    # use word.get() for confidence, as it's nice-to-have
-                                    w.update({"text": word["text"], "confidence": word.get("confidence", None)})
-                                    processed_results.append(w)
-                            # In this case, we do *NOT* want to return None; it might be that
-                            # only one instance of word has a missing key, for e.g. 
-                            # If 'height' or 'width' don't exist, None *WILL* be returned;
-                            # we want this, as we need the output to be in relative coords.
-                            except KeyError as k:
-                                logger.warn(f"Azure OCR results do not contain the key {k}.")
-                            except Exception as err:
-                                logger.warn(f"Another error occurred: {err}")
-                    # making it explicit that we wish to go to the next word here
+                    # if we want to find individual words (e.g. because the user has
+                    # selected some regions), take this path
+                    if self.use_words:
+                        if "words" in line:
+                            for word in line["words"]:
+                                # each word is run through process_json
+                                word_info = self.process_json(word, width, height)
+                                if word_info is not None:
+                                    processed_results.append(word_info)
+                        else:
+                            logger.warning(f"Azure OCR results line does not contain any words.")
+                    # otherwise, let Azure group words together into lines
                     else:
-                        pass
+                        line_info = self.process_json(line, width, height)
+                        if line_info is not None:
+                            processed_results.append(line_info)
+                    
                 # At this point, processed_results could be an empty list. If so,
                 # return None (we're not interested if there're no results).
-                return {"data": processed_results} if processed_results else None
+                return {"data":processed_results} if processed_results else None
             # In this case, no actual OCR data (i.e. lines of text) have been returned
             else:
                 return None
   
             # a couple of warnings to the server
             if len(results_pages) > 1:
-                logger.warn(f"Azure OCR has returned {len(results_pages)} pages (one page expected)")
+                logger.warning(f"Azure OCR has returned {len(results_pages)} pages (one page expected)")
             try:
                 if results_page["unit"] != "pixel":
-                    logger.warn(f"Azure OCR is using an unexpected unit: {results_page['unit']}")
+                    logger.warning(f"Azure OCR is using an unexpected unit: {results_page['unit']}")
             except KeyError as k:
-                logger.warn(f"Azure OCR results do not contain the key {k}.")
+                logger.warning(f"Azure OCR results do not contain the key {k}.")
             except Exception as err:
-                logger.warn(f"Another exception occured.")
-
+                logger.warning(f"Another exception occured.")
         else:
-            logger.warn("Input parameter azure_results is None")
+            logger.warning("Input parameter azure_results is None")
             return None
     
+    def process_json(self, json, max_width, max_height):
+        try:
+            bbox = json["boundingBox"]
+            text = json["text"]
+            confidence = json.get("confidence", None)                    
+        # Handle any exceptions, returning None if required keys don't exist
+        # (as there are no results )
+        except KeyError as k:
+            logger.warning(f"'json' does not contain the key {k}.")
+            return None
+        except TypeError as err:
+            logger.warning(f"'json' is of type {type(json)}; should be dict.")
+            return None
+        except Exception as err:
+            logger.warning(f"Another error occurred: {err}")
+            return None
+        
+        w = self.convert_bounds(bbox, max_width, max_height) 
+        if w is not None:
+            # use word.get() for confidence, as it's nice-to-have for words
+            # and doesn't apply to lines
+            w.update({"text": text, "confidence": confidence})
+            return w
+        else:
+            return None
+        
     def convert_bounds(self, bounding_coords, max_width, max_height):
         """
         Convert a list of 8 numbers representing pairs of (x,y) coordinates for a
@@ -449,7 +475,7 @@ class TextAnalyser(BasisFunctions):
         """
         Convenience function to analyse and process the image data.
 
-        Returns the output from process_output()
+        Returns the output from process_words() or process_lines()
         """
         text = None
         if self.image_data is not None:
@@ -467,7 +493,66 @@ class TextAnalyser(BasisFunctions):
             logger.error(f"No image data received from client")
 
         return self.process_output(text)
+
+# ================================================================================================
+# MATCHING WORDS TO REGIONS
+# ================================================================================================
+class MatchWordsToRegions:
+    def __init__(self, region_data, word_data):
+        self.regions = region_data
+        self.words = word_data
+
+    def match(self):
+        # 1. Iterate through each region
+        # 2. Get the words that are within the region:
+        #    - if word.x, .y  >= region.x, .y, and word.width, .height <= region.width, .height then inside
+        # 3. Order the words correctly into a single string:
+        #    - bit tricky, due to lots boundary issues. However, find min(words.y) 
+        #      and go from there...?
+        # 4. Add the string to the region data, as an extra field ('text')
+        # 5. At the end; each original region now has a 'text' field, with a string as
+        #    the value
+
+        for region in self.regions:
+            words_in_region = self.get_words_in_region(region)
+            sentence = self.order_words_into_sentence(words_in_region)
+            region["text"] = sentence
         
+        return self.regions
+    
+    def get_words_in_region(self, region):
+        words = []
+        for word in self.words:
+            if (word["x"] >= region["x"] and 
+                word["y"] >= region["y"] and
+                word["x"] + word["width"] <= region["x"] + region["width"] and 
+                word["y"]+ word["height"] <= region["y"] + region["height"]):
+            
+                words.append(word["text"])
+        return words
+
+    def order_words_into_sentence(self, words):
+        # NOTE: below is a simple placeholder for a more complex ordering algorithm.
+        # HOWEVER - is a more complex algorithm necessary?? E.g. if the Azure service
+        # finds word entries from top-to-bottom and left-to-right automatically, then 
+        # would the below suffice...?!
+        # 
+        # UPDATE: I don't think keeping it this simple is sensible, for what I want. 
+        # From the docs, Azure *does* order top-bottom and left-right; but also
+        # considers stuff like proximity in some cases. But would be easy to test.
+        sentence = " ".join(word for word in words)
+        # sentence = ""        
+        # while 
+        # first_word = None
+        # for word in words:
+        #     if first_word is None:
+        #         first_word = word
+        #     else:
+        #         # word is *definitely* higher than first_word
+        #         if word["y"] > first_word["y"] + first_word["height"]:
+        #             first_word = word
+        return sentence
+
 # ================================================================================================
 # HELPER FUNCTIONS
 # ================================================================================================
@@ -491,7 +576,7 @@ def get_file_bytes(image_path):
 def main():
     # get the image data
     current_dir = os.path.dirname(os.path.abspath(__file__))    
-    img_path = os.path.join(current_dir, "tests", "resources", "test_images", "test_jpg.jpg")
+    img_path = os.path.join(current_dir, "tests", "resources", "test_images", "lines_of_words.jpg")
     image_data = get_file_bytes(img_path)
 
     # --- OBJECT DETECTION ---
@@ -503,7 +588,8 @@ def main():
     aod = ObjectDetector(image_data=image_data, 
                         prediction_key=prediction_key,                       
                         obj_det_url=api_url)
-    print(f"{'-'*24}\nObject Detection output:\n{'-'*24}\n{aod.analyse_and_process()}\n")
+    regions = aod.analyse_and_process()
+    print(f"{'-'*24}\nObject Detection output:\n{'-'*24}\n{regions}\n")
     # --- /OBJECT DETECTION ---
 
     # --- TEXT ANALYSIS ---
@@ -511,9 +597,17 @@ def main():
     api_url = "https://snip-ocr.cognitiveservices.azure.com/vision/v3.0/read/analyze"
     ta = TextAnalyser(image_data=image_data, 
                     subscription_key=subscription_key, 
-                    api_url=api_url)
-    print(f"{'-'*11}\nOCR output:\n{'-'*11}\n{ta.analyse_and_process()}\n")
+                    api_url=api_url,
+                    use_words=True)
+    words = ta.analyse_and_process()
+    print(f"{'-'*11}\nOCR output:\n{'-'*11}\n{words}\n")
     # --- /TEXT ANALYSIS ---
+
+    # --- MATCH WORDS TO REGIONS ---
+    mwtr = MatchWordsToRegions(regions["data"], words["data"])
+    new_regions = mwtr.match()
+    print(f"{'-'*19}\nRegions with words:\n{'-'*19}\n{new_regions}\n")
+    # --- MATCH WORDS TO REGIONS ---
 
 if __name__ == "__main__":
     main()

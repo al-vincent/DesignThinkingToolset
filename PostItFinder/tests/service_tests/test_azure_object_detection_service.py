@@ -1,6 +1,6 @@
 from django.conf import settings
 from PostItFinder import azure_services
-import PostItFinder.tests.resources.test_results.azure_services_results as RESULTS
+import PostItFinder.tests.resources.test_results.azure_obj_det_results as RESULTS
 import unittest
 import os
 
@@ -21,7 +21,7 @@ class TestAnalyseImage(unittest.TestCase):
         self.img_bytes = azure_services.get_file_bytes(self.image_path)
 
     def tearDown(self):
-        del(self.image_path, self.image_path)
+        del(self.image_path, self.img_bytes)
 
     def test_get_file_bytes_correct_path_returns_bytes(self):
         """
@@ -42,7 +42,9 @@ class TestAnalyseImage(unittest.TestCase):
         Check that analyse_image returns the correct results when provided the correct arguments 
         """
         # get actual results from Azure service
-        aod = azure_services.ObjectDetector(image_data=self.img_bytes)
+        aod = azure_services.ObjectDetector(image_data=self.img_bytes, 
+                                            prediction_key=settings.OBJ_DET_PREDICTION_KEY,
+                                            obj_det_url=settings.OBJ_DET_API_URL)
         results = aod.analyse_image()
         # get expected results from features file
         expected_results = RESULTS.OBJ_DET_RESULTS
@@ -56,13 +58,17 @@ class TestAnalyseImage(unittest.TestCase):
         """
         Check that analyse_image returns None when image_path == None
         """
-        aod = azure_services.ObjectDetector(image_data=None)
+        aod = azure_services.ObjectDetector(image_data=None, 
+                                            prediction_key=settings.OBJ_DET_PREDICTION_KEY,
+                                            obj_det_url=settings.OBJ_DET_API_URL)
         results = aod.analyse_image()
         self.assertIsNone(results)
 
     def test_analyse_image_returns_none_with_non_image_input(self):
         txt_bytes = azure_services.get_file_bytes(get_file_path("test_file.txt"))
-        aod = azure_services.ObjectDetector(image_data=txt_bytes)
+        aod = azure_services.ObjectDetector(image_data=txt_bytes, 
+                                            prediction_key=settings.OBJ_DET_PREDICTION_KEY,
+                                            obj_det_url=settings.OBJ_DET_API_URL)
         results = aod.analyse_image()
         self.assertIsNone(results)
                             
@@ -71,7 +77,8 @@ class TestAnalyseImage(unittest.TestCase):
         Check that analyse_image returns None when prediction_key == None
         """
         aod = azure_services.ObjectDetector(image_data=self.img_bytes,
-                                            prediction_key="invalid_pred_key")
+                                            prediction_key="invalid_pred_key",
+                                            obj_det_url=settings.OBJ_DET_API_URL)
         results = aod.analyse_image()
         self.assertIsNone(results)
 
@@ -81,8 +88,9 @@ class TestAnalyseImage(unittest.TestCase):
         Check that analyse_image returns None when obj_det_url is invalid
         """
         # slice the last digit off the actual API URL
-        invalid_url = settings.OBJ_DET_API_URL[:-1]
-        aod = azure_services.ObjectDetector(image_data=self.img_bytes,
+        invalid_url = settings.OBJ_DET_API_URL[:-1]        
+        aod = azure_services.ObjectDetector(image_data=self.img_bytes, 
+                                            prediction_key=settings.OBJ_DET_PREDICTION_KEY,
                                             obj_det_url=invalid_url)
         results = aod.analyse_image()
         self.assertIsNone(results)
@@ -93,10 +101,12 @@ class TestProcessOutput(unittest.TestCase):
     def setUp(self):        
         self.image_path = get_file_path("test_jpg.jpg")
         self.img_bytes = azure_services.get_file_bytes(self.image_path)
-        self.aod = azure_services.ObjectDetector(image_data=self.img_bytes)
+        self.aod = azure_services.ObjectDetector(image_data=self.img_bytes, 
+                                                prediction_key=settings.OBJ_DET_PREDICTION_KEY,
+                                                obj_det_url=settings.OBJ_DET_API_URL)
     
     def tearDown(self):
-        del(self.image_path, self.img_bytes, self.aod, self.results)
+        del(self.image_path, self.img_bytes, self.aod)
 
     def test_process_output_provides_correct_results(self):
         """

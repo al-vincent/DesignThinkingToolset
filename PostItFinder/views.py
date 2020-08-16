@@ -60,8 +60,10 @@ def get_regions(input_str):
         try:
             start_img_str = input_str.index(",") + 1
             image_data_b64 = input_str[start_img_str:]
-            aod = ObjectDetector(image_data=image_data_b64,                            
-                            confidence_threshold=CONST["AZURE"]["OBJ_DET"]["CONFIDENCE_THRESHOLD"])
+            aod = ObjectDetector(image_data=image_data_b64, 
+                                prediction_key=settings.OBJ_DET_PREDICTION_KEY,
+                                obj_det_url=settings.OBJ_DET_API_URL,
+                                confidence_threshold=CONST["AZURE"]["OBJ_DET"]["CONFIDENCE_THRESHOLD"])
             return aod.analyse_and_process()
         except ValueError as err:
             logger.error(f"input_str, {input_str}, does not contain a comma. Sys error: {err}")
@@ -128,6 +130,9 @@ def faq(request):
     return render(request, PATHS["FAQ"], context=context)
 
 def choose_image(request):
+    # clear any regions session data, to prevent crossover between regions
+    request.session[settings.REGION_KEY] = None
+
     if request.is_ajax() and request.method == "POST":
         set_session_image_data(request)
         return JsonResponse({"status": "success"}, status=200)
