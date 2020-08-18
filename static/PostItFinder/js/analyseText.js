@@ -39,7 +39,7 @@ function addClickEventsToButtons(config) {
             console.log("AJAX RESPONSE SUCCEEDED"); 
             console.log(returnData);
             if(returnData !== null && returnData !== undefined) {
-                deleteRegionsAndRedraw(returnData["data"]); 
+                // deleteRegionsAndRedraw(returnData["data"]);
             }
             else {
                 alert("The object detection algorithm did not find any sticky notes.");

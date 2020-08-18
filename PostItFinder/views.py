@@ -3,7 +3,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.http import JsonResponse
 
-from PostItFinder.azure_services import ObjectDetector, TextAnalyser
+from PostItFinder.azure_services import ObjectDetector, TextAnalyser, MatchWordsToRegions
 
 import os
 from json import load, loads
@@ -54,13 +54,7 @@ def set_session_region_data(request):
         logger.info(f"Data sent from client does not contain the 'data' key - no regions selected?")
         
     request.session[settings.REGION_KEY] = regions
-
-    # ******************************************************************
-    # TODO - REMOVE THE LINES BELOW!!
-    from json import dumps
-    print(f"\n\n**********\n{dumps(regions, indent=4)}\n**********\n\n")
-    # ******************************************************************
-    
+   
 def get_regions(input_str):
     if input_str is not None:
         try:
@@ -73,24 +67,41 @@ def get_regions(input_str):
             return aod.analyse_and_process()
         except ValueError as err:
             logger.error(f"input_str, {input_str}, does not contain a comma. Sys error: {err}")
+            return None
     else:
         logger.warning(f"input_str is None; is this expected?")
-    return None
+        return None
 
-def get_text(input_str):
+def get_text(input_str, regions):
+    # if the user has selected some regions, set use_words to True. 
+    # Otherwise it's False,and lines of text will be extracted.
+    use_words = True if regions else False
     if input_str is not None:
         try:
             start_img_str = input_str.index(",") + 1
             image_data_b64 = input_str[start_img_str:]
+            
             ta = TextAnalyser(image_data=image_data_b64,
                             subscription_key=settings.OCR_SUBSCRIPTION_KEY,
-                            api_url=settings.OCR_API_URL)
-            return ta.analyse_and_process()
+                            api_url=settings.OCR_API_URL, 
+                            use_words=use_words)
+            text = ta.analyse_and_process()
+            if use_words:
+                logger.info("Text will be assigned to regions")
+                return assign_text_to_regions(regions, text);
+            else:
+                logger.info("No regions discovered; lines will be returned")
+                return text
         except ValueError as err:
             logger.error(f"input_str, {input_str}, does not contain a comma. Sys error: {err}")
+            return None
     else:
         logger.warning(f"input_str is None; is this expected?")
-    return None
+        return None
+
+def assign_text_to_regions(regions, words):
+    mwtr = MatchWordsToRegions(region_data=regions, word_data=words)
+    return mwtr.match()
 
 def get_stepper_bar_active_states(step_level):
     stepper = HTML["APP"]["STEPPER_BAR"]
@@ -176,12 +187,12 @@ def set_regions(request):
     if request.is_ajax() and request.method == "GET":
         logger.info(f"AJAX GET request received at server")        
         processed_data = get_regions(image_data.get("data", None))
-        if processed_data["data"] is not None:
+        if processed_data is not None:
             logger.info(f"Azure processing successful, results sent to client")
             return JsonResponse(processed_data, status=200)
         else:
             logger.warning(f"Azure processing unsuccessful, null response sent to client")
-            return JsonResponse(processed_data, status=400)
+            return JsonResponse(processed_data, safe=False, status=400)
     elif request.is_ajax() and request.method == "POST":
         logger.info(f"AJAX POST request received at server")        
         set_session_region_data(request)
@@ -214,16 +225,17 @@ def set_regions(request):
 def analyse_text(request):
     # get session data
     image_data = request.session.get(settings.IMAGE_KEY, None)
+    regions = request.session.get(settings.REGION_KEY, None)
 
+    # user has clicked "Analyse Text"
     if request.is_ajax() and request.method == "GET": 
-        # return JsonResponse({"status": "SUCCESS"})
-        processed_data = get_text(image_data.get("data", None))
+        processed_data = get_text(image_data.get("data", None), regions)
         if processed_data is not None:
             logger.info(f"Azure processing successful, results sent to client")
-            return JsonResponse(processed_data, status=200)
+            return JsonResponse(processed_data, safe=False, status=200)
         else:
             logger.warning(f"Azure processing unsuccessful, null response sent to client")
-            return JsonResponse(processed_data, status=400)
+            return JsonResponse(processed_data, safe=False, status=400)
     else:
         # Update config to set the 'active' class for the stepper bar
         stepper_bar = get_stepper_bar_active_states(3)

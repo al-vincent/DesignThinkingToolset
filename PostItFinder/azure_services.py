@@ -341,7 +341,7 @@ class TextAnalyser(BasisFunctions):
                     
                 # At this point, processed_results could be an empty list. If so,
                 # return None (we're not interested if there're no results).
-                return {"data":processed_results} if processed_results else None
+                return processed_results if processed_results else None
             # In this case, no actual OCR data (i.e. lines of text) have been returned
             else:
                 return None

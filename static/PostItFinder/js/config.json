@@ -12,7 +12,7 @@
         "COLOURS": {
             "THEME_COLOUR": "#55B776",
             "DISABLED_COLOUR": "#7D7D7D",
-            "REGION_COLOUR": "#FFA500",
+            "REGION_COLOUR": "#008000",
             "REGION_EDGE_COLOUR": "#000000",
             "REGION_HOVER_COLOUR": "#FF0000"
         },
