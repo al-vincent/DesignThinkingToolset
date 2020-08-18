@@ -30,7 +30,8 @@ window.onload = function() {
     
     // draw the regions
     if(REGION_DATA !== null && REGION_DATA !== undefined) {
-        createRegions(svg, REGION_DATA);
+        const absData = rescaleDataToAbsoluteCoords(REGION_DATA, startWidth, startHeight);
+        createRegions(svg, absData);
     }
     else {
         console.log("No regions found");
@@ -73,7 +74,9 @@ function addClickEventsToButtons(config) {
     nextBtn.onclick = function() {
         // get region data, send to server in POST request, browse to next page
         const data = d3.selectAll("." + config.CONSTANTS.CLASSES.REGION).data();
-        sendDataToServer({"data": JSON.stringify(data)}, 10000);        
+        // convert data to relative coords, for consistency with Azure
+        const rescaledData = rescaleDataToRelativeCoords(data, startWidth, startHeight);
+        sendDataToServer({"data": JSON.stringify(rescaledData)}, 10000);        
         return true;
     }
 }

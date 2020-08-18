@@ -54,6 +54,12 @@ def set_session_region_data(request):
         logger.info(f"Data sent from client does not contain the 'data' key - no regions selected?")
         
     request.session[settings.REGION_KEY] = regions
+
+    # ******************************************************************
+    # TODO - REMOVE THE LINES BELOW!!
+    from json import dumps
+    print(f"\n\n**********\n{dumps(regions, indent=4)}\n**********\n\n")
+    # ******************************************************************
     
 def get_regions(input_str):
     if input_str is not None:

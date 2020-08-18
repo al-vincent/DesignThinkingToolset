@@ -556,6 +556,7 @@ function getRegionDataFromServer(){
     .done(function(returnData) {
         console.log("AJAX RESPONSE SUCCEEDED"); 
         if(returnData !== null && returnData !== undefined) {
+            // const absData = rescaleDataToAbsoluteCoords(returnData["data"], startWidth, startHeight)
             deleteRegionsAndRedraw(returnData["data"]); 
         }
         else {

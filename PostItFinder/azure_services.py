@@ -9,6 +9,7 @@ import logging
 import requests
 from requests.exceptions import HTTPError
 import time
+import copy
 
 # Get a logger instance
 logger = logging.getLogger(__name__)
@@ -499,59 +500,183 @@ class TextAnalyser(BasisFunctions):
 # ================================================================================================
 class MatchWordsToRegions:
     def __init__(self, region_data, word_data):
+        """
+        Constructor for the class.
+
+        Parameters:
+            - region_data (list of dicts), details of each of the regions provided
+            by the user. Format:
+            [
+                { 
+                    "x": <float, range[0,1]>,      <- x-coord of region's top-left corner
+                    "y": <float, range[0,1]>,      <- y-coord of region's top-left corner
+                    "width": <float, range[0,1]>,  <- width of region
+                    "height": <float, range[0,1]>, <- height of region
+                },
+                {
+                    ...
+                }
+            ]
+            - word_data (list of dicts), details of each of the words recovered by the 
+            Azure OCR service. Each dict represents a single word. Format:
+            [
+                {
+                    "x": <float, range[0,1]>,      <- x-coord of region's top-left corner
+                    "y": <float, range[0,1]>,      <- y-coord of region's top-left corner
+                    "width": <float, range[0,1]>,  <- width of region
+                    "height": <float, range[0,1]>, <- height of region
+                    "text": <str>,                 <- word recovered
+                    "confidence": <float or None>  <- Azure level of confidence in correct word
+                },
+                {
+                    ...
+                }
+            ]
+        """
         self.regions = region_data
         self.words = word_data
 
-    def match(self):
-        # 1. Iterate through each region
-        # 2. Get the words that are within the region:
-        #    - if word.x, .y  >= region.x, .y, and word.width, .height <= region.width, .height then inside
-        # 3. Order the words correctly into a single string:
-        #    - bit tricky, due to lots boundary issues. However, find min(words.y) 
-        #      and go from there...?
-        # 4. Add the string to the region data, as an extra field ('text')
-        # 5. At the end; each original region now has a 'text' field, with a string as
-        #    the value
+    def input_is_valid(self):
+        """
+        Undertake some basic validation on the parameters passed to the constructor.
 
-        for region in self.regions:
-            words_in_region = self.get_words_in_region(region)
-            sentence = self.order_words_into_sentence(words_in_region)
-            region["text"] = sentence
+        May seem like overkill, but will probably be useful if things go wrong...!
+
+        Returns:
+            - bool indicating whether the input passes the validity checks (True) 
+            or not (False)
+        """
+        try:
+            assert self.words, f"Word list supplied to class should be list of dicts - {self.words}"
+            assert isinstance(self.words, list), f"Word list supplied to class should be list of dicts - {self.words}"
+            assert all(isinstance(word, dict) for word in self.words), f"Word list supplied to class should be list of dicts - {self.words}"
+            assert self.regions, f"Region list supplied to class should be list of dicts - {self.regions}"
+            assert isinstance(self.regions, list), f"Region list supplied to class should be list of dicts - {self.regions}"
+            assert all(isinstance(region, dict) for region in self.regions), f"Region list supplied to class should be list of dicts - {self.regions}"        
+        except AssertionError as err:
+            logger.error(err)
+            return False
         
-        return self.regions
-    
+        return True
+
     def get_words_in_region(self, region):
+        """
+        Check whether each word belongs within a region. 
+
+        Parameters:
+            - region (dict), coords of the region. Format:
+                { 
+                    "x": <float, range[0,1]>,      <- x-coord of region's top-left corner
+                    "y": <float, range[0,1]>,      <- y-coord of region's top-left corner
+                    "width": <float, range[0,1]>,  <- width of region
+                    "height": <float, range[0,1]>, <- height of region
+                }
+        
+        Returns:
+            - list of str, with each element a single word.
+        """
+        if self.words is None:
+            return None
+
         words = []
         for word in self.words:
-            if (word["x"] >= region["x"] and 
-                word["y"] >= region["y"] and
-                word["x"] + word["width"] <= region["x"] + region["width"] and 
-                word["y"]+ word["height"] <= region["y"] + region["height"]):
-            
-                words.append(word["text"])
-        return words
+            try:
+                # check if each word is within the region bounds
+                if (word["x"] >= region["x"] and 
+                    word["y"] >= region["y"] and
+                    word["x"] + word["width"] <= region["x"] + region["width"] and 
+                    word["y"]+ word["height"] <= region["y"] + region["height"]):
+
+                    words.append(word["text"])
+            except KeyError as k:
+                logger.warning(f"The key {k} is not in 'word': {word}")
+            except TypeError as err:
+                logger.warning(f"A TypeError occurred: {err}")
+            except Exception as err:
+                logger.warning(f"Another exception occurred: {err}")
+
+        return words if words else None
+    
 
     def order_words_into_sentence(self, words):
-        # NOTE: below is a simple placeholder for a more complex ordering algorithm.
-        # HOWEVER - is a more complex algorithm necessary?? E.g. if the Azure service
-        # finds word entries from top-to-bottom and left-to-right automatically, then 
-        # would the below suffice...?!
-        # 
-        # UPDATE: I don't think keeping it this simple is sensible, for what I want. 
-        # From the docs, Azure *does* order top-bottom and left-right; but also
-        # considers stuff like proximity in some cases. But would be easy to test.
-        sentence = " ".join(word for word in words)
-        # sentence = ""        
-        # while 
-        # first_word = None
-        # for word in words:
-        #     if first_word is None:
-        #         first_word = word
-        #     else:
-        #         # word is *definitely* higher than first_word
-        #         if word["y"] > first_word["y"] + first_word["height"]:
-        #             first_word = word
-        return sentence
+        """
+        Takes a series of words and orders them into a 'sentence'. 
+
+        Tests (in text_match_words_to_regions.py) strongly indicate that 
+        the Azure service returns words in order, from top-to-bottom and 
+        left-to-right, which is exactly what is needed. So this method is 
+        a super-simple word join, because all the ordering is already done.
+
+        Retained as a method in case user feedback indicates that the 
+        ordering is wrong, and a more complex function is required.
+
+        Parameters:
+            - words (list of str), the words that we want to join into a sentence,
+            *in the order that they should be joined*.
+
+            NOTE: some list items may be characters, like '(', '!', '-' etc.
+        
+        Returns:
+            - str with each word / char separated by a single space, or None.
+            None is returned if words is falsey, e.g. an empty list.
+        """
+
+        try:
+            assert isinstance(words, list), f"'words' should be of type list; actual type is {type(words)}"
+            return " ".join(word for word in words) if words else None
+        except AssertionError as err:
+            logger.error(err)
+            return None
+        except TypeError as err:
+            logger.error(f"'words' contains non-str elements. Sys error: {err}")
+            return None
+        except Exception as err:
+            logger.error(f"Another exception occurred; {err}")
+            return None
+
+    def match(self):
+        """
+        Driver function to complete the word-region matching.
+
+        Returns:
+            - list of dicts, placing the words discovered by Azure in the correct
+            region, in the appropriate order (hopefully...). Format:
+            [
+                { 
+                    "x": <float, range[0,1]>,      <- x-coord of region's top-left corner
+                    "y": <float, range[0,1]>,      <- y-coord of region's top-left corner
+                    "width": <float, range[0,1]>,  <- width of region
+                    "height": <float, range[0,1]>, <- height of region
+                    "text": <str>                  <- words within this region   
+                },
+                {
+                    ...
+                }
+            ]
+        """
+        # check that the input passes a few simple checks
+        if not self.input_is_valid():
+            return None
+
+        # I don't really want to change the original regions list, as this can lead to
+        # Bad Things, so make a deepcopy and update that.          
+        regions = copy.deepcopy(self.regions)
+
+        # Iterate through each region
+        for region in regions:
+            # Get the words that are within this region
+            words_in_region = self.get_words_in_region(region)
+            
+            # Order the words correctly into a single string
+            if words_in_region is not None:
+                sentence = self.order_words_into_sentence(words_in_region)
+            else:
+                sentence = None
+            
+            # Add the string to the region data, as an extra field ('text')
+            region["text"] = sentence
+        
+        return regions
 
 # ================================================================================================
 # HELPER FUNCTIONS
@@ -574,9 +699,12 @@ def get_file_bytes(image_path):
 # DRIVER
 # ================================================================================================
 def main():
+    from json import dumps
+
     # get the image data
+    img_file = "match_words_regions_4.png"
     current_dir = os.path.dirname(os.path.abspath(__file__))    
-    img_path = os.path.join(current_dir, "tests", "resources", "test_images", "lines_of_words.jpg")
+    img_path = os.path.join(current_dir, "tests", "resources", "test_images", img_file)
     image_data = get_file_bytes(img_path)
 
     # --- OBJECT DETECTION ---
@@ -589,7 +717,7 @@ def main():
                         prediction_key=prediction_key,                       
                         obj_det_url=api_url)
     regions = aod.analyse_and_process()
-    print(f"{'-'*24}\nObject Detection output:\n{'-'*24}\n{regions}\n")
+    print(f"{'-'*24}\nObject Detection output:\n{'-'*24}\n{dumps(regions, indent=4)}\n")
     # --- /OBJECT DETECTION ---
 
     # --- TEXT ANALYSIS ---
@@ -600,13 +728,13 @@ def main():
                     api_url=api_url,
                     use_words=True)
     words = ta.analyse_and_process()
-    print(f"{'-'*11}\nOCR output:\n{'-'*11}\n{words}\n")
+    print(f"{'-'*11}\nOCR output:\n{'-'*11}\n{dumps(words, indent=4)}\n")
     # --- /TEXT ANALYSIS ---
 
     # --- MATCH WORDS TO REGIONS ---
     mwtr = MatchWordsToRegions(regions["data"], words["data"])
     new_regions = mwtr.match()
-    print(f"{'-'*19}\nRegions with words:\n{'-'*19}\n{new_regions}\n")
+    print(f"{'-'*19}\nRegions with words:\n{'-'*19}\n{dumps(new_regions, indent=4)}\n")
     # --- MATCH WORDS TO REGIONS ---
 
 if __name__ == "__main__":
