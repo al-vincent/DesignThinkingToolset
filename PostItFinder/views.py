@@ -189,7 +189,7 @@ def set_regions(request):
         processed_data = get_regions(image_data.get("data", None))
         if processed_data is not None:
             logger.info(f"Azure processing successful, results sent to client")
-            return JsonResponse(processed_data, status=200)
+            return JsonResponse(processed_data, safe=False, status=200)
         else:
             logger.warning(f"Azure processing unsuccessful, null response sent to client")
             return JsonResponse(processed_data, safe=False, status=400)

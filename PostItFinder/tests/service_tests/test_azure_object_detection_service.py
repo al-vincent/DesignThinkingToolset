@@ -141,9 +141,8 @@ class TestProcessOutput(unittest.TestCase):
             }]
         }
         processed_results = self.aod.process_output(results)
-        expected_output = {"threshold": 0.3, 
-                            "data": [{"x": 0.290309846, "y": 0.310755759, "width": 0.408914924, "height": 0.355182737}]}      
-        self.assertDictEqual(processed_results, expected_output)
+        expected_output = [{"x": 0.290309846, "y": 0.310755759, "width": 0.408914924, "height": 0.355182737}]
+        self.assertListEqual(processed_results, expected_output)
     
     def test_process_output_returns_none_if_azure_output_contains_no_predictions_key(self):
         malformed_results = {"id": "594a913a-f079-47ec-a04e-0accbad2662e",
@@ -152,21 +151,18 @@ class TestProcessOutput(unittest.TestCase):
                             "created": "2020-07-16T12:11:50.062Z"}
 
         processed_results = self.aod.process_output(malformed_results)
-        expected_output = {"threshold": 0.3, "data": None}
-        self.assertDictEqual(processed_results, expected_output)
+        self.assertIsNone(processed_results)
         
     def test_process_output_returns_none_if_azure_output_is_not_a_dict(self):
         malformed_results = [None, "my_str", ["list", "of", "things"], 3, 2.145]
         for result in malformed_results:
             processed_results = self.aod.process_output(result)
-            expected_output = {"threshold": 0.3, "data": None}
-            self.assertDictEqual(processed_results, expected_output)
+            self.assertIsNone(processed_results)
     
     def test_process_output_returns_none_if_azure_output_is_empty_dict(self):
         malformed_results = {}
         processed_results = self.aod.process_output(malformed_results)
-        expected_output = {"threshold": 0.3, "data": None}
-        self.assertDictEqual(processed_results, expected_output)
+        self.assertIsNone(processed_results)
     
     def test_process_output_returns_none_if_azure_output_contains_no_probability_key(self):
         malformed_results = {
@@ -187,8 +183,7 @@ class TestProcessOutput(unittest.TestCase):
         }
 
         processed_results = self.aod.process_output(malformed_results)
-        expected_output = {"threshold": 0.3, "data": None}
-        self.assertDictEqual(processed_results, expected_output)
+        self.assertIsNone(processed_results)
     
     def test_process_output_returns_results_if_azure_output_contains_some_probability_keys(self):
         # In the dict below, the first sticky note doesn't have a probability but the second one does
@@ -221,9 +216,8 @@ class TestProcessOutput(unittest.TestCase):
         }
 
         processed_results = self.aod.process_output(malformed_results)
-        expected_output = {"threshold": 0.3, 
-                        "data": [{"x": 0.290309846, "y": 0.310755759, "width": 0.408914924, "height": 0.355182737}]}
-        self.assertDictEqual(processed_results, expected_output)
+        expected_output = [{"x": 0.290309846, "y": 0.310755759, "width": 0.408914924, "height": 0.355182737}]
+        self.assertListEqual(processed_results, expected_output)
     
     def test_process_output_returns_none_if_azure_output_contains_no_boundingBox_key(self):
         # In the dict below, the first sticky note doesn't have a probability but the second one does
@@ -240,8 +234,7 @@ class TestProcessOutput(unittest.TestCase):
         }
 
         processed_results = self.aod.process_output(malformed_results)
-        expected_output = {"threshold": 0.3, "data": None}
-        self.assertDictEqual(processed_results, expected_output)
+        self.assertIsNone(processed_results)
 
     def test_process_output_returns_results_if_azure_output_contains_some_boundingBox_keys(self):
         # In the dict below, the first sticky note doesn't have a boundingBox but the second one does
@@ -269,9 +262,8 @@ class TestProcessOutput(unittest.TestCase):
         }
 
         processed_results = self.aod.process_output(malformed_results)
-        expected_output = {"threshold": 0.3, 
-                        "data": [{"x": 0.290309846, "y": 0.310755759, "width": 0.408914924, "height": 0.355182737}]}
-        self.assertDictEqual(processed_results, expected_output)
+        expected_output =  [{"x": 0.290309846, "y": 0.310755759, "width": 0.408914924, "height": 0.355182737}]
+        self.assertListEqual(processed_results, expected_output)
 
     def test_process_output_returns_none_if_all_regions_are_below_confidence_threshold(self):
         # Neither sticky note has a high enough probability to be included in the results
@@ -305,8 +297,4 @@ class TestProcessOutput(unittest.TestCase):
         }
 
         processed_results = self.aod.process_output(results)
-        expected_output = {"threshold": 0.3, "data": None}
-        self.assertDictEqual(processed_results, expected_output)
-
-
-# ------------------------------------
+        self.assertIsNone(processed_results)

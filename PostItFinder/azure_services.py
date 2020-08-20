@@ -173,7 +173,8 @@ class ObjectDetector(BasisFunctions):
 
         # The ternary operator below is using the truthiness of a list to return results
         # iff it's a non-empty list; else return None
-        return {"threshold": self.confidence_threshold, "data": results if results else None}
+        # return {"threshold": self.confidence_threshold, "data": results if results else None}
+        return results if results else None
     
     def analyse_and_process(self):
         """

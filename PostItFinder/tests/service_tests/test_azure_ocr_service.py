@@ -228,7 +228,7 @@ class TestProcessOutput(unittest.TestCase):
 
     def test_correct_results_returned_from_valid_input(self):
         expected_results = RESULTS.PROCESSED_OCR_RESULTS
-        actual_results = self.ta.process_output(RESULTS.OCR_RESULTS)["data"]
+        actual_results = self.ta.process_output(RESULTS.OCR_RESULTS)
         self.assertListEqual(expected_results, actual_results)
     
     def test_input_is_none_returns_none(self):
@@ -281,7 +281,7 @@ class TestProcessOutput(unittest.TestCase):
         # do the test
         test_input = RESULTS.OCR_TEXT_IN_LINES
         expected_results = RESULTS.PROCESSED_OCR_TEXT_IN_LINES
-        actual_results = ta.process_output(test_input)["data"]
+        actual_results = ta.process_output(test_input)
         self.assertListEqual(expected_results, actual_results)
 
     def test_input_has_no_words_keys_returns_none(self):
@@ -297,13 +297,13 @@ class TestProcessOutput(unittest.TestCase):
     def test_one_words_entry_exists_returns_values(self):
         test_input = RESULTS.OCR_ONE_WORDS_KEY
         expected_results = RESULTS.PROCESSED_OCR_ONE_WORD
-        actual_results = self.ta.process_output(test_input)["data"]
+        actual_results = self.ta.process_output(test_input)
         self.assertListEqual(expected_results, actual_results)
     
     def test_one_words_list_not_empty_returns_values(self):
         test_input = RESULTS.OCR_ONE_WORDS_LIST
         expected_results = RESULTS.PROCESSED_OCR_ONE_WORD
-        actual_results = self.ta.process_output(test_input)["data"]
+        actual_results = self.ta.process_output(test_input)
         self.assertListEqual(expected_results, actual_results)
 
     def test_no_bounding_box_keys_returns_none(self):
@@ -314,7 +314,7 @@ class TestProcessOutput(unittest.TestCase):
     def test_one_bounding_box_key_returns_values(self):
         test_input = RESULTS.OCR_ONE_WORDS_LIST
         expected_results = RESULTS.PROCESSED_OCR_ONE_WORD
-        actual_results = self.ta.process_output(test_input)["data"]
+        actual_results = self.ta.process_output(test_input)
         self.assertListEqual(expected_results, actual_results)
 
     def test_no_text_keys_returns_none(self):
@@ -325,19 +325,19 @@ class TestProcessOutput(unittest.TestCase):
     def test_one_text_key_returns_values(self):
         test_input = RESULTS.OCR_ONE_TEXT_KEY_IN_WORDS
         expected_results = RESULTS.PROCESSED_OCR_ONE_WORD
-        actual_results = self.ta.process_output(test_input)["data"]
+        actual_results = self.ta.process_output(test_input)
         self.assertListEqual(expected_results, actual_results)
 
     def test_no_confidence_keys_returns_values(self):
         test_input = RESULTS.OCR_NO_CONFIDENCE_KEYS
         expected_results = RESULTS.PROCESSED_OCR_NO_CONFIDENCE_KEYS
-        actual_results = self.ta.process_output(test_input)["data"]
+        actual_results = self.ta.process_output(test_input)
         self.assertListEqual(expected_results, actual_results)
 
     def test_one_confidence_key_returns_values(self):
         test_input = RESULTS.OCR_ONE_CONFIDENCE_KEY
         expected_results = RESULTS.PROCESSED_OCR_ONE_CONFIDENCE_KEY
-        actual_results = self.ta.process_output(test_input)["data"]
+        actual_results = self.ta.process_output(test_input)
         self.assertListEqual(expected_results, actual_results)
 
 # ------------------------------------

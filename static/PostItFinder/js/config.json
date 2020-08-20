@@ -181,7 +181,8 @@
             },
             "FIND_REGIONS_BTN":{
                 "ID": "find-regions-btn-id",
-                "TEXT": "Find Regions"
+                "TEXT": "Find Regions",
+                "WAIT_TEXT": "Loading..."
             },
             "ADD_REGION_BTN":{
                 "ID": "add-region-btn-id",
@@ -209,7 +210,8 @@
             },
             "ANALYSE_TEXT_BTN" :{
                 "ID": "analyse-text-btn-id",
-                "TEXT": "Analyse Text"
+                "TEXT": "Analyse Text",
+                "WAIT_TEXT": "Loading..."
             },
             "PREVIOUS_BTN": {
                 "URL": "PostItFinder:set_regions"

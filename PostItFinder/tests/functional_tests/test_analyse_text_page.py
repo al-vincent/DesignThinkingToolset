@@ -17,7 +17,7 @@ import math
 from PostItFinder.tests.functional_tests import base
 
 # =========================================================================================
-# DYNAMIG TESTS
+# DYNAMIC TESTS
 # =========================================================================================
 class DynamicTests(base.DynamicTests):
     """
