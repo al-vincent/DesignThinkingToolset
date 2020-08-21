@@ -27,6 +27,17 @@ window.onload = function() {
     addClickEventsToButtons(CONFIG);
 }
 
+window.onresize  = function() {
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    const IMG = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);
+    
+    console.log("Resizing window: height=" + $(window).height() + ", width=" + $(window).width());
+    deleteRegionsAndRedraw();
+
+    startWidth = IMG.clientWidth;
+    startHeight = IMG.clientHeight;
+}
+
 function addClickEventsToButtons(config) {
     const analyseTextBtn = document.getElementById(config.HTML.ANALYSE_TEXT.ANALYSE_TEXT_BTN.ID);
     analyseTextBtn.onclick = function() { 

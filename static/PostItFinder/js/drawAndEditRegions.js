@@ -146,7 +146,7 @@ function createRegions(svg, data, isStatic) {
     }
 }
 
-function deleteRegionsAndRedraw(extraData) {
+function deleteRegionsAndRedraw(extraData, isStatic) {
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
     const REGION_GRP = CONFIG.CONSTANTS.CLASSES.REGION;
     const IMG = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);
@@ -172,7 +172,7 @@ function deleteRegionsAndRedraw(extraData) {
         CONFIG.HTML.APP.IMAGE_PANE.SVG.CLASS,
         IMG.clientWidth, 
         IMG.clientHeight);
-    createRegions(svg, newData);
+    createRegions(svg, newData, isStatic);
 }
 
 function drawStaticRegions(regionData){
