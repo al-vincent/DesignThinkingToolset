@@ -27,30 +27,37 @@ window.onload = function() {
     addClickEventsToButtons(CONFIG);
 }
 
+window.onresize  = function() {
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    const IMG = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);
+    
+    console.log("Resizing window: height=" + $(window).height() + ", width=" + $(window).width());
+    deleteRegionsAndRedraw();
+
+    startWidth = IMG.clientWidth;
+    startHeight = IMG.clientHeight;
+}
+
 function addClickEventsToButtons(config) {
     const analyseTextBtn = document.getElementById(config.HTML.ANALYSE_TEXT.ANALYSE_TEXT_BTN.ID);
     analyseTextBtn.onclick = function() { 
-        $.ajax({     
-            type: "GET",
-            dataType: "json",
-            timeout: 5000
-        })
-        .done(function(returnData) {
-            console.log("AJAX RESPONSE SUCCEEDED"); 
-            console.log(returnData);
-        })
-        .fail(function(jqXHR) {
-            console.log("AJAX RESPONSE FAILED");
-            console.log("Status: " +  jqXHR.status);
-            console.log("Status text: " + jqXHR.statusText);
-            console.log("Response type: " + jqXHR.responseType);
-            console.log("Response text: " + jqXHR.responseText);
-            console.log("Ready state: " + jqXHR.readyState);
+        // change the button text        
+        analyseTextBtn.innerHTML = config.HTML.ANALYSE_TEXT.ANALYSE_TEXT_BTN.WAIT_TEXT;
 
-            if(jqXHR.statusText === "timeout") {
-                alert("The request timed out. The Azure server may be experiencing issues; please try again later.");
-            }
-        }) 
+        // Make the AJAX GET request
+        const alertText = "The OCR algorithm did not find any text.";
+        getDataFromServer(analyseTextBtnAjax, alertText);
         return false;
     }
+}
+
+function analyseTextBtnAjax(regionData) {
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+
+    // draw the regions, apply tooltips etx.
+    drawStaticRegions(regionData);
+
+    // update the text in the button, to show that we're done
+    const analayseTxtBtn = document.getElementById(CONFIG.HTML.ANALYSE_TEXT.ANALYSE_TEXT_BTN.ID);
+    analayseTxtBtn.innerHTML = CONFIG.HTML.ANALYSE_TEXT.ANALYSE_TEXT_BTN.TEXT;
 }

@@ -30,7 +30,8 @@ window.onload = function() {
     
     // draw the regions
     if(REGION_DATA !== null && REGION_DATA !== undefined) {
-        createRegions(svg, REGION_DATA);
+        const absData = rescaleDataToAbsoluteCoords(REGION_DATA, startWidth, startHeight);
+        createRegions(svg, absData);
     }
     else {
         console.log("No regions found");
@@ -60,7 +61,13 @@ function addClickEventsToButtons(config) {
     // Add click event to the Find Regions button
     const findRgnsBtn = document.getElementById(config.HTML.SET_REGIONS.FIND_REGIONS_BTN.ID);
     findRgnsBtn.onclick = function() { 
-        getRegionDataFromServer();
+        // change the button text, to show the user that stuff is happening
+        findRgnsBtn.innerHTML = config.HTML.SET_REGIONS.FIND_REGIONS_BTN.WAIT_TEXT
+
+        // make the AJAX GET request
+        const alertText = "The object detection algorithm did not find any sticky notes.";
+        // getDataFromServer(deleteRegionsAndRedraw, alertText);
+        getDataFromServer(findRgnsBtnAjax, alertText);
         // NOTE: the line below ensures that the AJAX call doesn't reload the whole
         // page; it just gets the new data and stops there. 
         // Not essential in a GET request, but does prevent the URL from having a 
@@ -73,7 +80,18 @@ function addClickEventsToButtons(config) {
     nextBtn.onclick = function() {
         // get region data, send to server in POST request, browse to next page
         const data = d3.selectAll("." + config.CONSTANTS.CLASSES.REGION).data();
-        sendDataToServer({"data": JSON.stringify(data)}, 10000);        
+        // convert data to relative coords, for consistency with Azure
+        const rescaledData = rescaleDataToRelativeCoords(data, startWidth, startHeight);
+        sendDataToServer({"data": JSON.stringify(rescaledData)}, 10000);        
         return true;
     }
+}
+
+function findRgnsBtnAjax(regionData) {
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+
+    deleteRegionsAndRedraw(regionData);
+    // update the text in the button, to show that we're done
+    const analyseTxtBtn = document.getElementById(CONFIG.HTML.SET_REGIONS.FIND_REGIONS_BTN.ID);
+    analyseTxtBtn.innerHTML = CONFIG.HTML.SET_REGIONS.FIND_REGIONS_BTN.TEXT;
 }

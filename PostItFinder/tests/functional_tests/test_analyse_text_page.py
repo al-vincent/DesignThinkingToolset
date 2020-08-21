@@ -4,6 +4,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.color import Color
+from selenium.common.exceptions import NoSuchElementException
 
 from django.conf import settings
 from django.urls import reverse
@@ -17,7 +18,7 @@ import math
 from PostItFinder.tests.functional_tests import base
 
 # =========================================================================================
-# DYNAMIG TESTS
+# DYNAMIC TESTS
 # =========================================================================================
 class DynamicTests(base.DynamicTests):
     """
@@ -193,45 +194,18 @@ class TestExplanatoryText(DynamicTests):
 # Analyse Text button tests
 # -------------------------------------------------------------------------------------
 class TestAnalyseTextButton(DynamicTests):
-    def test_analyse_text_button_is_displayed(self):
+    def test_button_is_displayed(self):
         analyse_txt_btn = self.browser.find_element_by_id(base.ELEMS["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"]["ID"])
         self.assertTrue(analyse_txt_btn.is_displayed())
 
-    def test_analyse_text_button_is_enabled(self):
+    def test_button_is_enabled(self):
         analyse_txt_btn = self.browser.find_element_by_id(base.ELEMS["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"]["ID"])
         self.assertTrue(analyse_txt_btn.is_enabled())
 
-    def test_analyse_text_button_has_correct_text(self):
+    def test_button_has_correct_text(self):
         analyse_txt_btn = self.browser.find_element_by_id(base.ELEMS["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"]["ID"])
         intended_text = base.ELEMS["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"]["TEXT"]
         self.assertEqual(analyse_txt_btn.get_attribute("innerText"), intended_text)
-
-    # def test_find_regions_button_gets_correct_region(self):
-    #     # click the Find Regions button
-    #     find_rgns_id = base.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"]
-    #     self.browser.find_element_by_id(find_rgns_id).click()
-
-    #     # add a long sleep, to account for the time taken for Azure to respond
-    #     time.sleep(10)
-
-    #     # if successful, a single region should be created at specific points
-    #     rects = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])  
-    #     self.assertEqual(len(rects), 1)     
-    #     # get the rect and ensure that it's x, y, width, height are correct
-    #     rect = rects[0]
-        
-    #     # The azure return, when run standalone, return the below (relative coords, range [0,1]):
-    #     # {'x': 0.290309846, 'y': 0.310755759, 'width': 0.408914924, 'height': 0.355182737}. Need 
-    #     # to convert these to absolute coords using the width & height of the image.
-
-    #     # We don't know the image width and height in the browser, so get the image element
-    #     img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
-        
-    #     # Check that the values are correct
-    #     self.assertAlmostEqual(float(rect.get_attribute("x")), 0.290309846 * img.size["width"])
-    #     self.assertAlmostEqual(float(rect.get_attribute("y")), 0.310755759 * img.size["height"])
-    #     self.assertAlmostEqual(float(rect.get_attribute("width")), 0.408914924 * img.size["width"])
-    #     self.assertAlmostEqual(float(rect.get_attribute("height")), 0.355182737 * img.size["height"])
 
     # -------------------------------------------------------------------------------------
     # Next button tests
@@ -314,4 +288,249 @@ class TestImagePane(DynamicTests):
     def test_image_pane_renders_region_correctly(self):
         pass
 
+# -------------------------------------------------------------------------------------
+# Detailed tests on the results of the Analyse Text button, with a region included
+# -------------------------------------------------------------------------------------
+class TestAnalyseTextButtonWithRegion(base.DynamicTests):
+    def setUp(self):
+        """
+        setUp() in base.py navigates to the home page. We then need to select an image;
+        navigate to set-regions; create a region; resize it; and nav to analyse-text
+        """                
+        # call the 'normal' setUp from the base class; navigate to set-regions
+        super().setUp()
+        base.navigate_to_set_regions_page(self.browser)
+        # click the Find Regions button
+        find_rgns_id = base.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"]
+        self.browser.find_element_by_id(find_rgns_id).click()
+        # wait for the region to be rendered and get the rect
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["BODY_RECT"]))
+        )
+        # click the Next button to get to analyse-text
+        self.browser.find_element_by_id(base.ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
 
+        # click the Analyse Text button
+        analyse_txt_id = base.ELEMS["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"]["ID"]
+        self.browser.find_element_by_id(analyse_txt_id).click()
+
+        # wait for the results to be returned and regions to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["REGION"]))
+        )
+
+    def test_mouseover_shows_expected_text(self):
+        # get the rect element
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
+
+        # Hover on region, and wait for tooltip to appear
+        ActionChains(self.browser).move_to_element(rect).perform()
+        tooltip = WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["TOOLTIP"]))
+        )
+        self.assertEqual(tooltip.text, "WORDS HERE")
+        
+    def test_mouseover_and_mouseout_correctly_change_region_colour(self):
+        # get the rect element
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
+
+        # Hover on region, and wait for tooltip to appear
+        ActionChains(self.browser).move_to_element(rect).perform()
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["TOOLTIP"]))
+        )
+        # check that the rect has changed colour on hover
+        self.assertEqual(base.CONST["COLOURS"]["REGION_HOVER_COLOUR"], 
+                         Color.from_string(rect.value_of_css_property("fill")).hex.upper())
+        # move the mouse outside the rect, and check the rect colour has changed back
+        ActionChains(self.browser).move_to_element_with_offset(rect, -10, -10).perform()
+        self.assertEqual(base.CONST["COLOURS"]["REGION_COLOUR"], 
+                         Color.from_string(rect.value_of_css_property("fill")).hex.upper())
+
+    def test_region_rendered_is_in_correct_location(self):
+        # if successful, a single region should be created at specific points
+        rects = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
+        self.assertEqual(len(rects), 1)  
+        # get the rect and ensure that it's x, y, width, height are correct
+        rect = rects[0]
+        
+        # The azure return, when run standalone, return the below (relative coords, range [0,1]):
+        # {'x': 0.290309846, 'y': 0.310755759, 'width': 0.408914924, 'height': 0.355182737}. Need 
+        # to convert these to absolute coords using the width & height of the image.
+
+        # We don't know the image width and height in the browser, so get the image element
+        img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        
+        # Check that the region location is correct
+        self.assertAlmostEqual(float(rect.get_attribute("x")), 0.290309846 * img.size["width"])
+        self.assertAlmostEqual(float(rect.get_attribute("y")), 0.310755759 * img.size["height"])
+        self.assertAlmostEqual(float(rect.get_attribute("width")), 0.408914924 * img.size["width"])
+        self.assertAlmostEqual(float(rect.get_attribute("height")), 0.355182737 * img.size["height"])
+
+        
+    def test_region_has_no_handles(self):
+        # Best way to test is to look for handles and not find any...?!
+        # NOTE: find_elements_by_class_name() doesn't raise NoSuchElementException;
+        # if it doesn't find any elements, it returns an empty list.
+        handles = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["HANDLE"])
+        if len(handles) != 0:
+            self.fail("Handles should not be rendered")
+        else:
+            # pass the test
+            pass
+
+    def test_region_cannot_be_moved(self):
+        # get the rect element
+        rect = self.browser.find_element_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
+
+        # get it's original coords
+        x = rect.get_attribute("x")
+        y = rect.get_attribute("y")
+
+        # try to move the rect
+        ActionChains(self.browser).drag_and_drop_by_offset(rect, 20, 20).perform()
+
+        # get the 'new' coords
+        new_x = rect.get_attribute("x")
+        new_y = rect.get_attribute("y")
+
+        # check they're the same as the originals
+        self.assertEqual(x, new_x)
+        self.assertEqual(y, new_y)
+
+
+    def test_region_cannot_be_resized(self):
+        # NOTE: have established that no handles exist, so I think this is ok...?
+        pass
+            
+    def test_region_cannot_be_deleted(self):
+        # count the rect elements
+        rects = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
+        num_rects_start = len(rects)
+        rect = rects[0]
+
+        # double-click on it
+        ActionChains(self.browser).double_click(rect).perform()
+
+        # count the number of rects again
+        rects = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
+        num_rects_end = len(rects)
+
+        # confirm that the number of rects hasn't changed
+        self.assertEqual(num_rects_start, num_rects_end)
+
+# -------------------------------------------------------------------------------------
+# Detailed tests on the results of the Analyse Text button, with no regions
+# -------------------------------------------------------------------------------------
+class TestAnalyseTextButtonWithNoRegions(base.DynamicTests):
+    def setUp(self):
+        """
+        setUp() in base.py navigates to the home page. We then need to select an image;
+        navigate to set-regions; create a region; resize it; and nav to analyse-text
+        """                
+        # call the 'normal' setUp from the base class; navigate to set-regions
+        super().setUp()
+        base.navigate_to_set_regions_page(self.browser)
+        
+        # click the Next button to get to analyse-text
+        self.browser.find_element_by_id(base.ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
+
+        # click the Analyse Text button
+        analyse_txt_id = base.ELEMS["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"]["ID"]
+        self.browser.find_element_by_id(analyse_txt_id).click()
+
+        # wait for the results to be returned and regions to be rendered
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["REGION"]))
+        )
+
+    def test_two_regions_are_rendered(self):
+        # if successful, two regions should be created
+        rects = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
+        self.assertEqual(len(rects), 2)  
+
+    def test_mouseover_shows_expected_text(self):
+        # get the rect elements
+        rects = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
+
+        # for each region, check that mousing-over displays the correct text
+        for rect in rects:
+            # Hover on region, and wait for tooltip to appear
+            ActionChains(self.browser).move_to_element(rect).perform()
+            tooltip = WebDriverWait(self.browser, base.MAX_WAIT).until(
+                EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["TOOLTIP"]))
+            )
+            # I don't believe there's any way to predict which rect will be moused-over first
+            # so assert that the tooltip-text is *one* of the expected words.
+            self.assertIn(tooltip.text, ["WORDS", "HERE"])
+        
+    def test_mouseover_and_mouseout_correctly_change_region_colour(self):
+        # get the rect elements
+        rects = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
+
+        for rect in rects:
+            # Hover on region, and wait for tooltip to appear
+            ActionChains(self.browser).move_to_element(rect).perform()
+            WebDriverWait(self.browser, base.MAX_WAIT).until(
+                EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["TOOLTIP"]))
+            )
+            # check that the rect has changed colour on hover
+            self.assertEqual(base.CONST["COLOURS"]["REGION_HOVER_COLOUR"], 
+                            Color.from_string(rect.value_of_css_property("fill")).hex.upper())
+            # move the mouse outside the rect, and check the rect colour has changed back
+            ActionChains(self.browser).move_to_element_with_offset(rect, -10, -10).perform()
+            self.assertEqual(base.CONST["COLOURS"]["REGION_COLOUR"], 
+                            Color.from_string(rect.value_of_css_property("fill")).hex.upper())
+        
+    def test_regions_have_no_handles(self):
+        # Best way to test is to look for handles and not find any...?!
+        # NOTE: find_elements_by_class_name() doesn't raise NoSuchElementException;
+        # if it doesn't find any elements, it returns an empty list.
+        handles = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["HANDLE"])
+        if len(handles) != 0:
+            self.fail("Handles should not be rendered")
+        else:
+            # pass the test
+            pass
+
+    def test_regions_cannot_be_moved(self):
+        # get the rect elements
+        rects = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
+
+        for rect in rects:
+            # get it's original coords
+            x = rect.get_attribute("x")
+            y = rect.get_attribute("y")
+
+            # try to move the rect
+            ActionChains(self.browser).drag_and_drop_by_offset(rect, 5, 5).perform()
+
+            # get the 'new' coords
+            new_x = rect.get_attribute("x")
+            new_y = rect.get_attribute("y")
+
+            # check they're the same as the originals
+            self.assertEqual(x, new_x)
+            self.assertEqual(y, new_y)
+
+    def test_region_cannot_be_resized(self):
+        # NOTE: have established that no handles exist, so I think this is ok...?
+        pass
+            
+    def test_region_cannot_be_deleted(self):
+        # count the rect elements
+        rects = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
+        num_rects_start = len(rects)
+
+        # get one of the rects
+        rect = rects[0]
+
+        # double-click on it
+        ActionChains(self.browser).double_click(rect).perform()
+
+        # count the number of rects again
+        rects = self.browser.find_elements_by_class_name(base.CONST["CLASSES"]["BODY_RECT"])
+        num_rects_end = len(rects)
+
+        # confirm that the number of rects hasn't changed
+        self.assertEqual(num_rects_start, num_rects_end)

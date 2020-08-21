@@ -327,8 +327,8 @@ OCR_ONE_WORDS_LIST = {
 	}
 }
 
-# NOTE: for this test-case, we *DO* want 'boundingBox' keys in 'lines' - just not 
-# in 'words'
+# NOTE: for this test-case, we *DO* want "boundingBox" keys in "lines" - just not 
+# in "words"
 OCR_NO_BOUNDINGBOX_KEYS = {
 	"status": "succeeded",
 	"createdDateTime": "2020-08-03T12:15:02Z",
@@ -410,7 +410,7 @@ OCR_ONE_BOUNDINGBOX_KEY = {
 	}
 }
 
-# NOTE: for this test-case, we *DO* want 'text' keys in 'lines' - just not in 'words'
+# NOTE: for this test-case, we *DO* want "text" keys in "lines" - just not in "words"
 OCR_NO_TEXT_KEYS_IN_WORDS = { 
 	"status": "succeeded",
 	"createdDateTime": "2020-08-03T12:15:02Z",
@@ -573,73 +573,351 @@ OCR_ONE_CONFIDENCE_KEY = {
 	}
 }
 
+# NOTE: this dict is taken from the Microsoft quickstart example, and provides a 
+# better test for extracting lines of text. Matches the file lines_of_words.jpg
+# Code: https://docs.microsoft.com/en-gb/azure/cognitive-services/computer-vision/quickstarts/python-hand-text
+# Original image: https://raw.githubusercontent.com/MicrosoftDocs/azure-docs/master/articles/cognitive-services/Computer-vision/Images/readsample.jpg 
+OCR_TEXT_IN_LINES = {
+    "status": "succeeded",
+    "createdDateTime": "2020-08-15T13:16:13Z",
+    "lastUpdatedDateTime": "2020-08-15T13:16:14Z",
+    "analyzeResult": {
+        "version": "3.0.0",
+        "readResults": [
+            {
+                "page": 1,
+                "angle": 0.6856,
+                "width": 2661,
+                "height": 1901,
+                "unit": "pixel",
+                "lines": [
+                    {
+                        "boundingBox": [
+                            38,
+                            650,
+                            2572,
+                            699,
+                            2570,
+                            854,
+                            37,
+                            815
+                        ],
+                        "text": "The quick brown fox jumps",
+                        "words": [
+                            {
+                                "boundingBox": [
+                                    116,
+                                    654,
+                                    478,
+                                    672,
+                                    477,
+                                    819,
+                                    115,
+                                    818
+                                ],
+                                "text": "The",
+                                "confidence": 0.984
+                            },
+                            {
+                                "boundingBox": [
+                                    533,
+                                    675,
+                                    1005,
+                                    692,
+                                    1004,
+                                    823,
+                                    532,
+                                    819
+                                ],
+                                "text": "quick",
+                                "confidence": 0.967
+                            },
+                            {
+                                "boundingBox": [
+                                    1137,
+                                    697,
+                                    1620,
+                                    707,
+                                    1620,
+                                    833,
+                                    1136,
+                                    825
+                                ],
+                                "text": "brown",
+                                "confidence": 0.973
+                            },
+                            {
+                                "boundingBox": [
+                                    1653,
+                                    707,
+                                    2016,
+                                    711,
+                                    2015,
+                                    841,
+                                    1653,
+                                    833
+                                ],
+                                "text": "fox",
+                                "confidence": 0.559
+                            },
+                            {
+                                "boundingBox": [
+                                    2049,
+                                    712,
+                                    2565,
+                                    711,
+                                    2565,
+                                    854,
+                                    2048,
+                                    842
+                                ],
+                                "text": "jumps",
+                                "confidence": 0.978
+                            }
+                        ]
+                    },
+                    {
+                        "boundingBox": [
+                            184,
+                            1053,
+                            508,
+                            1044,
+                            510,
+                            1123,
+                            184,
+                            1128
+                        ],
+                        "text": "over",
+                        "words": [
+                            {
+                                "boundingBox": [
+                                    221,
+                                    1058,
+                                    506,
+                                    1045,
+                                    510,
+                                    1125,
+                                    221,
+                                    1128
+                                ],
+                                "text": "over",
+                                "confidence": 0.835
+                            }
+                        ]
+                    },
+                    {
+                        "boundingBox": [
+                            639,
+                            1011,
+                            1976,
+                            1026,
+                            1974,
+                            1158,
+                            637,
+                            1141
+                        ],
+                        "text": "the lazy dog!",
+                        "words": [
+                            {
+                                "boundingBox": [
+                                    669,
+                                    1012,
+                                    967,
+                                    1012,
+                                    967,
+                                    1144,
+                                    668,
+                                    1127
+                                ],
+                                "text": "the",
+                                "confidence": 0.985
+                            },
+                            {
+                                "boundingBox": [
+                                    1087,
+                                    1012,
+                                    1504,
+                                    1018,
+                                    1506,
+                                    1158,
+                                    1087,
+                                    1149
+                                ],
+                                "text": "lazy",
+                                "confidence": 0.981
+                            },
+                            {
+                                "boundingBox": [
+                                    1661,
+                                    1021,
+                                    1974,
+                                    1029,
+                                    1976,
+                                    1156,
+                                    1663,
+                                    1158
+                                ],
+                                "text": "dog!",
+                                "confidence": 0.559
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
+
+OCR_SINGLE_WORD = {
+	"boundingBox": [
+		116,
+		654,
+		478,
+		672,
+		477,
+		819,
+		115,
+		818
+	],
+	"text": "The",
+	"confidence": 0.984
+}
+
+OCR_SINGLE_WORD_NO_BOUNDING_BOX_KEY = {
+	"text": "The",
+	"confidence": 0.984
+}
+
+OCR_SINGLE_WORD_NO_TEXT_KEY = {
+	"boundingBox": [
+		116,
+		654,
+		478,
+		672,
+		477,
+		819,
+		115,
+		818
+	],
+	"confidence": 0.984
+}
+
+OCR_SINGLE_WORD_NO_CONFIDENCE_KEY = {
+	"boundingBox": [
+		116,
+		654,
+		478,
+		672,
+		477,
+		819,
+		115,
+		818
+	],
+	"text": "The"
+}
 # ------------------------------------------------------------------------------------------------
 # AZURE OCR PROCESSED RESULTS
 # ------------------------------------------------------------------------------------------------
 PROCESSED_OCR_RESULTS = [
 	{
-		'x': 0.3643663194444444, 
-		'y': 0.39988425925925924, 
-		'width': 0.16905381944444445, 
-		'height': 0.09519675925925926, 
-		'text': 'WORDS', 
-		'confidence': 0.981
+		"x": 0.3643663194444444, 
+		"y": 0.39988425925925924, 
+		"width": 0.16905381944444445, 
+		"height": 0.09519675925925926, 
+		"text": "WORDS", 
+		"confidence": 0.981
 	}, 
 	{
-		'x': 0.4598524305555556, 
-		'y': 0.5237268518518519, 
-		'width': 0.1421440972222222, 
-		'height': 0.08796296296296297, 
-		'text': 'HERE', 
-		'confidence': 0.985
+		"x": 0.4598524305555556, 
+		"y": 0.5237268518518519, 
+		"width": 0.1421440972222222, 
+		"height": 0.08796296296296297, 
+		"text": "HERE", 
+		"confidence": 0.985
 	}
 ]
 
 PROCESSED_OCR_ONE_WORD = [
 	{
-		'x': 0.3643663194444444, 
-		'y': 0.39988425925925924, 
-		'width': 0.16905381944444445, 
-		'height': 0.09519675925925926, 
-		'text': 'WORDS', 
-		'confidence': 0.981
+		"x": 0.3643663194444444, 
+		"y": 0.39988425925925924, 
+		"width": 0.16905381944444445, 
+		"height": 0.09519675925925926, 
+		"text": "WORDS", 
+		"confidence": 0.981
 	}
 ]
 
 PROCESSED_OCR_NO_CONFIDENCE_KEYS = [
 	{
-		'x': 0.3643663194444444, 
-		'y': 0.39988425925925924, 
-		'width': 0.16905381944444445, 
-		'height': 0.09519675925925926, 
-		'text': 'WORDS', 
-		'confidence': None
+		"x": 0.3643663194444444, 
+		"y": 0.39988425925925924, 
+		"width": 0.16905381944444445, 
+		"height": 0.09519675925925926, 
+		"text": "WORDS", 
+		"confidence": None
 	}, 
 	{
-		'x': 0.4598524305555556, 
-		'y': 0.5237268518518519, 
-		'width': 0.1421440972222222, 
-		'height': 0.08796296296296297, 
-		'text': 'HERE', 
-		'confidence': None
+		"x": 0.4598524305555556, 
+		"y": 0.5237268518518519, 
+		"width": 0.1421440972222222, 
+		"height": 0.08796296296296297, 
+		"text": "HERE", 
+		"confidence": None
 	}
 ]
 
 PROCESSED_OCR_ONE_CONFIDENCE_KEY = [
 	{
-		'x': 0.3643663194444444, 
-		'y': 0.39988425925925924, 
-		'width': 0.16905381944444445, 
-		'height': 0.09519675925925926, 
-		'text': 'WORDS', 
-		'confidence': 0.981
+		"x": 0.3643663194444444, 
+		"y": 0.39988425925925924, 
+		"width": 0.16905381944444445, 
+		"height": 0.09519675925925926, 
+		"text": "WORDS", 
+		"confidence": 0.981
 	}, 
 	{
-		'x': 0.4598524305555556, 
-		'y': 0.5237268518518519, 
-		'width': 0.1421440972222222, 
-		'height': 0.08796296296296297, 
-		'text': 'HERE', 
+		"x": 0.4598524305555556, 
+		"y": 0.5237268518518519, 
+		"width": 0.1421440972222222, 
+		"height": 0.08796296296296297, 
+		"text": "HERE", 
+		"confidence": None
+	}
+]
+
+PROCESSED_OCR_TEXT_IN_LINES = [
+	{
+		'x': 0.013904547162720781, 
+		'y': 0.34192530247238295, 
+		'width': 0.9526493799323562, 
+		'height': 0.10731194108364019, 
+		'text': 'The quick brown fox jumps', 
+		'confidence': None
+	}, 
+	{
+		'x': 0.06914693724163848, 
+		'y': 0.5491846396633351, 
+		'width': 0.12251033446072905, 
+		'height': 0.04418726985796949, 
+		'text': 'over', 
+		'confidence': None
+	}, 
+	{
+		'x': 0.2393836903419767, 
+		'y': 0.5318253550762756, 
+		'width': 0.5031942878617062, 
+		'height': 0.0773277222514466, 
+		'text': 'the lazy dog!', 
 		'confidence': None
 	}
 ]
+
+PROCESSED_OCR_TEXT_SINGLE_WORD = {
+	'x': 0.04321683577602405, 
+	'y': 0.3440294581799053, 
+	'width': 0.13641488162344984, 
+	'height': 0.08679642293529721, 
+	'text': 'The', 
+	'confidence': 0.984
+}

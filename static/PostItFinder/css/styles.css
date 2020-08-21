@@ -44,6 +44,18 @@ handle to no longer be bound to the rect element (hence commented out) */
     transition: all 0.5s;
 } */
 
+div.tooltip {	
+    position: absolute;			
+    text-align: center;
+    padding: 5px;				
+    font: 18px sans-serif;
+    color: whitesmoke;
+    background: black;	
+    border: 1px;		
+    border-radius: 5px;			
+    pointer-events: none;			
+}
+
 /* ========================================================================== 
  * Stepper progress bar
  * ========================================================================== */
