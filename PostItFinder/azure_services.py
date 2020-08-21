@@ -9,6 +9,7 @@ import logging
 import requests
 from requests.exceptions import HTTPError
 import time
+import copy
 
 # Get a logger instance
 logger = logging.getLogger(__name__)
@@ -83,12 +84,12 @@ class BasisFunctions:
 # AZURE OBJECT DETECTION
 # ================================================================================================
 class ObjectDetector(BasisFunctions):
-    def __init__(self, image_data, confidence_threshold=0.3, prediction_key=None, obj_det_url=None):
+    def __init__(self, image_data, prediction_key, obj_det_url, confidence_threshold=0.3):
         super().__init__()
         self.image_data = self.get_image_data(image_data)    
         self.confidence_threshold = confidence_threshold    
-        self.PREDICTION_KEY = prediction_key if prediction_key is not None else settings.OBJ_DET_PREDICTION_KEY
-        self.OBJ_DET_URL = obj_det_url if obj_det_url is not None else settings.OBJ_DET_API_URL
+        self.prediction_key = prediction_key
+        self.obj_det_url = obj_det_url
 
     def analyse_image(self, image_data=None):
         """
@@ -107,12 +108,12 @@ class ObjectDetector(BasisFunctions):
 
         headers = {
             # Request headers
-            'Prediction-Key': self.PREDICTION_KEY,
+            'Prediction-Key': self.prediction_key,
             'Content-Type': 'application/octet-stream',
         }
 
         try:
-            response = requests.post(self.OBJ_DET_URL, headers=headers, data=image_data)
+            response = requests.post(self.obj_det_url, headers=headers, data=image_data)
             response.raise_for_status()
         except Exception as err:
             logger.error(f"Exception raised; sys error message: {err}")
@@ -166,13 +167,14 @@ class ObjectDetector(BasisFunctions):
                                 "height": region["boundingBox"]["height"]
                             })
                         except Exception as err:
-                            logger.warn(f"An exception occurred; region={region}, error={err}")
+                            logger.warning(f"An exception occurred; region={region}, error={err}")
                 else:
                     logger.error(f"Input data does not contain required keys")        
 
         # The ternary operator below is using the truthiness of a list to return results
         # iff it's a non-empty list; else return None
-        return {"threshold": self.confidence_threshold, "data": results if results else None}
+        # return {"threshold": self.confidence_threshold, "data": results if results else None}
+        return results if results else None
     
     def analyse_and_process(self):
         """
@@ -206,13 +208,14 @@ class TextAnalyser(BasisFunctions):
     # https://westcentralus.dev.cognitive.microsoft.com/docs/services/computer-vision-v3-ga/operations/5d9869604be85dee480c8750
     # Example:
     # https://docs.microsoft.com/en-gb/azure/cognitive-services/computer-vision/quickstarts/python-hand-text
-    def __init__(self, image_data, subscription_key, api_url):
+    def __init__(self, image_data, subscription_key, api_url, use_words=True):
         super().__init__()
         self.image_data = self.get_image_data(image_data)    
         self.subscription_key = subscription_key
         self.api_url = api_url
         self.headers = {"Ocp-Apim-Subscription-Key": self.subscription_key,
                         "Content-Type": "application/octet-stream"}
+        self.use_words = use_words
     
     def submit_image_for_processing(self):
         """
@@ -272,15 +275,15 @@ class TextAnalyser(BasisFunctions):
                 return (results, False)
             # in this case, the analysis has completed but failed to work
             elif results["status"] == "failed":
-                logger.warn("The Azure service failed to return any results.")
+                logger.warning("The Azure service failed to return any results.")
                 return (None, False)
         else:
-            logger.warn(f"Azure results missing expected key 'status': {results}")
+            logger.warning(f"Azure results missing expected key 'status': {results}")
             return (None, False)
 
         # in this case it's taken too long for the service to work, so exit
         if time_elapsed >= max_time:
-            logger.warn("The Azure OCR service exceeded the max response time.")
+            logger.warning("The Azure OCR service exceeded the max response time.")
             return (None, False)            
 
         # Otherwise, we're still waiting
@@ -295,11 +298,16 @@ class TextAnalyser(BasisFunctions):
 
     def process_output(self, azure_results):
         if azure_results is not None:
-            # if any of these entries are missing, the analysis has failed; return None
+            # if any of these entries are missing, the analysis has failed; return None.
             try:
                 results_pages = azure_results["analyzeResult"]["readResults"]
+                # Key assumption - the [0] index below is a ref to the page analysed.
+                # This is relevant for PDF docs, which can be multi-page; but not for
+                # the images we're processing, which will only ever be one page long.
                 results_page = results_pages[0]
                 lines = results_page["lines"]
+                width = results_page["width"]
+                height = results_page["height"]
             except KeyError as k:
                 logger.error(f"Azure OCR results do not contain the key {k}.")
                 return None
@@ -310,33 +318,28 @@ class TextAnalyser(BasisFunctions):
                 logger.error(f"Another error occurred: {err}")
                 return None
 
-            # Key assumption - the [0] index below is a ref to the page analysed.
-            # This is relevant for PDF docs, which can be multi-page; but not for
-            # the images we're processing, which will only ever be one page long.
+            # process the lines or words (depending on whether the user has provided
+            # any regions)
             processed_results = []
             if len(lines) > 0:
                 for line in lines:
-                    if "words" in line:
-                        for word in line["words"]:
-                            try:
-                                w = self.convert_bounds(bounding_coords=word["boundingBox"], 
-                                                        max_width=results_page["width"], 
-                                                        max_height=results_page["height"]) 
-                                if w is not None:
-                                    # use word.get() for confidence, as it's nice-to-have
-                                    w.update({"text": word["text"], "confidence": word.get("confidence", None)})
-                                    processed_results.append(w)
-                            # In this case, we do *NOT* want to return None; it might be that
-                            # only one instance of word has a missing key, for e.g. 
-                            # If 'height' or 'width' don't exist, None *WILL* be returned;
-                            # we want this, as we need the output to be in relative coords.
-                            except KeyError as k:
-                                logger.warn(f"Azure OCR results do not contain the key {k}.")
-                            except Exception as err:
-                                logger.warn(f"Another error occurred: {err}")
-                    # making it explicit that we wish to go to the next word here
+                    # if we want to find individual words (e.g. because the user has
+                    # selected some regions), take this path
+                    if self.use_words:
+                        if "words" in line:
+                            for word in line["words"]:
+                                # each word is run through process_json
+                                word_info = self.process_json(word, width, height)
+                                if word_info is not None:
+                                    processed_results.append(word_info)
+                        else:
+                            logger.warning(f"Azure OCR results line does not contain any words.")
+                    # otherwise, let Azure group words together into lines
                     else:
-                        pass
+                        line_info = self.process_json(line, width, height)
+                        if line_info is not None:
+                            processed_results.append(line_info)
+                    
                 # At this point, processed_results could be an empty list. If so,
                 # return None (we're not interested if there're no results).
                 return processed_results if processed_results else None
@@ -346,19 +349,44 @@ class TextAnalyser(BasisFunctions):
   
             # a couple of warnings to the server
             if len(results_pages) > 1:
-                logger.warn(f"Azure OCR has returned {len(results_pages)} pages (one page expected)")
+                logger.warning(f"Azure OCR has returned {len(results_pages)} pages (one page expected)")
             try:
                 if results_page["unit"] != "pixel":
-                    logger.warn(f"Azure OCR is using an unexpected unit: {results_page['unit']}")
+                    logger.warning(f"Azure OCR is using an unexpected unit: {results_page['unit']}")
             except KeyError as k:
-                logger.warn(f"Azure OCR results do not contain the key {k}.")
+                logger.warning(f"Azure OCR results do not contain the key {k}.")
             except Exception as err:
-                logger.warn(f"Another exception occured.")
-
+                logger.warning(f"Another exception occured.")
         else:
-            logger.warn("Input parameter azure_results is None")
+            logger.warning("Input parameter azure_results is None")
             return None
     
+    def process_json(self, json, max_width, max_height):
+        try:
+            bbox = json["boundingBox"]
+            text = json["text"]
+            confidence = json.get("confidence", None)                    
+        # Handle any exceptions, returning None if required keys don't exist
+        # (as there are no results )
+        except KeyError as k:
+            logger.warning(f"'json' does not contain the key {k}.")
+            return None
+        except TypeError as err:
+            logger.warning(f"'json' is of type {type(json)}; should be dict.")
+            return None
+        except Exception as err:
+            logger.warning(f"Another error occurred: {err}")
+            return None
+        
+        w = self.convert_bounds(bbox, max_width, max_height) 
+        if w is not None:
+            # use word.get() for confidence, as it's nice-to-have for words
+            # and doesn't apply to lines
+            w.update({"text": text, "confidence": confidence})
+            return w
+        else:
+            return None
+        
     def convert_bounds(self, bounding_coords, max_width, max_height):
         """
         Convert a list of 8 numbers representing pairs of (x,y) coordinates for a
@@ -398,9 +426,7 @@ class TextAnalyser(BasisFunctions):
             assert len(bounding_coords) == 8, f"bounding_coords should have 8 elements; it has {len(bounding_coords)} elements"
             assert max_width > 0, f"max_width={max_width}, which is <= 0"
             assert max_height > 0, f"max_height={max_height}, which is <= 0"
-            assert all(i >= 0 for i in bounding_coords), f"One of bounding_coords < 0: {bounding_coords}"
-            assert all(i <= max_width for i in bounding_coords), f"One of bounding_coords > max_width; bounding_coords: {bounding_coords}, max_width: {max_width}"
-            assert all(i <= max_height for i in bounding_coords),f"One of bounding_coords > max_height; bounding_coords: {bounding_coords}, max_height: {max_height}"
+            assert all(i >= 0 for i in bounding_coords), f"One of bounding_coords < 0: {bounding_coords}"            
         except AssertionError as err:
             logger.error(err)
             return None
@@ -415,10 +441,19 @@ class TextAnalyser(BasisFunctions):
             all_x = [i for i in bounding_coords[::2]]
             all_y = [i for i in bounding_coords[1::2]]
 
+            assert all(i <= max_width for i in all_x), f"Some of all_x > max_width; all_x: {all_x}, max_width: {max_width}"
+            assert all(i <= max_height for i in all_y), f"Some of all_y > max_height; all_y: {all_y}, max_height: {max_height}"
+
             x = min(all_x) / max_width
             y = min(all_y) / max_height
             width = (max(all_x) - min(all_x)) / max_width
             height = (max(all_y) - min(all_y)) / max_height
+        except AssertionError as err:
+            logger.error(err)
+            return None
+        except TypeError as err:
+            logger.error(err)
+            return None
         except Exception as err:
             logger.error(err)
             return None
@@ -442,7 +477,7 @@ class TextAnalyser(BasisFunctions):
         """
         Convenience function to analyse and process the image data.
 
-        Returns the output from process_output()
+        Returns the output from process_words() or process_lines()
         """
         text = None
         if self.image_data is not None:
@@ -460,7 +495,190 @@ class TextAnalyser(BasisFunctions):
             logger.error(f"No image data received from client")
 
         return self.process_output(text)
+
+# ================================================================================================
+# MATCHING WORDS TO REGIONS
+# ================================================================================================
+class MatchWordsToRegions:
+    def __init__(self, region_data, word_data):
+        """
+        Constructor for the class.
+
+        Parameters:
+            - region_data (list of dicts), details of each of the regions provided
+            by the user. Format:
+            [
+                { 
+                    "x": <float, range[0,1]>,      <- x-coord of region's top-left corner
+                    "y": <float, range[0,1]>,      <- y-coord of region's top-left corner
+                    "width": <float, range[0,1]>,  <- width of region
+                    "height": <float, range[0,1]>, <- height of region
+                },
+                {
+                    ...
+                }
+            ]
+            - word_data (list of dicts), details of each of the words recovered by the 
+            Azure OCR service. Each dict represents a single word. Format:
+            [
+                {
+                    "x": <float, range[0,1]>,      <- x-coord of region's top-left corner
+                    "y": <float, range[0,1]>,      <- y-coord of region's top-left corner
+                    "width": <float, range[0,1]>,  <- width of region
+                    "height": <float, range[0,1]>, <- height of region
+                    "text": <str>,                 <- word recovered
+                    "confidence": <float or None>  <- Azure level of confidence in correct word
+                },
+                {
+                    ...
+                }
+            ]
+        """
+        self.regions = region_data
+        self.words = word_data
+
+    def input_is_valid(self):
+        """
+        Undertake some basic validation on the parameters passed to the constructor.
+
+        May seem like overkill, but will probably be useful if things go wrong...!
+
+        Returns:
+            - bool indicating whether the input passes the validity checks (True) 
+            or not (False)
+        """
+        try:
+            assert self.words, f"Word list supplied to class should be list of dicts - {self.words}"
+            assert isinstance(self.words, list), f"Word list supplied to class should be list of dicts - {self.words}"
+            assert all(isinstance(word, dict) for word in self.words), f"Word list supplied to class should be list of dicts - {self.words}"
+            assert self.regions, f"Region list supplied to class should be list of dicts - {self.regions}"
+            assert isinstance(self.regions, list), f"Region list supplied to class should be list of dicts - {self.regions}"
+            assert all(isinstance(region, dict) for region in self.regions), f"Region list supplied to class should be list of dicts - {self.regions}"        
+        except AssertionError as err:
+            logger.error(err)
+            return False
         
+        return True
+
+    def get_words_in_region(self, region):
+        """
+        Check whether each word belongs within a region. 
+
+        Parameters:
+            - region (dict), coords of the region. Format:
+                { 
+                    "x": <float, range[0,1]>,      <- x-coord of region's top-left corner
+                    "y": <float, range[0,1]>,      <- y-coord of region's top-left corner
+                    "width": <float, range[0,1]>,  <- width of region
+                    "height": <float, range[0,1]>, <- height of region
+                }
+        
+        Returns:
+            - list of str, with each element a single word.
+        """
+        if self.words is None:
+            return None
+
+        words = []
+        for word in self.words:
+            try:
+                # check if each word is within the region bounds
+                if (word["x"] >= region["x"] and 
+                    word["y"] >= region["y"] and
+                    word["x"] + word["width"] <= region["x"] + region["width"] and 
+                    word["y"]+ word["height"] <= region["y"] + region["height"]):
+
+                    words.append(word["text"])
+            except KeyError as k:
+                logger.warning(f"The key {k} is not in 'word': {word}")
+            except TypeError as err:
+                logger.warning(f"A TypeError occurred: {err}")
+            except Exception as err:
+                logger.warning(f"Another exception occurred: {err}")
+
+        return words if words else None
+    
+
+    def order_words_into_sentence(self, words):
+        """
+        Takes a series of words and orders them into a 'sentence'. 
+
+        Tests (in text_match_words_to_regions.py) strongly indicate that 
+        the Azure service returns words in order, from top-to-bottom and 
+        left-to-right, which is exactly what is needed. So this method is 
+        a super-simple word join, because all the ordering is already done.
+
+        Retained as a method in case user feedback indicates that the 
+        ordering is wrong, and a more complex function is required.
+
+        Parameters:
+            - words (list of str), the words that we want to join into a sentence,
+            *in the order that they should be joined*.
+
+            NOTE: some list items may be characters, like '(', '!', '-' etc.
+        
+        Returns:
+            - str with each word / char separated by a single space, or None.
+            None is returned if words is falsey, e.g. an empty list.
+        """
+
+        try:
+            assert isinstance(words, list), f"'words' should be of type list; actual type is {type(words)}"
+            return " ".join(word for word in words) if words else None
+        except AssertionError as err:
+            logger.error(err)
+            return None
+        except TypeError as err:
+            logger.error(f"'words' contains non-str elements. Sys error: {err}")
+            return None
+        except Exception as err:
+            logger.error(f"Another exception occurred; {err}")
+            return None
+
+    def match(self):
+        """
+        Driver function to complete the word-region matching.
+
+        Returns:
+            - list of dicts, placing the words discovered by Azure in the correct
+            region, in the appropriate order (hopefully...). Format:
+            [
+                { 
+                    "x": <float, range[0,1]>,      <- x-coord of region's top-left corner
+                    "y": <float, range[0,1]>,      <- y-coord of region's top-left corner
+                    "width": <float, range[0,1]>,  <- width of region
+                    "height": <float, range[0,1]>, <- height of region
+                    "text": <str>                  <- words within this region   
+                },
+                {
+                    ...
+                }
+            ]
+        """
+        # check that the input passes a few simple checks
+        if not self.input_is_valid():
+            return None
+
+        # I don't really want to change the original regions list, as this can lead to
+        # Bad Things, so make a deepcopy and update that.          
+        regions = copy.deepcopy(self.regions)
+
+        # Iterate through each region
+        for region in regions:
+            # Get the words that are within this region
+            words_in_region = self.get_words_in_region(region)
+            
+            # Order the words correctly into a single string
+            if words_in_region is not None:
+                sentence = self.order_words_into_sentence(words_in_region)
+            else:
+                sentence = None
+            
+            # Add the string to the region data, as an extra field ('text')
+            region["text"] = sentence
+        
+        return regions
+
 # ================================================================================================
 # HELPER FUNCTIONS
 # ================================================================================================
@@ -482,9 +700,12 @@ def get_file_bytes(image_path):
 # DRIVER
 # ================================================================================================
 def main():
+    from json import dumps
+
     # get the image data
+    img_file = "match_words_regions_4.png"
     current_dir = os.path.dirname(os.path.abspath(__file__))    
-    img_path = os.path.join(current_dir, "tests", "resources", "test_images", "test_jpg.jpg")
+    img_path = os.path.join(current_dir, "tests", "resources", "test_images", img_file)
     image_data = get_file_bytes(img_path)
 
     # --- OBJECT DETECTION ---
@@ -496,7 +717,8 @@ def main():
     aod = ObjectDetector(image_data=image_data, 
                         prediction_key=prediction_key,                       
                         obj_det_url=api_url)
-    print(f"{'-'*24}\nObject Detection output:\n{'-'*24}\n{aod.analyse_and_process()}\n")
+    regions = aod.analyse_and_process()
+    print(f"{'-'*24}\nObject Detection output:\n{'-'*24}\n{dumps(regions, indent=4)}\n")
     # --- /OBJECT DETECTION ---
 
     # --- TEXT ANALYSIS ---
@@ -504,9 +726,17 @@ def main():
     api_url = "https://snip-ocr.cognitiveservices.azure.com/vision/v3.0/read/analyze"
     ta = TextAnalyser(image_data=image_data, 
                     subscription_key=subscription_key, 
-                    api_url=api_url)
-    print(f"{'-'*11}\nOCR output:\n{'-'*11}\n{ta.analyse_and_process()}\n")
+                    api_url=api_url,
+                    use_words=True)
+    words = ta.analyse_and_process()
+    print(f"{'-'*11}\nOCR output:\n{'-'*11}\n{dumps(words, indent=4)}\n")
     # --- /TEXT ANALYSIS ---
+
+    # --- MATCH WORDS TO REGIONS ---
+    mwtr = MatchWordsToRegions(regions["data"], words["data"])
+    new_regions = mwtr.match()
+    print(f"{'-'*19}\nRegions with words:\n{'-'*19}\n{dumps(new_regions, indent=4)}\n")
+    # --- MATCH WORDS TO REGIONS ---
 
 if __name__ == "__main__":
     main()

@@ -33,6 +33,7 @@ function createRegions(svg, data, isStatic) {
     const HANDLE_CLASS = CONFIG.CONSTANTS.CLASSES.HANDLE;
     const TOP_LEFT_CLASS = CONFIG.CONSTANTS.CLASSES.TOP_LEFT_HANDLE;
     const BOTTOM_RIGHT_CLASS = CONFIG.CONSTANTS.CLASSES.BOTTOM_RIGHT_HANDLE;
+    const TOOLTIP_CLASS = CONFIG.CONSTANTS.CLASSES.TOOLTIP;
     const HANDLE_RADIUS = CONFIG.CONSTANTS.VALUES.HANDLE_RADIUS;
     const CORNER_RADIUS = CONFIG.CONSTANTS.VALUES.CORNER_RADIUS;
     const FILL_COLOUR = CONFIG.CONSTANTS.COLOURS.REGION_COLOUR;
@@ -56,6 +57,12 @@ function createRegions(svg, data, isStatic) {
         .origin(function(d) { return d; })
         .on("dragstart", dragStarted)
         .on("drag", dragBrHandle);
+
+
+    // Define the div for the tooltip
+    let div = d3.select("body").append("div")	
+        .attr("class", TOOLTIP_CLASS)				
+        .style("opacity", 0);
 
     // create the regions
     // https://stackoverflow.com/questions/43297888/d3-js-grouping-with-g-with-the-data-join-enter-update-exit-cycle/43298892
@@ -97,6 +104,27 @@ function createRegions(svg, data, isStatic) {
         .attr("height", function(d) { return d.height; })
         .attr("rx", CORNER_RADIUS)
         .on("click", function(d) { console.log(d); })
+        .on("mouseover", function(d) {
+            if(isStatic){                
+                // position the tooltip so that it's at the centre of the 'owning'
+                // region, save width as region, and at the top (ish)
+                const myRegion = this.getBoundingClientRect();
+                // ref for below: see https://stackoverflow.com/a/24041991
+                const matrix = this.getScreenCTM()
+                    .translate(+ this.getAttribute("x"), + this.getAttribute("y"));
+
+                div.transition().duration(200).style("opacity", 0.9);		
+                div.html(d.text)
+                    .style("width", myRegion.width + "px")
+                    .style("left", (myRegion.x) + "px")
+                    .style("top", (window.pageYOffset + matrix.f - 50) + "px");
+            }
+        })					
+        .on("mouseout", function(d) {	
+            if(isStatic){
+                div.transition().duration(500).style("opacity", 0);
+            }
+        })
         .call(dragRect);
     
     if(!isStatic) {
@@ -118,7 +146,7 @@ function createRegions(svg, data, isStatic) {
     }
 }
 
-function deleteRegionsAndRedraw(extraData) {
+function deleteRegionsAndRedraw(extraData, isStatic) {
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
     const REGION_GRP = CONFIG.CONSTANTS.CLASSES.REGION;
     const IMG = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID);
@@ -144,7 +172,16 @@ function deleteRegionsAndRedraw(extraData) {
         CONFIG.HTML.APP.IMAGE_PANE.SVG.CLASS,
         IMG.clientWidth, 
         IMG.clientHeight);
-    createRegions(svg, newData);
+    createRegions(svg, newData, isStatic);
+}
+
+function drawStaticRegions(regionData){
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+    // delete any existing regions
+    d3.selectAll("." + CONFIG.CONSTANTS.CLASSES.REGION).remove()
+    const svg = d3.select("#"+CONFIG.HTML.APP.IMAGE_PANE.SVG.ID);
+    const absData = rescaleDataToAbsoluteCoords(regionData, startWidth, startHeight);
+    createRegions(svg, absData, true);
 }
 
 // ================================================================================================
@@ -317,10 +354,6 @@ function dragBrHandle(d) {
 }
 
 
-/** 
- * @todo: consider - should this (and the two fns above) be moved into the driver function instead?
- * Arguments both ways I think.
-*/
 function clickAddRegion() {
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
     const REGION_CLASS = CONFIG.CONSTANTS.CLASSES.REGION;
@@ -482,12 +515,27 @@ function rescaleDataToRelativeCoords(data, imgWidth, imgHeight) {
 
 // NOTE: 'data' parameter in the below is rescaled on [0,1]!! <= include in @params
 function rescaleDataToAbsoluteCoords(data, imgWidth, imgHeight) {
+    let newData = null;
     const scaledData = data.map(function(d) {
-        return {"x": d.x * imgWidth,
+        if(d.hasOwnProperty('text')) {
+            newData = {
+                "x": d.x * imgWidth,
+                "y": d.y * imgHeight,
+                "width": d.width * imgWidth,
+                "height": d.height * imgHeight,
+                "text": d.text
+            };
+        }
+        else {
+            newData = {
+                "x": d.x * imgWidth,
                 "y": d.y * imgHeight,
                 "width": d.width * imgWidth,
                 "height": d.height * imgHeight
-                };
+            };
+        }
+        
+        return newData;
     })
 
     return scaledData;
@@ -541,7 +589,7 @@ function sendDataToServer(data, timeout){
     })
 }
 
-function getRegionDataFromServer(){
+function getDataFromServer(callbackFunc, alertText){
     /** 
      * NOTE: a GET request doesn't require CSRF protection, so the Django 
      * boilerplate used above is removed here.
@@ -556,10 +604,10 @@ function getRegionDataFromServer(){
     .done(function(returnData) {
         console.log("AJAX RESPONSE SUCCEEDED"); 
         if(returnData !== null && returnData !== undefined) {
-            deleteRegionsAndRedraw(returnData["data"]); 
+            callbackFunc(returnData);
         }
         else {
-            alert("The object detection algorithm did not find any sticky notes.");
+            alert(alertText);
         }
     })
     .fail(function(jqXHR) {

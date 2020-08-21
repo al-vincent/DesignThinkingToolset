@@ -12,7 +12,7 @@
         "COLOURS": {
             "THEME_COLOUR": "#55B776",
             "DISABLED_COLOUR": "#7D7D7D",
-            "REGION_COLOUR": "#FFA500",
+            "REGION_COLOUR": "#008000",
             "REGION_EDGE_COLOUR": "#000000",
             "REGION_HOVER_COLOUR": "#FF0000"
         },
@@ -21,7 +21,8 @@
             "BODY_RECT": "body-rect",
             "HANDLE": "handle-grp",
             "TOP_LEFT_HANDLE": "top-left-handle",
-            "BOTTOM_RIGHT_HANDLE": "bottom-right-handle"
+            "BOTTOM_RIGHT_HANDLE": "bottom-right-handle",
+            "TOOLTIP": "tooltip"
         },
         "VALUES": {
             "HANDLE_RADIUS": 3,
@@ -181,7 +182,8 @@
             },
             "FIND_REGIONS_BTN":{
                 "ID": "find-regions-btn-id",
-                "TEXT": "Find Regions"
+                "TEXT": "Find Regions",
+                "WAIT_TEXT": "Loading..."
             },
             "ADD_REGION_BTN":{
                 "ID": "add-region-btn-id",
@@ -209,7 +211,8 @@
             },
             "ANALYSE_TEXT_BTN" :{
                 "ID": "analyse-text-btn-id",
-                "TEXT": "Analyse Text"
+                "TEXT": "Analyse Text",
+                "WAIT_TEXT": "Loading..."
             },
             "PREVIOUS_BTN": {
                 "URL": "PostItFinder:set_regions"
