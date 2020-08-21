@@ -389,7 +389,6 @@ class DynamicTests(base.DynamicTests):
         find_rgns_id = base.ELEMS["SET_REGIONS"]["FIND_REGIONS_BTN"]["ID"]
         self.browser.find_element_by_id(find_rgns_id).click()
 
-        # add a long sleep, to account for the time taken for Azure to respond
         # wait for the results to be returned
         WebDriverWait(self.browser, base.MAX_WAIT).until(
             EC.visibility_of_element_located((By.CLASS_NAME, base.CONST["CLASSES"]["REGION"]))
@@ -582,7 +581,7 @@ class DynamicTests(base.DynamicTests):
         # check the colours of the SVG elements       
         expected_colour = base.CONST["COLOURS"]["REGION_HOVER_COLOUR"]
         self.assertEqual(expected_colour, 
-                         Color.from_string(rect.value_of_css_property("fill")).hex.upper())        
+                         Color.from_string(rect.value_of_css_property("fill")).hex.upper())
         self.assertEqual(expected_colour, 
                          Color.from_string(circles[0].value_of_css_property("fill")).hex.upper())
         self.assertEqual(expected_colour, 

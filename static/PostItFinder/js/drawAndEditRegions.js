@@ -33,6 +33,7 @@ function createRegions(svg, data, isStatic) {
     const HANDLE_CLASS = CONFIG.CONSTANTS.CLASSES.HANDLE;
     const TOP_LEFT_CLASS = CONFIG.CONSTANTS.CLASSES.TOP_LEFT_HANDLE;
     const BOTTOM_RIGHT_CLASS = CONFIG.CONSTANTS.CLASSES.BOTTOM_RIGHT_HANDLE;
+    const TOOLTIP_CLASS = CONFIG.CONSTANTS.CLASSES.TOOLTIP;
     const HANDLE_RADIUS = CONFIG.CONSTANTS.VALUES.HANDLE_RADIUS;
     const CORNER_RADIUS = CONFIG.CONSTANTS.VALUES.CORNER_RADIUS;
     const FILL_COLOUR = CONFIG.CONSTANTS.COLOURS.REGION_COLOUR;
@@ -60,7 +61,7 @@ function createRegions(svg, data, isStatic) {
 
     // Define the div for the tooltip
     let div = d3.select("body").append("div")	
-        .attr("class", "tooltip")				
+        .attr("class", TOOLTIP_CLASS)				
         .style("opacity", 0);
 
     // create the regions

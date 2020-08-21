@@ -21,7 +21,8 @@
             "BODY_RECT": "body-rect",
             "HANDLE": "handle-grp",
             "TOP_LEFT_HANDLE": "top-left-handle",
-            "BOTTOM_RIGHT_HANDLE": "bottom-right-handle"
+            "BOTTOM_RIGHT_HANDLE": "bottom-right-handle",
+            "TOOLTIP": "tooltip"
         },
         "VALUES": {
             "HANDLE_RADIUS": 3,
