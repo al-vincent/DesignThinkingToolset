@@ -248,6 +248,7 @@ def analyse_text(request):
             "next_btn": HTML["APP"]["NEXT_BTN"],
             "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
             "analyse_txt_btn": HTML["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"],
+            "download_results_btn": HTML["ANALYSE_TEXT"]["DOWNLOAD_RESULTS_BTN"],
             "image_pane": HTML["APP"]["IMAGE_PANE"],
             "config": CONFIG,
             "image_data": image_data, 

@@ -207,90 +207,7 @@ class TestAnalyseTextButton(DynamicTests):
         intended_text = base.ELEMS["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"]["TEXT"]
         self.assertEqual(analyse_txt_btn.get_attribute("innerText"), intended_text)
 
-    # -------------------------------------------------------------------------------------
-    # Next button tests
-    # -------------------------------------------------------------------------------------
-    # def test_next_button_is_displayed(self):        
-    #     next_btn = self.browser.find_element_by_id(base.ELEMS["APP"]["NEXT_BTN"]["ID"])
-    #     self.assertTrue(next_btn.is_displayed())
-
-    # def test_next_button_is_enabled(self):        
-    #     next_btn = self.browser.find_element_by_id(base.ELEMS["APP"]["NEXT_BTN"]["ID"])
-    #     self.assertFalse(next_btn.get_attribute("aria-disabled"))
-    #     self.assertNotIn("disabled", next_btn.get_attribute("class"))
-    
-    # def test_clicking_next_button_takes_user_to_output_results_page(self):
-    #     base_url = self.live_server_url        
-    #     self.browser.find_element_by_id(base.ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
-    #     expected_url = reverse(base.ELEMS["SET_REGIONS"]["NEXT_BTN"]["URL"])
-    #     self.assertEqual(self.browser.current_url, base_url + expected_url)
-
-    # -------------------------------------------------------------------------------------
-    # Previous button tests
-    # -------------------------------------------------------------------------------------
-    # def test_previous_button_is_displayed(self):        
-    #     prev_btn = self.browser.find_element_by_id(base.ELEMS["APP"]["PREVIOUS_BTN"]["ID"])
-    #     self.assertTrue(prev_btn.is_displayed())
-
-    # def test_previous_button_is_enabled(self):        
-    #     prev_btn = self.browser.find_element_by_id(base.ELEMS["APP"]["PREVIOUS_BTN"]["ID"])
-    #     self.assertFalse(prev_btn.get_attribute("aria-disabled"))
-    #     self.assertNotIn("disabled", prev_btn.get_attribute("class"))
-
-    # def test_clicking_previous_button_takes_user_to_set_regions_page(self):
-    #     base_url = self.live_server_url   
-    #     self.browser.find_element_by_id(base.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
-    #     expected_url = reverse(base.ELEMS["ANALYSE_TEXT"]["PREVIOUS_BTN"]["URL"])
-    #     self.assertEqual(self.browser.current_url, base_url + expected_url)
-    
-    # def test_image_and_regions_are_displayed_when_user_clicks_back_button(self):
-    #     # browse back to the home page
-    #     self.browser.find_element_by_id(base.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
-        
-    #     # short wait to ensure the page is rendered
-    #     time.sleep(2)
-
-    #     # get the src data for the image as a UTF-8 string decoded from base64
-    #     img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
-    #     src_string = img.get_attribute("src")
-
-    #     # get the same UTF-8 string from the original image.        
-    #     # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', base.IMG_FILE)
-    #     path = base.get_image_file_path(base.IMG_FILE)
-    #     with open(path, "rb") as f:
-    #         b64_encoded_img = base64.b64encode(f.read())
-    #         b64_msg = b64_encoded_img.decode('utf-8')
-
-    #     # compare the two strings
-    #     self.assertEqual(src_string, f"data:image/jpeg;base64,{b64_msg}")
-
-# -------------------------------------------------------------------------------------
-# Image pane tests
-# -------------------------------------------------------------------------------------
-class TestImagePane(DynamicTests):
-    def test_image_pane_exists(self):
-        img_pane = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
-        self.assertTrue(img_pane)
-
-    def test_image_pane_contains_correct_image(self):
-        img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
-        src = img.get_attribute("src")
-
-        # get the sam UTF-8 string from the original image.                
-        path = base.get_image_file_path(base.IMG_FILE)
-        with open(path, "rb") as f:
-            b64_encoded_img = base64.b64encode(f.read())
-            b64_msg = b64_encoded_img.decode('utf-8')
-
-        # compare the two strings
-        self.assertEqual(src, f"data:image/jpeg;base64,{b64_msg}")
-    
-    def test_image_pane_renders_region_correctly(self):
-        pass
-
-# -------------------------------------------------------------------------------------
 # Detailed tests on the results of the Analyse Text button, with a region included
-# -------------------------------------------------------------------------------------
 
 # **** NOTE ****
 # The tests below are useful tests, but for some reason the ExpectedConditions
@@ -428,9 +345,9 @@ class TestImagePane(DynamicTests):
 #         # confirm that the number of rects hasn't changed
 #         self.assertEqual(num_rects_start, num_rects_end)
 
-# # -------------------------------------------------------------------------------------
+
 # # Detailed tests on the results of the Analyse Text button, with no regions
-# # -------------------------------------------------------------------------------------
+
 # class TestAnalyseTextButtonWithNoRegions(base.DynamicTests):
 #     def setUp(self):
 #         """
@@ -544,3 +461,109 @@ class TestImagePane(DynamicTests):
 
 #         # confirm that the number of rects hasn't changed
 #         self.assertEqual(num_rects_start, num_rects_end)
+
+
+# -------------------------------------------------------------------------------------
+# Download Results button tests
+# -------------------------------------------------------------------------------------
+class TestDownloadResultsButton(DynamicTests):
+    def test_button_is_displayed(self):
+        download_results_btn = self.browser.find_element_by_id(base.ELEMS["ANALYSE_TEXT"]["DOWNLOAD_RESULTS_BTN"]["ID"])
+        self.assertTrue(download_results_btn.is_displayed())
+
+    def test_button_is_disabled_initially(self):
+        # NOTE: I want the button to be *disabled* until the user has analysed the text
+        download_results_btn = self.browser.find_element_by_id(base.ELEMS["ANALYSE_TEXT"]["DOWNLOAD_RESULTS_BTN"]["ID"])
+        self.assertFalse(download_results_btn.is_enabled())
+    
+    def test_button_is_enabled_once_text_analysed(self):
+        # NOTE: I want the button to be *disabled* until the user has analysed the text
+        download_results_btn = self.browser.find_element_by_id(base.ELEMS["ANALYSE_TEXT"]["DOWNLOAD_RESULTS_BTN"]["ID"])
+        # self.assertFalse(download_results_btn.is_enabled())
+        pass
+
+    def test_button_has_correct_text(self):
+        download_results_btn = self.browser.find_element_by_id(base.ELEMS["ANALYSE_TEXT"]["DOWNLOAD_RESULTS_BTN"]["ID"])
+        intended_text = base.ELEMS["ANALYSE_TEXT"]["DOWNLOAD_RESULTS_BTN"]["TEXT"]
+        self.assertEqual(download_results_btn.get_attribute("innerText"), intended_text)
+
+    # -------------------------------------------------------------------------------------
+    # Next button tests
+    # -------------------------------------------------------------------------------------
+    # def test_next_button_is_displayed(self):        
+    #     next_btn = self.browser.find_element_by_id(base.ELEMS["APP"]["NEXT_BTN"]["ID"])
+    #     self.assertTrue(next_btn.is_displayed())
+
+    # def test_next_button_is_enabled(self):        
+    #     next_btn = self.browser.find_element_by_id(base.ELEMS["APP"]["NEXT_BTN"]["ID"])
+    #     self.assertFalse(next_btn.get_attribute("aria-disabled"))
+    #     self.assertNotIn("disabled", next_btn.get_attribute("class"))
+    
+    # def test_clicking_next_button_takes_user_to_output_results_page(self):
+    #     base_url = self.live_server_url        
+    #     self.browser.find_element_by_id(base.ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
+    #     expected_url = reverse(base.ELEMS["SET_REGIONS"]["NEXT_BTN"]["URL"])
+    #     self.assertEqual(self.browser.current_url, base_url + expected_url)
+
+    # -------------------------------------------------------------------------------------
+    # Previous button tests
+    # -------------------------------------------------------------------------------------
+    # def test_previous_button_is_displayed(self):        
+    #     prev_btn = self.browser.find_element_by_id(base.ELEMS["APP"]["PREVIOUS_BTN"]["ID"])
+    #     self.assertTrue(prev_btn.is_displayed())
+
+    # def test_previous_button_is_enabled(self):        
+    #     prev_btn = self.browser.find_element_by_id(base.ELEMS["APP"]["PREVIOUS_BTN"]["ID"])
+    #     self.assertFalse(prev_btn.get_attribute("aria-disabled"))
+    #     self.assertNotIn("disabled", prev_btn.get_attribute("class"))
+
+    # def test_clicking_previous_button_takes_user_to_set_regions_page(self):
+    #     base_url = self.live_server_url   
+    #     self.browser.find_element_by_id(base.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
+    #     expected_url = reverse(base.ELEMS["ANALYSE_TEXT"]["PREVIOUS_BTN"]["URL"])
+    #     self.assertEqual(self.browser.current_url, base_url + expected_url)
+    
+    # def test_image_and_regions_are_displayed_when_user_clicks_back_button(self):
+    #     # browse back to the home page
+    #     self.browser.find_element_by_id(base.ELEMS["APP"]["PREVIOUS_BTN"]["ID"]).click()
+        
+    #     # short wait to ensure the page is rendered
+    #     time.sleep(2)
+
+    #     # get the src data for the image as a UTF-8 string decoded from base64
+    #     img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+    #     src_string = img.get_attribute("src")
+
+    #     # get the same UTF-8 string from the original image.        
+    #     # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', base.IMG_FILE)
+    #     path = base.get_image_file_path(base.IMG_FILE)
+    #     with open(path, "rb") as f:
+    #         b64_encoded_img = base64.b64encode(f.read())
+    #         b64_msg = b64_encoded_img.decode('utf-8')
+
+    #     # compare the two strings
+    #     self.assertEqual(src_string, f"data:image/jpeg;base64,{b64_msg}")
+
+# -------------------------------------------------------------------------------------
+# Image pane tests
+# -------------------------------------------------------------------------------------
+class TestImagePane(DynamicTests):
+    def test_image_pane_exists(self):
+        img_pane = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        self.assertTrue(img_pane)
+
+    def test_image_pane_contains_correct_image(self):
+        img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
+        src = img.get_attribute("src")
+
+        # get the sam UTF-8 string from the original image.                
+        path = base.get_image_file_path(base.IMG_FILE)
+        with open(path, "rb") as f:
+            b64_encoded_img = base64.b64encode(f.read())
+            b64_msg = b64_encoded_img.decode('utf-8')
+
+        # compare the two strings
+        self.assertEqual(src, f"data:image/jpeg;base64,{b64_msg}")
+    
+    def test_image_pane_renders_region_correctly(self):
+        pass

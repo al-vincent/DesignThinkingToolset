@@ -85,10 +85,6 @@
                     {
                         "ID": "step3-id",
                         "TEXT": "ANALYSE TEXT"
-                    },
-                    {
-                        "ID": "step4-id",
-                        "TEXT": "OUTPUT RESULTS"
                     }
                 ]
             },
@@ -214,16 +210,14 @@
                 "TEXT": "Analyse Text",
                 "WAIT_TEXT": "Loading..."
             },
+            "DOWNLOAD_RESULTS_BTN" :{
+                "ID": "download-results-btn-id",
+                "TEXT": "Download Results",
+                "WAIT_TEXT": "Loading..."
+            },
             "PREVIOUS_BTN": {
                 "URL": "PostItFinder:set_regions"
-            },
-            "NEXT_BTN": {
-                "URL": "PostItFinder:output_results"
             }
-        },
-        "OUTPUT_RESULTS": {
-            "URL": "PostItFinder:output_results",
-            "TITLE": "SNIP: Output Results"
         }
     }
 }
