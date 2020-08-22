@@ -46,18 +46,7 @@ function addClickEventsToButtons(config) {
 
         // Make the AJAX GET request
         const alertText = "The OCR algorithm did not find any text.";
-        getDataFromServer(analyseTextBtnAjax, alertText);
+        getDataFromServer(drawStaticRegions, alertText, config.HTML.ANALYSE_TEXT.ANALYSE_TEXT_BTN);
         return false;
     }
-}
-
-function analyseTextBtnAjax(regionData) {
-    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
-
-    // draw the regions, apply tooltips etx.
-    drawStaticRegions(regionData);
-
-    // update the text in the button, to show that we're done
-    const analayseTxtBtn = document.getElementById(CONFIG.HTML.ANALYSE_TEXT.ANALYSE_TEXT_BTN.ID);
-    analayseTxtBtn.innerHTML = CONFIG.HTML.ANALYSE_TEXT.ANALYSE_TEXT_BTN.TEXT;
 }

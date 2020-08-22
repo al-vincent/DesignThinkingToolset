@@ -589,7 +589,7 @@ function sendDataToServer(data, timeout){
     })
 }
 
-function getDataFromServer(callbackFunc, alertText){
+function getDataFromServer(callbackFunc, alertText, btn){
     /** 
      * NOTE: a GET request doesn't require CSRF protection, so the Django 
      * boilerplate used above is removed here.
@@ -621,5 +621,9 @@ function getDataFromServer(callbackFunc, alertText){
         if(jqXHR.statusText === "timeout") {
             alert("The request timed out. The Azure server may be experiencing issues; please try again later.");
         }
-    }) 
+    })
+    .always(function() {
+        let myBtn = document.getElementById(btn.ID);
+        myBtn.innerHTML = btn.TEXT;
+    })
 }
