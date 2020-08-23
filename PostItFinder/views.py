@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.conf import settings
 from django.urls import reverse
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 
 from PostItFinder.azure_services import ObjectDetector, TextAnalyser, MatchWordsToRegions
 
@@ -228,7 +228,7 @@ def analyse_text(request):
     regions = request.session.get(settings.REGION_KEY, None)
 
     # user has clicked "Analyse Text"
-    if request.is_ajax() and request.method == "GET": 
+    if request.is_ajax() and request.method == "GET":
         processed_data = get_text(image_data.get("data", None), regions)
         if processed_data is not None:
             logger.info(f"Azure processing successful, results sent to client")
@@ -239,7 +239,11 @@ def analyse_text(request):
     else:
         # Update config to set the 'active' class for the stepper bar
         stepper_bar = get_stepper_bar_active_states(3)
-        
+
+        # update the Download-Results URL
+        download_results = HTML["ANALYSE_TEXT"]["DOWNLOAD_RESULTS_BTN"]
+        download_results["URL"] = "https://snipblobstorage.blob.core.windows.net/quickstart1d7140c9-8337-45bf-abda-4d96a20820b0/quickstarte352b8c1-5a36-46c3-b7fb-b0cdf6efe29b.txt"
+
         context = {
             "title": HTML["ANALYSE_TEXT"]["TITLE"],
             "navbar": HTML["BASE"]["NAVBAR"],
@@ -248,7 +252,7 @@ def analyse_text(request):
             "next_btn": HTML["APP"]["NEXT_BTN"],
             "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
             "analyse_txt_btn": HTML["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"],
-            "download_results_btn": HTML["ANALYSE_TEXT"]["DOWNLOAD_RESULTS_BTN"],
+            "download_results_btn": download_results,
             "image_pane": HTML["APP"]["IMAGE_PANE"],
             "config": CONFIG,
             "image_data": image_data, 

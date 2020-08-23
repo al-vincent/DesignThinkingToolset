@@ -46,7 +46,19 @@ function addClickEventsToButtons(config) {
 
         // Make the AJAX GET request
         const alertText = "The OCR algorithm did not find any text.";
-        getDataFromServer(drawStaticRegions, alertText, config.HTML.ANALYSE_TEXT.ANALYSE_TEXT_BTN);
+        getDataFromServer(clickAnalyseTextAJAX, alertText, config.HTML.ANALYSE_TEXT.ANALYSE_TEXT_BTN);
         return false;
     }
+}
+
+function clickAnalyseTextAJAX(returnData) {
+    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
+
+    // draw the text regions and tooltip
+    drawStaticRegions(returnData);
+    
+    // change the Download Results button to be enabled
+    const downloadResultsBtn = document.getElementById(CONFIG.HTML.ANALYSE_TEXT.DOWNLOAD_RESULTS_BTN.ID);
+    downloadResultsBtn.classList.remove("disabled");
+    downloadResultsBtn.setAttribute("aria-disabled", false);
 }

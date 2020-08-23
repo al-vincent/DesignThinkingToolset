@@ -13,6 +13,10 @@
         <b>extract it</b></a>. All words in the same region will be grouped together; text 
         not in a region will be discovered and grouped where possible.
       </p>
+
+      <p>
+        Click Download Results to get the output in a PowerPoint file.
+      </p>
     </div>
     <div class="col-lg-2"></div>
   </div>
@@ -60,18 +64,19 @@
 {% endblock %}
 
 {% block image_action_buttons %}
-<form method="GET" action=""></form>
   <div class="row pt-2 d-flex justify-content-center">
-    <div class="col-6">      
-      <button id="{{ analyse_txt_btn.ID }}" type="submit" class="btn btn-block btn-outline-success">
-        {{ analyse_txt_btn.TEXT }}
-      </button>
+    <div class="col-6">
+      <form method="GET" action="">
+        <button id="{{ analyse_txt_btn.ID }}" type="submit" class="btn btn-block btn-outline-success">
+          {{ analyse_txt_btn.TEXT }}
+        </button>
+      </form>
     </div>
 
-    <div class="col-6">      
-      <button id="{{ download_results_btn.ID }}" type="submit" class="btn btn-block btn-outline-success">
+    <div class="col-6">
+      <a id="{{ download_results_btn.ID }}" href="{{ download_results_btn.URL }}" class="btn btn-block btn-outline-success disabled" aria-disabled="true" download>
         {{ download_results_btn.TEXT }}
-      </button>
+      </a>
     </div>
   </div>
 </form>

@@ -118,6 +118,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [STATIC_DIR, ]
 
+
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 if 'DJANGO_DEBUG_FALSE' in os.environ:  
@@ -152,6 +153,10 @@ MAX_IMAGE_SIZE = 4194304
 
 OCR_SUBSCRIPTION_KEY = os.environ["SNIP_OCR_SUBS_KEY"]
 OCR_API_URL = "https://snip-ocr.cognitiveservices.azure.com/vision/v3.0/read/analyze"
+
+# Azure settings - Blob Storage API
+BLOB_STORAGE = os.environ["SNIP_BLOB_STORAGE_CONN_STR"]
+
 
 # Logging configuration
 LOGGING = {

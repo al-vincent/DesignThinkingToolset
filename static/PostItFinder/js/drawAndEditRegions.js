@@ -572,8 +572,8 @@ function sendDataToServer(data, timeout){
             }
         }
     })
-    .done(function() {
-        console.log("AJAX RESPONSE SUCCEEDED"); 
+    .done(function(returnData) {
+        console.log("AJAX RESPONSE SUCCEEDED");
     })
     .fail(function(jqXHR) {
         console.log("AJAX RESPONSE FAILED");
