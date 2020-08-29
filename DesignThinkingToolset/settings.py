@@ -119,6 +119,12 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [STATIC_DIR, ]
 
 
+# Media files (user uploads, temporary files) 
+# https://docs.djangoproject.com/en/2.1/howto/static-files/#serving-files-uploaded-by-a-user-duringdevelopment
+
+MEDIA_ROOT = MEDIA_DIR
+MEDIA_URL = '/media/'
+
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 if 'DJANGO_DEBUG_FALSE' in os.environ:  
@@ -155,7 +161,8 @@ OCR_SUBSCRIPTION_KEY = os.environ["SNIP_OCR_SUBS_KEY"]
 OCR_API_URL = "https://snip-ocr.cognitiveservices.azure.com/vision/v3.0/read/analyze"
 
 # Azure settings - Blob Storage API
-BLOB_STORAGE = os.environ["SNIP_BLOB_STORAGE_CONN_STR"]
+BLOB_STORAGE_CONN_STR = os.environ["SNIP_BLOB_STORAGE_CONN_STR"]
+BLOB_STORAGE_URL_ROOT = "https://snipblobstorage.blob.core.windows.net/"
 
 
 # Logging configuration
