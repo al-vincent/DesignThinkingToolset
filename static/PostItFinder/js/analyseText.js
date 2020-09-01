@@ -55,10 +55,13 @@ function clickAnalyseTextAJAX(returnData) {
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
 
     // draw the text regions and tooltip
-    drawStaticRegions(returnData);
-    
-    // change the Download Results button to be enabled
+    drawStaticRegions(returnData["data"]);
+
     const downloadResultsBtn = document.getElementById(CONFIG.HTML.ANALYSE_TEXT.DOWNLOAD_RESULTS_BTN.ID);
+    // change the href of the Download Results button
+    downloadResultsBtn.href = returnData["url"];
+
+    // change the Download Results button to be enabled
     downloadResultsBtn.classList.remove("disabled");
     downloadResultsBtn.setAttribute("aria-disabled", false);
 }

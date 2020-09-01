@@ -5,10 +5,11 @@ from pptx.dml.color import RGBColor
 from pptx.oxml.xmlchemy import OxmlElement
 from pptx.util import Pt
 
-import os, uuid
-from datetime import datetime
+from azure.storage.blob import BlobServiceClient
+
+import os
+from datetime import datetime, timedelta
 from PIL import Image
-from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 import logging
 
 # Get a logger instance
@@ -217,56 +218,58 @@ class SnipPptxCreator:
 # ================================================================================================
 # STORE POWERPOINT IN BLOB STORAGE
 # ================================================================================================
-class SavePresToAzureBlobStorage:
-    def __init__(self, connect_str, filename, filepath, container_name=None):
+class SaveFileToAzureBlobStorage:
+    def __init__(self, connect_str, container_name, pres_name, pres_path, img_name, img_path):
         self.connect_str = connect_str
-        self.filename = filename
-        self.filepath = filepath
         self.container_name = container_name
+        self.pres_name = pres_name
+        self.pres_path = pres_path
+        self.img_name = img_name
+        self.img_path = img_path
         self.blob_service_client = None
 
-    def generate_container_name(self):
-        # Create a unique name for the container, in the format:
-        # YYYYMMDDHHMMSS-imagename-uuid (to prevent clashes in the rest of the container)
-        now = datetime.now()
-        return f"{now.strftime('%Y%m%d%H%M')}-{self.filename.replace('.', '')}-{uuid.uuid4()}"
-
     def create_container(self):
-        self.container_name = self.generate_container_name()
         # Create the BlobServiceClient object which will be used to create a container client
-        self.blob_service_client = BlobServiceClient.from_connection_string(self.connect_str)
-
-        # Create the container
-        self.blob_service_client.create_container(self.container_name)
-
-    def create_blob_client(self):
-        if self.blob_service_client is None:
-            self.blob_client = BlobClient.from_connection_string(conn_str=self.connect_str, 
-                                                                container_name=self.container_name, 
-                                                                blob_name=self.filename)
-        else:                            
-            self.blob_client = None
-            try:
-                self.blob_client = self.blob_service_client.get_blob_client(container=self.container_name, 
-                                                                        blob=self.filename)
-            except Exception as err:
-                print(f"The file upload failed. Sys error: {err}")
-
-    def upload_file_from_tmp_storage_to_container(self):
         try:
-            with open(self.filepath, "rb") as data:
-                self.blob_client.upload_blob(data)                
-        except FileNotFoundError as err:
-            print(f"The file {self.filepath} was not found. Sys error: {err}")
+            self.blob_service_client = BlobServiceClient.from_connection_string(self.connect_str)
+        except ValueError as err:
+            logger.error(f"The connection string is invalid. Sys error: {err}")
+            return False
         except Exception as err:
-            print(f"Another exception occurred. Sys error: {err}")
+            logger.error(f"Another error occurred. Sys error: {err}")
+            return False
 
-    def get_blob_url(self):
-        if self.blob_client is not None:
-            return self.blob_client.url
-        else:
-            print(f"The blob client was not created successfully; no URL was created")
+        # Create the container with blobs (*NOT* the container) having public access
+        try:
+            container = self.blob_service_client.create_container(self.container_name, public_access="blob")
+        # NOTE: the excception raised for duplicating an existing container is an Azure one,
+        # so stick with the generic catch-all
+        except Exception as err:
+            logger.error(f"Failed to create the container. Sys error: {err}")
+            return False
+
+        return True
+
+    def create_blob_client(self, file_name):
+        try:
+            return self.blob_service_client.get_blob_client(container=self.container_name, 
+                                                            blob=file_name)
+        except Exception as err:
+            logger.error(f"Failed to create the blob. Sys error: {err}")
             return None
+
+    def upload_file_to_container(self, file_path, blob_client):
+        try:
+            with open(file_path, "rb") as f:
+                blob_client.upload_blob(f)
+        except FileNotFoundError as err:
+            logger.error(f"The file {file_path} was not found. Sys error: {err}")
+            return False
+        except Exception as err:
+            logger.error(f"Another exception occurred. Sys error: {err}")
+            return False
+        else:
+            return True
 
     def list_blobs_in_container(self):
         # NOTE: this is more useful for testing the blob upload than anything else
@@ -275,12 +278,44 @@ class SavePresToAzureBlobStorage:
     def delete_pres_from_tmp_storage(self):
         pass
 
-    def copy_file_to_blob_storage_and_delete_from_tmp(self):
-        if self.container_name is None:
-            self.create_container()
-        self.create_blob_client()
-        self.upload_file_from_tmp_storage_to_container()
-        return self.get_blob_url()
+    def copy_file_to_blob_storage(self):
+        container_created = self.create_container()
+        
+        if self.blob_service_client is not None and container_created:
+            logger.info(f"Container created successfully")
+            # upload the presentation to the container
+            pres = self.create_blob_client(self.pres_name)
+            if pres is not None:
+                upload_successful = self.upload_file_to_container(file_path=self.pres_path,
+                                                                blob_client=pres)
+                if not upload_successful:
+                    logger.error(f"Presentation was NOT uploaded")
+                    return None
+                else:
+                    logger.info(f"Presentation uploaded successfully")
+            else:
+                logger.error(f"Presentation blob was NOT created successfully")
+                return None
+            
+            # upload the image to the container
+            img = self.create_blob_client(self.img_name)
+            if img is not None:
+                upload_successful = self.upload_file_to_container(file_path=self.img_path,
+                                                                blob_client=img)
+                if not upload_successful:
+                    logger.error(f"Image was NOT uploaded")
+                    return None
+                else:
+                    logger.info(f"Image uploaded successfully")
+            else:
+                logger.error(f"Image blob was NOT created successfully")
+                return None
+
+            logger.info(f"All files uploaded successfully; returning presentation URL")
+            return pres.url
+        else:
+            logger.error(f"Container NOT created")
+            return None
 
 # ================================================================================================
 # DRIVER
@@ -317,13 +352,18 @@ def main():
     # store the presentation in blob storage
     # -----------------------------------------------------------------------------
     connect_str = os.getenv('SNIP_BLOB_STORAGE_CONN_STR')
+    container_name = "snip-test-container"
 
-    sptabs = SavePresToAzureBlobStorage(connect_str=connect_str,
+    sftabs = SaveFileToAzureBlobStorage(connect_str=connect_str,
                                         filename=outfile,
                                         filepath=outpath,
-                                        container_name="snip-test-container")
-    url = sptabs.copy_file_to_blob_storage_and_delete_from_tmp()
-    print(f"File saved to blob storage; see {url}")
+                                        container_name=container_name,
+                                        create_new_container=False)
+    url = sftabs.copy_file_to_blob_storage_and_delete_from_tmp()
+    if url is not None:
+        print(f"File saved to blob storage; see {url}")
+    else:
+        print(f"The file was NOT saved successfully")
     
 if __name__ == "__main__":
     main()

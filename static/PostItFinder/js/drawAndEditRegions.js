@@ -179,6 +179,7 @@ function drawStaticRegions(regionData){
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
     // delete any existing regions
     d3.selectAll("." + CONFIG.CONSTANTS.CLASSES.REGION).remove()
+    // rescale the data to image coords, and draw regions
     const svg = d3.select("#"+CONFIG.HTML.APP.IMAGE_PANE.SVG.ID);
     const absData = rescaleDataToAbsoluteCoords(regionData, startWidth, startHeight);
     createRegions(svg, absData, true);

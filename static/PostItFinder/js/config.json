@@ -213,7 +213,8 @@
             "DOWNLOAD_RESULTS_BTN" :{
                 "ID": "download-results-btn-id",
                 "TEXT": "Download Results",
-                "WAIT_TEXT": "Loading..."
+                "WAIT_TEXT": "Loading...",
+                "URL": "#"
             },
             "PREVIOUS_BTN": {
                 "URL": "PostItFinder:set_regions"

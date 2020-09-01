@@ -70,6 +70,9 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.file'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 IMAGE_KEY = "image_info"
 REGION_KEY = "regions"
+OCR_KEY = "ocr_results"
+CONTAINER_NAME_KEY = "container_name"
+PRESENTATION_NAME_KEY = "presentation_filename"
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
@@ -162,7 +165,6 @@ OCR_API_URL = "https://snip-ocr.cognitiveservices.azure.com/vision/v3.0/read/ana
 
 # Azure settings - Blob Storage API
 BLOB_STORAGE_CONN_STR = os.environ["SNIP_BLOB_STORAGE_CONN_STR"]
-BLOB_STORAGE_URL_ROOT = "https://snipblobstorage.blob.core.windows.net/"
 
 
 # Logging configuration
