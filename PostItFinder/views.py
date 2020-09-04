@@ -1,15 +1,17 @@
 from django.shortcuts import render
 from django.conf import settings
 from django.urls import reverse
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 
 from PostItFinder.azure_services import ObjectDetector, TextAnalyser, MatchWordsToRegions
+from PostItFinder.create_and_store_pptx import SnipPptxCreator, SaveFileToAzureBlobStorage
 
 import os
 from json import load, loads
 import base64
 import logging
-import time
+from datetime import datetime, timedelta
+import uuid
 
 
 # ================================================================================================
@@ -102,6 +104,120 @@ def get_text(input_str, regions):
 def assign_text_to_regions(regions, words):
     mwtr = MatchWordsToRegions(region_data=regions, word_data=words)
     return mwtr.match()
+
+def get_blob_url(filename, filepath, container_name, create_new_container):
+    sftabs = SaveFileToAzureBlobStorage(settings.BLOB_STORAGE_CONN_STR,
+                                        filename=filename,
+                                        filepath=filepath,
+                                        container_name=container_name, 
+                                        create_new_container=create_new_container)
+    return sftabs.get_blob_url()
+
+def generate_container_name_and_pres_filename():
+    """ 
+    Create a unique name for the container and presentation file, in the formats:
+        - container; YYYYMMDDHHMMSS-uuid
+        - presentation file; YYYYMMDDHHMMSS-SnipResults
+    
+    Appending the uuid to the container name prevents clashes with other container 
+    names, and the datetime should allow easy lookup if anything goes wrong.
+
+    Including a ref to the image in either name is not a good option, given how 
+    many issues could be encountered with filenames (e.g. length of filename, 
+    switching / removing illegal characters etc).
+
+    The container name and filename must conform to the Azure rules:
+    https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata#container-names
+    https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata#blob-names
+    [NOTE: container format is much more stringent than filename format]
+    """    
+    # generate the container name and presentation filename
+    now = datetime.now()
+    container_name = f"{now.strftime('%Y%m%d%H%M%S')}-{uuid.uuid4()}"
+    pres_filename = f"{now.strftime('%Y%m%d%H%M%S')}-SnipResults.pptx"
+    
+    return (container_name, pres_filename)                                  
+
+def create_new_media_directory(path):
+    try:
+        os.mkdir(path)
+    except OSError as err:
+        logger.error(f"Could not create container directory in /media/. Sys err: {err}")
+        return False
+    else:
+        return True
+
+def create_file_from_b64_encoded_string(b64_string, path):
+    start_img_str = b64_string.index(",") + 1
+    image_data_b64 = b64_string[start_img_str:]
+    base64_img_bytes = image_data_b64.encode('utf-8')
+    with open(path, 'wb') as f:
+        decoded_image_data = base64.decodebytes(base64_img_bytes)
+        f.write(decoded_image_data)
+
+def analyse_text_button_click(request):
+    # get the image and the current regions (if any)
+    image_data = request.session.get(settings.IMAGE_KEY, None)
+    regions = request.session.get(settings.REGION_KEY, None)
+
+    # analyse the text
+    region_text = get_text(image_data.get("data", None), regions)
+
+    # text has been found and assigned to regions
+    if region_text is not None:
+        logger.info(f"Azure processing successful")
+
+        # generate Blob Storage container name and presentation filename
+        container_name, presentation_name = generate_container_name_and_pres_filename()
+
+        # create new directory in /media/
+        dir_path = os.path.join(settings.MEDIA_ROOT, container_name)
+        result = create_new_media_directory(path=dir_path)  
+
+        # save the image file to the new directory
+        image_path = os.path.join(dir_path, image_data.get("name"))
+
+        if result:
+            create_file_from_b64_encoded_string(image_data.get("data"), path=image_path)
+            logger.info(f"The image {image_data.get('name')} was saved to {image_path}")
+        else:
+            logger.critical(f"The directory tmp was not created successfully")
+            # return ....what??
+
+        # create the presentation and save it to the new directory
+        pres_path = os.path.join(dir_path, presentation_name)
+        spc = SnipPptxCreator(image_filename=image_data.get("name"),
+                            image_path=image_path,
+                            text_boxes=region_text,
+                            outpath=pres_path)
+        spc.build_pres()
+        logger.info(f"The presentation {presentation_name} was saved to {pres_path}")
+
+        # create blob storage container and upload presentation and image, returning 
+        # the URL of the presentation
+        sftabs = SaveFileToAzureBlobStorage(connect_str=settings.BLOB_STORAGE_CONN_STR,
+                                            container_name=container_name, 
+                                            pres_name=presentation_name, 
+                                            pres_path=pres_path,
+                                            img_name=image_data.get("name"),
+                                            img_path=image_path)
+        url = sftabs.copy_file_to_blob_storage()
+        
+        # delete the tmp directory and contentts in /media/<container_name>        
+        # NOTE: this can't be done (in this way), because the files are in-use by Blob Storage
+        # from shutil import rmtree
+        # rmtree(dir_path)
+
+        if url is not None:
+            logger.info("Processing successful and files transferred. Sending results to client")
+            return JsonResponse({"data": region_text, "url": url}, status=200)
+        else: 
+            logger.warning(f"File transfer unsuccessful, null response sent to client")
+            return JsonResponse(None, safe=False, status=400) 
+    # something has gone wrong...
+    else:
+        logger.warning(f"Azure region_text unsuccessful, null response sent to client")
+        return JsonResponse(None, safe=False, status=400)    
 
 def get_stepper_bar_active_states(step_level):
     stepper = HTML["APP"]["STEPPER_BAR"]
@@ -228,26 +344,20 @@ def analyse_text(request):
     regions = request.session.get(settings.REGION_KEY, None)
 
     # user has clicked "Analyse Text"
-    if request.is_ajax() and request.method == "GET": 
-        processed_data = get_text(image_data.get("data", None), regions)
-        if processed_data is not None:
-            logger.info(f"Azure processing successful, results sent to client")
-            return JsonResponse(processed_data, safe=False, status=200)
-        else:
-            logger.warning(f"Azure processing unsuccessful, null response sent to client")
-            return JsonResponse(processed_data, safe=False, status=400)
+    if request.is_ajax() and request.method == "GET":        
+        return analyse_text_button_click(request)
     else:
         # Update config to set the 'active' class for the stepper bar
         stepper_bar = get_stepper_bar_active_states(3)
-        
+
         context = {
             "title": HTML["ANALYSE_TEXT"]["TITLE"],
             "navbar": HTML["BASE"]["NAVBAR"],
             "stepper": stepper_bar,
             "explain_text": HTML["ANALYSE_TEXT"]["EXPLAIN_TEXT"],
-            "next_btn": HTML["APP"]["NEXT_BTN"],
-            "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
+            "prev_btn": HTML["ANALYSE_TEXT"]["PREVIOUS_BTN"],
             "analyse_txt_btn": HTML["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"],
+            "download_results_btn": HTML["ANALYSE_TEXT"]["DOWNLOAD_RESULTS_BTN"],
             "image_pane": HTML["APP"]["IMAGE_PANE"],
             "config": CONFIG,
             "image_data": image_data, 

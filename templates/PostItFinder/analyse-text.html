@@ -13,6 +13,10 @@
         <b>extract it</b></a>. All words in the same region will be grouped together; text 
         not in a region will be discovered and grouped where possible.
       </p>
+
+      <p>
+        Click Download Results to get the output in a PowerPoint file.
+      </p>
     </div>
     <div class="col-lg-2"></div>
   </div>
@@ -68,8 +72,19 @@
         </button>
       </form>
     </div>
+
+    <div class="col-6">      
+      <a id="{{ download_results_btn.ID }}" href="{{ download_results_btn.URL }}" class="btn btn-block btn-outline-success disabled" aria-disabled="true" download>
+        {{ download_results_btn.TEXT }}
+      </a>
+    </div>
   </div>
+</form>
 {% endblock %}
+
+{% block next_button %}
+<!-- don't show the previous button on this page -->
+{% endblock%}
 
 {% block scripts %}
   {{ block.super }}

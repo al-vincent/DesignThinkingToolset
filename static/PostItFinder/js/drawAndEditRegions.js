@@ -179,6 +179,7 @@ function drawStaticRegions(regionData){
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
     // delete any existing regions
     d3.selectAll("." + CONFIG.CONSTANTS.CLASSES.REGION).remove()
+    // rescale the data to image coords, and draw regions
     const svg = d3.select("#"+CONFIG.HTML.APP.IMAGE_PANE.SVG.ID);
     const absData = rescaleDataToAbsoluteCoords(regionData, startWidth, startHeight);
     createRegions(svg, absData, true);
@@ -572,8 +573,8 @@ function sendDataToServer(data, timeout){
             }
         }
     })
-    .done(function() {
-        console.log("AJAX RESPONSE SUCCEEDED"); 
+    .done(function(returnData) {
+        console.log("AJAX RESPONSE SUCCEEDED");
     })
     .fail(function(jqXHR) {
         console.log("AJAX RESPONSE FAILED");
@@ -589,7 +590,7 @@ function sendDataToServer(data, timeout){
     })
 }
 
-function getDataFromServer(callbackFunc, alertText){
+function getDataFromServer(callbackFunc, alertText, btn){
     /** 
      * NOTE: a GET request doesn't require CSRF protection, so the Django 
      * boilerplate used above is removed here.
@@ -621,5 +622,9 @@ function getDataFromServer(callbackFunc, alertText){
         if(jqXHR.statusText === "timeout") {
             alert("The request timed out. The Azure server may be experiencing issues; please try again later.");
         }
-    }) 
+    })
+    .always(function() {
+        let myBtn = document.getElementById(btn.ID);
+        myBtn.innerHTML = btn.TEXT;
+    })
 }

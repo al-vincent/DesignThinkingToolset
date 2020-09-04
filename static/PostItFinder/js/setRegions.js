@@ -66,8 +66,7 @@ function addClickEventsToButtons(config) {
 
         // make the AJAX GET request
         const alertText = "The object detection algorithm did not find any sticky notes.";
-        // getDataFromServer(deleteRegionsAndRedraw, alertText);
-        getDataFromServer(findRgnsBtnAjax, alertText);
+        getDataFromServer(deleteRegionsAndRedraw, alertText, config.HTML.SET_REGIONS.FIND_REGIONS_BTN);
         // NOTE: the line below ensures that the AJAX call doesn't reload the whole
         // page; it just gets the new data and stops there. 
         // Not essential in a GET request, but does prevent the URL from having a 
@@ -85,13 +84,4 @@ function addClickEventsToButtons(config) {
         sendDataToServer({"data": JSON.stringify(rescaledData)}, 10000);        
         return true;
     }
-}
-
-function findRgnsBtnAjax(regionData) {
-    const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
-
-    deleteRegionsAndRedraw(regionData);
-    // update the text in the button, to show that we're done
-    const analyseTxtBtn = document.getElementById(CONFIG.HTML.SET_REGIONS.FIND_REGIONS_BTN.ID);
-    analyseTxtBtn.innerHTML = CONFIG.HTML.SET_REGIONS.FIND_REGIONS_BTN.TEXT;
 }
