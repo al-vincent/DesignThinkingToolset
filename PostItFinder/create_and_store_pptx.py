@@ -275,9 +275,6 @@ class SaveFileToAzureBlobStorage:
         # NOTE: this is more useful for testing the blob upload than anything else
         pass
 
-    def delete_pres_from_tmp_storage(self):
-        pass
-
     def copy_file_to_blob_storage(self):
         container_created = self.create_container()
         

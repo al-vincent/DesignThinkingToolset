@@ -120,7 +120,7 @@
             "TITLE": "SNIP",
             "START_BTN": {
                 "ID": "start-btn-id",
-                "TEXT": "START",
+                "TEXT": "start",
                 "URL": "PostItFinder:choose_image"
             },
             "ERROR_MESSAGE": {

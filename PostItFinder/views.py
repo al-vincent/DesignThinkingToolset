@@ -165,7 +165,7 @@ def analyse_text_button_click(request):
 
     # text has been found and assigned to regions
     if region_text is not None:
-        logger.info(f"Azure processing successful, results sent to client")
+        logger.info(f"Azure processing successful")
 
         # generate Blob Storage container name and presentation filename
         container_name, presentation_name = generate_container_name_and_pres_filename()
@@ -209,6 +209,7 @@ def analyse_text_button_click(request):
         # rmtree(dir_path)
 
         if url is not None:
+            logger.info("Processing successful and files transferred. Sending results to client")
             return JsonResponse({"data": region_text, "url": url}, status=200)
         else: 
             logger.warning(f"File transfer unsuccessful, null response sent to client")
@@ -354,8 +355,7 @@ def analyse_text(request):
             "navbar": HTML["BASE"]["NAVBAR"],
             "stepper": stepper_bar,
             "explain_text": HTML["ANALYSE_TEXT"]["EXPLAIN_TEXT"],
-            "next_btn": HTML["APP"]["NEXT_BTN"],
-            "prev_btn": HTML["APP"]["PREVIOUS_BTN"],
+            "prev_btn": HTML["ANALYSE_TEXT"]["PREVIOUS_BTN"],
             "analyse_txt_btn": HTML["ANALYSE_TEXT"]["ANALYSE_TEXT_BTN"],
             "download_results_btn": HTML["ANALYSE_TEXT"]["DOWNLOAD_RESULTS_BTN"],
             "image_pane": HTML["APP"]["IMAGE_PANE"],

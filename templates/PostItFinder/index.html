@@ -1,23 +1,78 @@
 {% extends "PostItFinder/base.html" %}
 
+{% block styles %}
+{% endblock %}
+
 {% block title %}{{ title }}{% endblock %}
 
-{% block content %}
-    {{ home_content }}
-    <div class="row">
-        <div class="mx-auto">
-            <div class="col-4">                
-                <a id="{{ start_btn.ID}}" href="{% url start_btn.URL %}" role="button" class="btn btn-success btn-lg rounded-circle">
-                    <p class="display-4">{{ start_btn.TEXT }}</p>
-                </a>
-            </div>        
+{% block content %}    
+    <div class="jumbotron">
+        <div class="row">
+            <div class="col-12"> 
+                <h1 class="display-4 text-center my-4">
+                    Welcome to
+                </h1>
+                <div class="word text-center">
+                    <span><b>s</b></span>
+                    <span><b>n</b></span>
+                    <span><b>i</b></span>
+                    <span><b>p</b></span>
+                </div>
+
+                <br>
+                <hr class="my-4">
+                <br>
+
+                <p class="lead text-center">
+                    Extract text from images, effortlessly
+                </p>
+            </div>
+        </div>
+        <div class="row my-5">    
+            <div class="mx-auto">
+                <div class="col-4">
+                    <!-- <button class="button">
+                        <a id="{{ start_btn.ID}}" href="{% url start_btn.URL %}"> -->
+                        <a id="{{ start_btn.ID}}" href="{% url start_btn.URL %}" role="button" class="button btn btn-success btn-lg badge-pill px-4 py-0">
+                                {{ start_btn.TEXT }}
+                            <!-- </p> -->
+                        </a>
+                    <!-- </button>  -->
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <br>
+                <hr class="my-4">
+                <br>
+
+                <h2 class="h2 display-4">
+                    What is snip?                
+                </h2>
+                <p class="lead">
+                    Most of the best ideas don't start out as digital media - they start
+                    out with people in a room together,, sharing ideas, drawing on a 
+                    white-board (and often with <i>lots</i> of sticky notes).
+                </p>
+                <p class="lead">
+                    At some point though, it's often useful to turn those ideas into 
+                    something that you can share digitally, like a slide deck. And that
+                    can take a long time to make.
+                </p>
+                <p class="lead">
+                    snip is a simple little app that takes some of the work out of 
+                    this process.
+                </p>
+            </div>
         </div>
     </div>
+
 {% endblock %}
 
 {% block scripts %}
     {{ block.super }} 
-    
+
     {% load static %}
     <script type="text/javascript" src="{% static 'PostItFinder/js/index.js' %}"></script>
 {% endblock %}
