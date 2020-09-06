@@ -218,7 +218,8 @@ def index(request):
 def about(request):
     context = {
         "title": HTML["ABOUT"]["TITLE"],
-        "about_content": "some info about the app"
+        "navbar": HTML["BASE"]["NAVBAR"],
+        "about_content": "Placeholder for some info about the app"
         }
     
     return render(request, PATHS["ABOUT"], context=context)
@@ -226,7 +227,8 @@ def about(request):
 def faq(request):
     context = {
         "title": HTML["FAQ"]["TITLE"],
-        "faq_content": "some frequently asked questions"
+        "navbar": HTML["BASE"]["NAVBAR"],
+        "faq_content": "Placeholder for frequently asked questions"
         }
     
     return render(request, PATHS["FAQ"], context=context)
