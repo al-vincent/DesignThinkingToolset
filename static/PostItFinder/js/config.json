@@ -53,7 +53,8 @@
                 "ID": "navbar-id",
                 "LOGO": {
                     "ID": "logo-id",
-                    "IMAGE": "logo-image"
+                    "IMAGE": "logo-image",
+                    "URL": "PostItFinder:index"
                 },
                 "PAGES": [
                     {   

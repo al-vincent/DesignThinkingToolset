@@ -12,6 +12,7 @@ import base64
 import logging
 from datetime import datetime, timedelta
 import uuid
+from io import BytesIO
 
 
 # ================================================================================================
@@ -138,22 +139,11 @@ def generate_container_name_and_pres_filename():
     
     return (container_name, pres_filename)                                  
 
-def create_new_media_directory(path):
-    try:
-        os.mkdir(path)
-    except OSError as err:
-        logger.error(f"Could not create container directory in /media/. Sys err: {err}")
-        return False
-    else:
-        return True
-
-def create_file_from_b64_encoded_string(b64_string, path):
+def get_bytes_from_b64_encoded_string(b64_string):
     start_img_str = b64_string.index(",") + 1
     image_data_b64 = b64_string[start_img_str:]
     base64_img_bytes = image_data_b64.encode('utf-8')
-    with open(path, 'wb') as f:
-        decoded_image_data = base64.decodebytes(base64_img_bytes)
-        f.write(decoded_image_data)
+    return BytesIO(base64.decodebytes(base64_img_bytes))
 
 def analyse_text_button_click(request):
     # get the image and the current regions (if any)
@@ -170,43 +160,22 @@ def analyse_text_button_click(request):
         # generate Blob Storage container name and presentation filename
         container_name, presentation_name = generate_container_name_and_pres_filename()
 
-        # create new directory in /media/
-        dir_path = os.path.join(settings.MEDIA_ROOT, container_name)
-        result = create_new_media_directory(path=dir_path)  
-
-        # save the image file to the new directory
-        image_path = os.path.join(dir_path, image_data.get("name"))
-
-        if result:
-            create_file_from_b64_encoded_string(image_data.get("data"), path=image_path)
-            logger.info(f"The image {image_data.get('name')} was saved to {image_path}")
-        else:
-            logger.critical(f"The directory tmp was not created successfully")
-            # return ....what??
+        # get the image bytes
+        img_bytes = get_bytes_from_b64_encoded_string(image_data.get("data"))
 
         # create the presentation and save it to the new directory
-        pres_path = os.path.join(dir_path, presentation_name)
         spc = SnipPptxCreator(image_filename=image_data.get("name"),
-                            image_path=image_path,
-                            text_boxes=region_text,
-                            outpath=pres_path)
-        spc.build_pres()
-        logger.info(f"The presentation {presentation_name} was saved to {pres_path}")
+                            image_bytes=img_bytes,
+                            text_boxes=region_text)
+        pres_bytes = spc.build_pres()
+        logger.info(f"The presentation {presentation_name} was created successfully")
 
         # create blob storage container and upload presentation and image, returning 
         # the URL of the presentation
         sftabs = SaveFileToAzureBlobStorage(connect_str=settings.BLOB_STORAGE_CONN_STR,
-                                            container_name=container_name, 
-                                            pres_name=presentation_name, 
-                                            pres_path=pres_path,
-                                            img_name=image_data.get("name"),
-                                            img_path=image_path)
-        url = sftabs.copy_file_to_blob_storage()
-        
-        # delete the tmp directory and contentts in /media/<container_name>        
-        # NOTE: this can't be done (in this way), because the files are in-use by Blob Storage
-        # from shutil import rmtree
-        # rmtree(dir_path)
+                                            container_name=container_name)
+        url = sftabs.upload_bytes_to_blob_storage(file_name=presentation_name,
+                                                file_bytes=pres_bytes)
 
         if url is not None:
             logger.info("Processing successful and files transferred. Sending results to client")

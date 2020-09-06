@@ -10,6 +10,7 @@ from azure.storage.blob import BlobServiceClient
 import os
 from datetime import datetime, timedelta
 from PIL import Image
+from io import BytesIO
 import logging
 
 # Get a logger instance
@@ -19,12 +20,11 @@ logger = logging.getLogger(__name__)
 # CREATE POWERPOINT
 # ================================================================================================
 class SnipPptxCreator:
-    def __init__(self, image_filename, image_path, text_boxes, outpath):
+    def __init__(self, image_filename, image_bytes, text_boxes):
         self.image_filename = image_filename
-        self.image_path = image_path
+        self.image_bytes = image_bytes
         self.image = self.get_image()
         self.text_boxes = text_boxes
-        self.outpath = outpath
         self.pres = Presentation()
 
     def get_image(self):
@@ -32,9 +32,9 @@ class SnipPptxCreator:
         Open the image using pillow for easy manipulation
         """
         try:
-            return Image.open(self.image_path)
-        except (FileNotFoundError, FileExistsError) as err:
-            logger.error(f"File {self.image_path} not found. Sys error: {err}")
+            return Image.open(self.image_bytes)
+        except Exception as err:
+            logger.error(f"An exception occurred. Sys error: {err}")
             # --------------------------------
             # TODO: change the return! If this happens, it's pretty critical...!
             # --------------------------------
@@ -85,7 +85,7 @@ class SnipPptxCreator:
             # record the image size and position; we'll need it later!
             self.image_size = {"left": left, "top": top, "width": width, "height": height}
             # add the image to the slide
-            slide.shapes.add_picture(self.image_path, left, top, width=width)
+            slide.shapes.add_picture(self.image_bytes, left, top, width=width)
         else:
             # set the height of the image to be 80% of <space-below-bottom-of-title>
             height = int((self.pres.slide_height - (title.top + title.height)) * 0.8)
@@ -98,7 +98,7 @@ class SnipPptxCreator:
             # record the image size and position; we'll need it later!
             self.image_size = {"left": left, "top": top, "width": width, "height": height}            
             # add the image to the slide
-            slide.shapes.add_picture(self.image_path, left, top, width=width, height=height)
+            slide.shapes.add_picture(self.image_bytes, left, top, width=width, height=height)
 
     def add_image_and_text_slide(self):
         """
@@ -114,7 +114,7 @@ class SnipPptxCreator:
         title.text = "Original Image with Extracted Text"
         
         # add the image to the slide
-        slide.shapes.add_picture(self.image_path, self.image_size["left"], self.image_size["top"], 
+        slide.shapes.add_picture(self.image_bytes, self.image_size["left"], self.image_size["top"], 
                                 self.image_size["width"], self.image_size["height"])
 
         # overlay the textboxes on the image
@@ -199,34 +199,28 @@ class SnipPptxCreator:
         # font = run.font
         # font.size = Pt(80)
         # ------------------------------------------------------------------
-    
-    def save_presentation(self):
-        try:
-            self.pres.save(self.outpath)
-        except FileNotFoundError as err:
-            logger.error(f"File save unsuccessful; filepath not found. Sys error: {err}")
-        except Exception as err:
-            logger.error(f"File save unsuccessful. Another error occurred: {err}")
+
+    def save_pres_as_bytes(self):
+        out = BytesIO()
+        self.pres.save(out)
+        return out.getvalue()
 
     def build_pres(self):
         self.add_title_slide()
         self.add_original_image_slide()
         self.add_image_and_text_slide()
         self.add_text_as_bullets_slide()
-        self.save_presentation()
+        return self.save_pres_as_bytes()
 
 # ================================================================================================
-# STORE POWERPOINT IN BLOB STORAGE
+# SAVE FILE TO BLOB STORAGE
 # ================================================================================================
 class SaveFileToAzureBlobStorage:
-    def __init__(self, connect_str, container_name, pres_name, pres_path, img_name, img_path):
+    def __init__(self, connect_str, container_name):
         self.connect_str = connect_str
         self.container_name = container_name
-        self.pres_name = pres_name
-        self.pres_path = pres_path
-        self.img_name = img_name
-        self.img_path = img_path
         self.blob_service_client = None
+        self.container_created = self.create_container()
 
     def create_container(self):
         # Create the BlobServiceClient object which will be used to create a container client
@@ -271,45 +265,42 @@ class SaveFileToAzureBlobStorage:
         else:
             return True
 
+    def upload_bytes_to_container(self, file_bytes, blob_client):
+        try:
+            # with open(file_path, "rb") as f:?
+            blob_client.upload_blob(file_bytes)
+        except FileNotFoundError as err:
+            logger.error(f"The file {file_path} was not found. Sys error: {err}")
+            return False
+        except Exception as err:
+            logger.error(f"Another exception occurred. Sys error: {err}")
+            return False
+        else:
+            return True
+
+
     def list_blobs_in_container(self):
         # NOTE: this is more useful for testing the blob upload than anything else
         pass
 
-    def copy_file_to_blob_storage(self):
-        container_created = self.create_container()
-        
-        if self.blob_service_client is not None and container_created:
+    def upload_bytes_to_blob_storage(self, file_name, file_bytes):
+        if self.blob_service_client is not None and self.container_created:
             logger.info(f"Container created successfully")
-            # upload the presentation to the container
-            pres = self.create_blob_client(self.pres_name)
-            if pres is not None:
-                upload_successful = self.upload_file_to_container(file_path=self.pres_path,
-                                                                blob_client=pres)
+            # upload the file to the container
+            blob = self.create_blob_client(file_name)
+            if blob is not None:
+                upload_successful = self.upload_bytes_to_container(file_bytes=file_bytes,
+                                                                blob_client=blob)
                 if not upload_successful:
-                    logger.error(f"Presentation was NOT uploaded")
+                    logger.error(f"File {file_name} was NOT uploaded")
                     return None
                 else:
-                    logger.info(f"Presentation uploaded successfully")
+                    logger.info(f"File {file_name} uploaded successfully")
             else:
-                logger.error(f"Presentation blob was NOT created successfully")
-                return None
-            
-            # upload the image to the container
-            img = self.create_blob_client(self.img_name)
-            if img is not None:
-                upload_successful = self.upload_file_to_container(file_path=self.img_path,
-                                                                blob_client=img)
-                if not upload_successful:
-                    logger.error(f"Image was NOT uploaded")
-                    return None
-                else:
-                    logger.info(f"Image uploaded successfully")
-            else:
-                logger.error(f"Image blob was NOT created successfully")
+                logger.error(f"Blob {file_name} was NOT created successfully")
                 return None
 
-            logger.info(f"All files uploaded successfully; returning presentation URL")
-            return pres.url
+            return blob.url
         else:
             logger.error(f"Container NOT created")
             return None
@@ -322,8 +313,8 @@ def main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     image_path = os.path.join(current_dir, "tests", "resources", "test_images", infile)
     outfile = "test.pptx"
-    outpath = os.path.join(os.path.dirname(current_dir), "media", "tmp", outfile)
-    
+    image_bytes = open(image_path, "rb")
+
     # -----------------------------------------------------------------------------
     # create the presentation, save in /media/tmp
     # -----------------------------------------------------------------------------
@@ -339,28 +330,30 @@ def main():
     ]
 
     spc = SnipPptxCreator(image_filename=infile,
-                        image_path=image_path,
-                        text_boxes=text_boxes,
-                        outpath=outpath)
-    spc.build_pres()
-    print(f"Presentation created; see {outpath}")
+                        image_bytes=image_bytes,
+                        text_boxes=text_boxes)
+    pres_bytes = spc.build_pres()
+    print(f"Presentation created")
 
     # -----------------------------------------------------------------------------
     # store the presentation in blob storage
     # -----------------------------------------------------------------------------
     connect_str = os.getenv('SNIP_BLOB_STORAGE_CONN_STR')
-    container_name = "snip-test-container"
-
-    sftabs = SaveFileToAzureBlobStorage(connect_str=connect_str,
-                                        filename=outfile,
-                                        filepath=outpath,
-                                        container_name=container_name,
-                                        create_new_container=False)
-    url = sftabs.copy_file_to_blob_storage_and_delete_from_tmp()
+    container_name = "snip-test-container-11"
+    
+    sftabs = SaveFileToAzureBlobStorage(connect_str=connect_str, 
+                                        container_name=container_name)
+    url = sftabs.upload_bytes_to_blob_storage(outfile, pres_bytes)  
     if url is not None:
         print(f"File saved to blob storage; see {url}")
     else:
         print(f"The file was NOT saved successfully")
+
+    # url = sftabs.upload_bytes_to_blob_storage(infile, image_bytes)
+    # if url is not None:
+    #     print(f"File saved to blob storage; see {url}")
+    # else:
+    #     print(f"The file was NOT saved successfully")
     
 if __name__ == "__main__":
     main()

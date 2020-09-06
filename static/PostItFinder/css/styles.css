@@ -11,7 +11,7 @@
 .word span {
     cursor: pointer;
     display: inline-block;
-    font-size: 130px;
+    font-size: 100px;
     padding-left: 10px;
     padding-right: 10px;
     user-select: none;
