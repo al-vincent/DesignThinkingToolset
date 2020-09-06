@@ -350,6 +350,8 @@ def analyse_text(request):
         # Update config to set the 'active' class for the stepper bar
         stepper_bar = get_stepper_bar_active_states(3)
 
+        HTML["ANALYSE_TEXT"]["PREVIOUS_BTN"]["ID"] = HTML["APP"]["PREVIOUS_BTN"]["ID"]
+
         context = {
             "title": HTML["ANALYSE_TEXT"]["TITLE"],
             "navbar": HTML["BASE"]["NAVBAR"],

@@ -175,7 +175,24 @@
         opacity: 0;
     }
 }
-  
+
+
+/* ========================================================================== 
+ * Allow SVGs to overlay an image
+ * ========================================================================== */
+ /* Ref: https://stackoverflow.com/a/43806724 */
+.img-overlay-wrap {
+    position: relative;
+    display: inline-block; /* <= shrinks container to image size */
+}
+
+.img-overlay-wrap .svg-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+
 /* ========================================================================== 
  * Resizable boxes
  * ========================================================================== */

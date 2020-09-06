@@ -1,0 +1,8 @@
+azure-storage-blob==12.4.0
+django>=3.0.3
+gunicorn==20.0.4
+pillow>=7.0.0
+python-pptx==0.6.18
+requests==2.24.0
+selenium>=3.141.0
+whitenoise==4.1.4
