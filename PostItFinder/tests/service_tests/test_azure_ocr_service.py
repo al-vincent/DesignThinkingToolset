@@ -254,20 +254,11 @@ class TestProcessOutput(unittest.TestCase):
         test_input = RESULTS.OCR_NO_LINES_KEY
         actual_results = self.ta.process_output(test_input)
         self.assertIsNone(actual_results)
-<<<<<<< HEAD
-
-=======
     
->>>>>>> 0372f88ff30d30312938629e3c542f253e01c88c
     def test_input_has_no_width_key_returns_none(self):
         test_input = RESULTS.OCR_NO_WIDTH_KEY
         actual_results = self.ta.process_output(test_input)
         self.assertIsNone(actual_results)
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> 0372f88ff30d30312938629e3c542f253e01c88c
     def test_input_has_no_height_key_returns_none(self):
         test_input = RESULTS.OCR_NO_HEIGHT_KEY
         actual_results = self.ta.process_output(test_input)
@@ -278,8 +269,6 @@ class TestProcessOutput(unittest.TestCase):
         actual_results = self.ta.process_output(test_input)
         self.assertIsNone(actual_results)    
 
-<<<<<<< HEAD
-=======
     def test_use_words_false_extracts_correct_lines(self):
         # create a new ta object for the file we want to process
         image_path = get_file_path("lines_of_words.jpg")
@@ -294,7 +283,6 @@ class TestProcessOutput(unittest.TestCase):
         actual_results = ta.process_output(test_input)
         self.assertListEqual(expected_results, actual_results)
 
->>>>>>> 0372f88ff30d30312938629e3c542f253e01c88c
     def test_input_has_no_words_keys_returns_none(self):
         test_input = RESULTS.OCR_NO_WORDS_KEYS
         actual_results = self.ta.process_output(test_input)
@@ -321,11 +309,7 @@ class TestProcessOutput(unittest.TestCase):
         test_input = RESULTS.OCR_NO_BOUNDINGBOX_KEYS
         actual_results = self.ta.process_output(test_input)
         self.assertIsNone(actual_results)
-<<<<<<< HEAD
-
-=======
     
->>>>>>> 0372f88ff30d30312938629e3c542f253e01c88c
     def test_one_bounding_box_key_returns_values(self):
         test_input = RESULTS.OCR_ONE_WORDS_LIST
         expected_results = RESULTS.PROCESSED_OCR_ONE_WORD
@@ -357,83 +341,6 @@ class TestProcessOutput(unittest.TestCase):
 
 # ------------------------------------
 
-<<<<<<< HEAD
-=======
-class TestProcessJson(unittest.TestCase):
-    def setUp(self):        
-        self.image_path = get_file_path("test_jpg.jpg")
-        self.img_bytes = azure_services.get_file_bytes(self.image_path)
-        self.ta = azure_services.TextAnalyser(image_data=self.img_bytes, 
-                                            subscription_key=settings.OCR_SUBSCRIPTION_KEY,
-                                            api_url=settings.OCR_API_URL)
-
-    def tearDown(self):
-        del(self.image_path, self.img_bytes, self.ta)
-
-    def test_json_is_not_dict_returns_none(self):
-        test_input = ["a", "b", "c"]
-        max_width = 200
-        max_height = 200
-        actual_results = self.ta.process_json(test_input, max_width, max_height)
-        self.assertIsNone(actual_results)
-
-    def test_max_height_is_not_number_returns_none(self):
-        test_input = RESULTS.OCR_TEXT_IN_LINES
-        max_width = 200
-        max_height = "a"
-        actual_results = self.ta.process_json(test_input, max_width, max_height)
-        self.assertIsNone(actual_results)
-
-    def test_max_width_is_not_number_returns_none(self):
-        test_input = RESULTS.OCR_TEXT_IN_LINES
-        max_width = "a"
-        max_height = 200
-        actual_results = self.ta.process_json(test_input, max_width, max_height)
-        self.assertIsNone(actual_results)
-
-    # I have no idea why this fails. It should return None, but instead returns
-    # the tuple (None,), even though the next test is pretty much identical and 
-    # works fine, returning None??!
-    @unittest.expectedFailure
-    def test_no_bounding_box_key_returns_none(self):
-        test_input = RESULTS.OCR_SINGLE_WORD_NO_BOUNDING_BOX_KEY        
-        max_width = 200
-        max_height = 200
-        actual_results = self.ta.process_json(test_input, max_width, max_height), 
-        self.assertIsNone(actual_results)
-
-    def test_no_text_key_returns_none(self):
-        test_input = RESULTS.OCR_SINGLE_WORD_NO_TEXT_KEY
-        max_width = 200
-        max_height = 200
-        actual_results = self.ta.process_json(test_input, max_width, max_height)
-        self.assertIsNone(actual_results)
-    
-    def test_no_confidence_key_returns_values(self):
-        test_input = RESULTS.OCR_SINGLE_WORD_NO_CONFIDENCE_KEY
-        max_width = 200
-        max_height = 200
-        actual_results = self.ta.process_json(test_input, max_width, max_height)
-        self.assertIsNone(actual_results)
-
-    def test_convert_bounds_no_result_returns_none(self):
-        test_input = RESULTS.OCR_SINGLE_WORD
-        max_width = 200
-        max_height = 200
-        actual_results = self.ta.process_json(test_input, max_width, max_height)
-        self.assertIsNone(actual_results)
-
-    def test_correct_input_gives_correct_result(self):
-        test_input = RESULTS.OCR_SINGLE_WORD
-        max_width = 2661
-        max_height = 1901
-        actual_results = self.ta.process_json(test_input, max_width, max_height)
-        expected_results = RESULTS.PROCESSED_OCR_TEXT_SINGLE_WORD
-        self.assertDictEqual(actual_results, expected_results)
-
-# ------------------------------------
-
->>>>>>> 0372f88ff30d30312938629e3c542f253e01c88c
 class TestConvertBounds(unittest.TestCase):
     def setUp(self):        
         self.image_path = get_file_path("test_jpg.jpg")
@@ -445,11 +352,6 @@ class TestConvertBounds(unittest.TestCase):
     def tearDown(self):
         del(self.image_path, self.img_bytes, self.ta)
 
-<<<<<<< HEAD
-    # TODO: add a few 'correct' edge-cases, e.g. checking that bbox includes
-    # zeros leads to x and/or y being zero
-=======
->>>>>>> 0372f88ff30d30312938629e3c542f253e01c88c
     def test_valid_input_returns_correct_results(self):
         max_width = 100
         max_height = 100
@@ -573,40 +475,23 @@ class TestConvertBounds(unittest.TestCase):
         max_width = 10
         max_height = 10
         self.assertIsNotNone(self.ta.convert_bounds(bbox, max_width, max_height))
-<<<<<<< HEAD
-
-    def test_bounding_coords_element_greater_than_max_width_returns_none(self):
-        bbox = [1,2,3,4,5,6,7,0]
-=======
     
     def test_bounding_coords_has_non_numeric_element_returns_none(self):
         bbox = [1,2,3,4,5,6,7,"a"]
->>>>>>> 0372f88ff30d30312938629e3c542f253e01c88c
         max_width = 3
         max_height = 8
         self.assertIsNone(self.ta.convert_bounds(bbox, max_width, max_height))
 
-<<<<<<< HEAD
-    def test_bounding_coords_element_greater_than_max_height_returns_none(self):
-=======
     def test_x_coords_element_greater_than_max_width_returns_none(self):
->>>>>>> 0372f88ff30d30312938629e3c542f253e01c88c
         bbox = [1,2,3,4,5,6,7,0]
         max_width = 3
         max_height = 8
         self.assertIsNone(self.ta.convert_bounds(bbox, max_width, max_height))
 
-<<<<<<< HEAD
-    def test_bounding_coords_has_non_numeric_element_returns_none(self):
-        bbox = [1,2,3,4,5,6,7,"a"]
-        max_width = 3
-        max_height = 8
-=======
     def test_y_coords_element_greater_than_max_height_returns_none(self):
         bbox = [1,2,3,4,5,6,7,0]
         max_width = 8
         max_height = 3
->>>>>>> 0372f88ff30d30312938629e3c542f253e01c88c
         self.assertIsNone(self.ta.convert_bounds(bbox, max_width, max_height))
 
     # --------------------------------------------------------------------

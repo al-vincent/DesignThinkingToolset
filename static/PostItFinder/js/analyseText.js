@@ -46,18 +46,22 @@ function addClickEventsToButtons(config) {
 
         // Make the AJAX GET request
         const alertText = "The OCR algorithm did not find any text.";
-        getDataFromServer(analyseTextBtnAjax, alertText);
+        getDataFromServer(clickAnalyseTextAJAX, alertText, config.HTML.ANALYSE_TEXT.ANALYSE_TEXT_BTN);
         return false;
     }
 }
 
-function analyseTextBtnAjax(regionData) {
+function clickAnalyseTextAJAX(returnData) {
     const CONFIG = JSON.parse(document.getElementById("config-id").textContent);
 
-    // draw the regions, apply tooltips etx.
-    drawStaticRegions(regionData);
+    // draw the text regions and tooltip
+    drawStaticRegions(returnData["data"]);
 
-    // update the text in the button, to show that we're done
-    const analayseTxtBtn = document.getElementById(CONFIG.HTML.ANALYSE_TEXT.ANALYSE_TEXT_BTN.ID);
-    analayseTxtBtn.innerHTML = CONFIG.HTML.ANALYSE_TEXT.ANALYSE_TEXT_BTN.TEXT;
+    const downloadResultsBtn = document.getElementById(CONFIG.HTML.ANALYSE_TEXT.DOWNLOAD_RESULTS_BTN.ID);
+    // change the href of the Download Results button
+    downloadResultsBtn.href = returnData["url"];
+
+    // change the Download Results button to be enabled
+    downloadResultsBtn.classList.remove("disabled");
+    downloadResultsBtn.setAttribute("aria-disabled", false);
 }

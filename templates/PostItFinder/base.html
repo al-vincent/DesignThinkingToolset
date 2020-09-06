@@ -20,6 +20,8 @@
         <!-- custom CSS -->
         <link rel="stylesheet" type="text/css" href="{% static 'PostItFinder/css/styles.css' %}">
         
+        {% block styles %}{% endblock %}
+
         <title>{% block title %}SNIP{% endblock %}</title>
     </head>    
     <body>

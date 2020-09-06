@@ -22,6 +22,7 @@ MEDIA_DIR = os.path.join(BASE_DIR, 'media')         # media files
 # Application definition
 
 INSTALLED_APPS = [
+    'whitenoise.runserver_nostatic',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -33,6 +34,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -70,6 +72,9 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.file'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 IMAGE_KEY = "image_info"
 REGION_KEY = "regions"
+OCR_KEY = "ocr_results"
+CONTAINER_NAME_KEY = "container_name"
+PRESENTATION_NAME_KEY = "presentation_filename"
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
@@ -80,7 +85,7 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
+# DATABASES = {}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -118,6 +123,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [STATIC_DIR, ]
 
+
+# Media files (user uploads, temporary files) 
+# https://docs.djangoproject.com/en/2.1/howto/static-files/#serving-files-uploaded-by-a-user-duringdevelopment
+
+MEDIA_ROOT = MEDIA_DIR
+MEDIA_URL = '/media/'
+
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 if 'DJANGO_DEBUG_FALSE' in os.environ:  
@@ -152,6 +164,10 @@ MAX_IMAGE_SIZE = 4194304
 
 OCR_SUBSCRIPTION_KEY = os.environ["SNIP_OCR_SUBS_KEY"]
 OCR_API_URL = "https://snip-ocr.cognitiveservices.azure.com/vision/v3.0/read/analyze"
+
+# Azure settings - Blob Storage API
+BLOB_STORAGE_CONN_STR = os.environ["SNIP_BLOB_STORAGE_CONN_STR"]
+
 
 # Logging configuration
 LOGGING = {
