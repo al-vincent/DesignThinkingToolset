@@ -85,19 +85,22 @@ class TestNavbar(DynamicTests):
             element = self.browser.find_element_by_id(nav_item["ID"])
             self.assertEqual(element.get_attribute("innerText"), nav_item["TEXT"])
     
-    # def test_clicking_logo_takes_user_to_home(self):
-    #     pass
+    def test_clicking_logo_takes_user_to_home(self):
+        base_url = self.live_server_url
+        logo = base.ELEMS["BASE"]["NAVBAR"]["LOGO"]
+        self.browser.find_element_by_id(logo["ID"]).click()
+        self.assertEqual(self.browser.current_url, base_url + reverse(logo["URL"]))
 
     def test_clicking_about_takes_user_to_about_page(self):
         base_url = self.live_server_url
         page = base.ELEMS["BASE"]["NAVBAR"]["PAGES"][0]        
-        page_elem = self.browser.find_element_by_id(page["ID"]).click()
+        self.browser.find_element_by_id(page["ID"]).click()
         self.assertEqual(self.browser.current_url, base_url + reverse(page["URL"]))
 
     def test_clicking_faq_takes_user_to_faq_page(self):
         base_url = self.live_server_url
         page = base.ELEMS["BASE"]["NAVBAR"]["PAGES"][1]        
-        page_elem = self.browser.find_element_by_id(page["ID"]).click()
+        self.browser.find_element_by_id(page["ID"]).click()
         self.assertEqual(self.browser.current_url, base_url + reverse(page["URL"]))
     
 # -------------------------------------------------------------------------------------
@@ -479,8 +482,8 @@ class TestDownloadResultsButton(DynamicTests):
     def test_button_is_enabled_once_text_analysed(self):
         # NOTE: I want the button to be *disabled* until the user has analysed the text
         download_results_btn = self.browser.find_element_by_id(base.ELEMS["ANALYSE_TEXT"]["DOWNLOAD_RESULTS_BTN"]["ID"])
-        # self.assertFalse(download_results_btn.is_enabled())
-        pass
+        self.assertFalse(download_results_btn.is_enabled())
+        # pass
 
     def test_button_has_correct_text(self):
         download_results_btn = self.browser.find_element_by_id(base.ELEMS["ANALYSE_TEXT"]["DOWNLOAD_RESULTS_BTN"]["ID"])

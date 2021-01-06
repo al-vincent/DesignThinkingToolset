@@ -265,8 +265,11 @@ class DynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     # Navbar tests
     # -------------------------------------------------------------------------------------
-    # def test_clicking_logo_takes_user_to_home(self):
-    #     pass
+    def test_clicking_logo_takes_user_to_home(self):
+        base_url = self.live_server_url
+        logo = base.ELEMS["BASE"]["NAVBAR"]["LOGO"]
+        self.browser.find_element_by_id(logo["ID"]).click()
+        self.assertEqual(self.browser.current_url, base_url + reverse(logo["URL"]))
 
     def test_clicking_about_takes_user_to_faq_page(self):
         base_url = self.live_server_url

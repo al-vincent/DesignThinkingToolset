@@ -29,7 +29,7 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-success" id="{{ navbar.ID }}">
             {% block navbar %}
             <!-- SNIP icon -->
-            <a class="navbar-brand" href="{% url navbar.LOGO.URL %}">SNIP</a>
+            <a class="navbar-brand" href="{% url navbar.LOGO.URL %}" id="{{ navbar.LOGO.ID }}">SNIP</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>

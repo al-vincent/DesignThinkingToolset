@@ -56,10 +56,10 @@ class BasisFunctions:
         gif, bmp or png, and is of size <= 4MB.
 
         Parameters:
-        - bytestream (bytes), the data to be checked.
+            bytestream (bytes), the data to be checked.
 
         Returns:
-        - boolean, True if the data is valid and false if not.
+            boolean, True if the data is valid and false if not.
         """              
         result = False
 
@@ -95,14 +95,17 @@ class ObjectDetector(BasisFunctions):
         """
         Access the Azure Custom Vision service to process an image.
 
+        Parameters:
+            image_data (bytes), the image bytestream
+
         Returns:
-            Dict containing the results of the analysis, or None
+            Dict containing the analysis results, or None (if the analysis fails)
         
         NOTE: if results are a dict, the format will be as defined in the Custom Vision API:
         https://southcentralus.dev.cognitive.microsoft.com/docs/services/Custom_Vision_Prediction_3.1/operations/5eb37d24548b571998fde5f3
         """
 
-        # Allow the object's
+        # If no image data is supplied, use the data encapsulated in the object
         if image_data is None:
             image_data = self.image_data
 
@@ -137,16 +140,15 @@ class ObjectDetector(BasisFunctions):
                 error or no objects were detected in the image.
         
         Returns:
-            dict, either of the form:
-                {"threshold": (float), 
-                "data":[{"x": (float), "y": (float), }, "width": (float), "height": (float)}, 
-                        {"x": ..., "y": ..., "width": ..., "height": ... }, etc. ] }, 
-            or    
-                {"threshold": (float), "data": None}
+            either a list-of-dicts, of the form:
+                [
+                 {"x": (float), "y": (float), }, "width": (float), "height": (float)}, 
+                 {"x": ..., "y": ..., "width": ..., "height": ... }, etc. 
+                ] 
+            or None.
             
-            The first format is used if the Azure return contains legitimate results; the 
-            second format is used if no results are provided or if the results are in an
-            incorrect format.
+            None is returned if no results are provided by the Azure service or if the 
+            results are in an incorrect format.
         """
         try:
             regions = azure_results.get("predictions", None)
@@ -180,7 +182,16 @@ class ObjectDetector(BasisFunctions):
         """
         Convenience function to analyse and process the image data.
 
-        Returns the output from process_output()
+        Returns:
+            either a list-of-dicts, of the form:
+                [
+                 {"x": (float), "y": (float), }, "width": (float), "height": (float)}, 
+                 {"x": ..., "y": ..., "width": ..., "height": ... }, etc. 
+                ] 
+            or None.
+            
+            None is returned if no results are provided by the Azure service or if the 
+            results are in an incorrect format.
         """
         sticky_notes = None
         if self.image_data is not None:
@@ -689,11 +700,9 @@ def get_file_bytes(image_path):
             return f.read()
     except FileNotFoundError:
         print(f"*** ERROR: the file '{image_path}' was not found. ***")
-        # exit(1)
         return None
     except Exception as err:
         print(f"*** ERROR: {err}")
-        # exit(2)
         return None
 
 # ================================================================================================
@@ -733,7 +742,7 @@ def main():
     # --- /TEXT ANALYSIS ---
 
     # --- MATCH WORDS TO REGIONS ---
-    mwtr = MatchWordsToRegions(regions["data"], words["data"])
+    mwtr = MatchWordsToRegions(regions, words)
     new_regions = mwtr.match()
     print(f"{'-'*19}\nRegions with words:\n{'-'*19}\n{dumps(new_regions, indent=4)}\n")
     # --- MATCH WORDS TO REGIONS ---

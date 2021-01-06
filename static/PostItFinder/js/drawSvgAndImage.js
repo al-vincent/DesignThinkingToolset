@@ -13,8 +13,7 @@
 
 /**
  * Displays an image selected by a user from the local filesystem via an 
- * HTML input control in the UI. Also stores the file data and file name in 
- * sessionStorage for retrieval by other pages.
+ * HTML input control in the UI. 
  * https://stackoverflow.com/questions/922057/is-it-possible-to-preview-local-images-before-uploading-them-via-a-form,
  * https://stackoverflow.com/a/20535454 
  * @param {string} imgID - the ID of the HTML <img> element that will display the image
@@ -32,19 +31,19 @@ function previewImage(imgID, fileData, maxImageSize, input) {
     if (input !== undefined && input.files && input.files[0]) {
         const fileSize = input.files[0].size;
         if(fileSize <= maxImageSize) {
+            let fileInfo = null;
             const reader = new FileReader();
             reader.onload = function(myFile) {            
                 const img = new Image();
                 img.src = myFile.target.result;
-
+                fileInfo = {"data": img.src, "name": input.files[0].name};
                 img.onload = function() {
                     $('#' + imgID).attr('src', this.src);
                     $('#' + imgID).prop('alt', input.files[0].name);
                     // send the image data to the server as an AJAX POST request
-                    sendDataToServer({"data": this.src, "name": input.files[0].name}, 10000);
-                }                       
+                    // sendDataToServer({"data": this.src, "name": input.files[0].name}, 10000);
+                }                   
             };
-
             reader.readAsDataURL(input.files[0]);
         }
         else {

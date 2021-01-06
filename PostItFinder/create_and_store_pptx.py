@@ -6,6 +6,7 @@ from pptx.oxml.xmlchemy import OxmlElement
 from pptx.util import Pt
 
 from azure.storage.blob import BlobServiceClient
+from azure.core.exceptions import ResourceExistsError, ResourceNotFoundError
 
 import os
 from datetime import datetime, timedelta
@@ -124,7 +125,7 @@ class SnipPptxCreator:
     # ***************************************************************************
     # NOTE: python-pptx doesn't implement shape fill transparency yet (Aug 2020). 
     # The only way to manipulate it (and it will help a lot here) is to 
-    # manipulate the underlying XML of the PowerPoint(!).
+    # manipulate the underlying XML of the PowerPoint, which is...tricky.
     # 
     # Thankfully, stackoverflow has the answer in the two methods below
     # https://stackoverflow.com/a/57258217
@@ -141,7 +142,7 @@ class SnipPptxCreator:
         """
         ts = shape.fill._xPr.solidFill
         sf = ts.get_or_change_to_srgbClr()
-        se = self.sub_element(sf, 'a:alpha', val=str(alpha))
+        self.sub_element(sf, 'a:alpha', val=str(alpha))
 
     def add_text_as_bullets_slide(self):
         """
@@ -219,91 +220,88 @@ class SaveFileToAzureBlobStorage:
     def __init__(self, connect_str, container_name):
         self.connect_str = connect_str
         self.container_name = container_name
-        self.blob_service_client = None
-        self.container_created = self.create_container()
 
-    def create_container(self):
+    def create_blob_service_client(self):
         # Create the BlobServiceClient object which will be used to create a container client
         try:
-            self.blob_service_client = BlobServiceClient.from_connection_string(self.connect_str)
+            logger.info("The BlobServiceClient was created successfully")
+            return BlobServiceClient.from_connection_string(self.connect_str)
         except ValueError as err:
-            logger.error(f"The connection string is invalid. Sys error: {err}")
-            return False
+            # Occurs when the connection string is either malformed or empty
+            logger.error(f"The connection string '{self.connect_str}' is invalid; the BlobServiceClient was not created. Sys error: {err}")
+            return None
+        except AttributeError as err:
+            # Occurs when the connection string is None (for e.g.)
+            logger.error(f"The connection string '{self.connect_str}' is invalid; the BlobServiceClient was not created. Sys error: {err}")
+            return None
         except Exception as err:
-            logger.error(f"Another error occurred. Sys error: {err}")
-            return False
+            logger.error(f"Another error occurred; the BlobServiceClient was not created. Sys error: {err}")
+            return None
 
-        # Create the container with blobs (*NOT* the container) having public access
-        try:
-            container = self.blob_service_client.create_container(self.container_name, public_access="blob")
-        # NOTE: the excception raised for duplicating an existing container is an Azure one,
-        # so stick with the generic catch-all
-        except Exception as err:
-            logger.error(f"Failed to create the container. Sys error: {err}")
-            return False
-
-        return True
+    def create_container(self):
+        blob_service_client = self.create_blob_service_client()
+        
+        if blob_service_client is not None:
+            # Create the container, with blobs (*NOT* the container) being publicly accessible
+            try:
+                logger.info(f"The container {self.container_name} was created successfully")
+                return blob_service_client.create_container(self.container_name, public_access="blob")        
+            except ResourceExistsError as err:
+                # this is raised if the container already exists
+                logger.error(f"A container named {self.container_name} already exists. Sys error: {err}")
+                return None
+            except Exception as err:
+                logger.error(f"Another error occurred; failed to create the container. Sys error: {err}")
+                return None
+        else:
+            return None
 
     def create_blob_client(self, file_name):
-        try:
-            return self.blob_service_client.get_blob_client(container=self.container_name, 
-                                                            blob=file_name)
-        except Exception as err:
-            logger.error(f"Failed to create the blob. Sys error: {err}")
+        blob_service_client = self.create_blob_service_client()
+        
+        if blob_service_client is not None:            
+            try:
+                logger.info(f"The blob service client was created successfully")
+                return blob_service_client.get_blob_client(container=self.container_name,
+                                                        blob=file_name)
+            except Exception as err:
+                logger.error(f"Failed to create the blob. Sys error: {err}")
+                return None
+        else:
             return None
 
-    def upload_file_to_container(self, file_path, blob_client):
-        try:
-            with open(file_path, "rb") as f:
-                blob_client.upload_blob(f)
-        except FileNotFoundError as err:
-            logger.error(f"The file {file_path} was not found. Sys error: {err}")
-            return False
-        except Exception as err:
-            logger.error(f"Another exception occurred. Sys error: {err}")
-            return False
-        else:
-            return True
+    def upload_bytes_to_container(self, file_name, file_bytes):
+        blob_client = self.create_blob_client(file_name=file_name)
 
-    def upload_bytes_to_container(self, file_bytes, blob_client):
-        try:
-            # with open(file_path, "rb") as f:?
-            blob_client.upload_blob(file_bytes)
-        except FileNotFoundError as err:
-            logger.error(f"The file {file_path} was not found. Sys error: {err}")
-            return False
-        except Exception as err:
-            logger.error(f"Another exception occurred. Sys error: {err}")
-            return False
-        else:
-            return True
-
+        if blob_client is not None:
+            try:
+                blob_client.upload_blob(file_bytes)
+            except Exception as err:
+                logger.error(f"Another exception occurred; file {file_name} was NOT uploaded successfully. Sys error: {err}")
+                return None
+            else:
+                logger.info(f"File {file_name} uploaded successfully")
+                return blob_client.url
+        else: 
+            logger.error(f"Blob client creation failed; blob {file_name} was NOT uploaded successfully")
+            return None
+        
+    def create_container_and_upload_file(self, file_name, file_bytes):
+        container = self.create_container()
+        
+        return self.upload_bytes_to_container(file_name, file_bytes) if container else None
 
     def list_blobs_in_container(self):
-        # NOTE: this is more useful for testing the blob upload than anything else
+        # NOTE: this is primarily useful as a check that uploads have completed 
+        # successfully (or otherwise)
         pass
 
-    def upload_bytes_to_blob_storage(self, file_name, file_bytes):
-        if self.blob_service_client is not None and self.container_created:
-            logger.info(f"Container created successfully")
-            # upload the file to the container
-            blob = self.create_blob_client(file_name)
-            if blob is not None:
-                upload_successful = self.upload_bytes_to_container(file_bytes=file_bytes,
-                                                                blob_client=blob)
-                if not upload_successful:
-                    logger.error(f"File {file_name} was NOT uploaded")
-                    return None
-                else:
-                    logger.info(f"File {file_name} uploaded successfully")
-            else:
-                logger.error(f"Blob {file_name} was NOT created successfully")
-                return None
+    def delete_container(self):
+        pass
 
-            return blob.url
-        else:
-            logger.error(f"Container NOT created")
-            return None
+    def delete_blob(self, file_name):
+        pass
+
 
 # ================================================================================================
 # DRIVER
@@ -339,15 +337,19 @@ def main():
     # store the presentation in blob storage
     # -----------------------------------------------------------------------------
     connect_str = os.getenv('SNIP_BLOB_STORAGE_CONN_STR')
-    container_name = "snip-test-container-11"
+    container_name = "snip-test-container-01"
     
     sftabs = SaveFileToAzureBlobStorage(connect_str=connect_str, 
                                         container_name=container_name)
-    url = sftabs.upload_bytes_to_blob_storage(outfile, pres_bytes)  
-    if url is not None:
-        print(f"File saved to blob storage; see {url}")
+    container_created = sftabs.create_container()
+    if container_created:
+        url = sftabs.upload_bytes_to_container(file_name=outfile, file_bytes=pres_bytes)
+        if url is not None:
+            print(f"File saved to blob storage; see {url}")
+        else:
+            print(f"The file was NOT saved successfully")
     else:
-        print(f"The file was NOT saved successfully")
+        print(f"The container was NOT created successfully")
 
     # url = sftabs.upload_bytes_to_blob_storage(infile, image_bytes)
     # if url is not None:

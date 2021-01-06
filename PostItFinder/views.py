@@ -91,7 +91,7 @@ def get_text(input_str, regions):
             text = ta.analyse_and_process()
             if use_words:
                 logger.info("Text will be assigned to regions")
-                return assign_text_to_regions(regions, text);
+                return assign_text_to_regions(regions, text)
             else:
                 logger.info("No regions discovered; lines will be returned")
                 return text
@@ -107,11 +107,8 @@ def assign_text_to_regions(regions, words):
     return mwtr.match()
 
 def get_blob_url(filename, filepath, container_name, create_new_container):
-    sftabs = SaveFileToAzureBlobStorage(settings.BLOB_STORAGE_CONN_STR,
-                                        filename=filename,
-                                        filepath=filepath,
-                                        container_name=container_name, 
-                                        create_new_container=create_new_container)
+    sftabs = SaveFileToAzureBlobStorage(connect_str=settings.BLOB_STORAGE_CONN_STR,
+                                        container_name=container_name)
     return sftabs.get_blob_url()
 
 def generate_container_name_and_pres_filename():
@@ -204,6 +201,8 @@ def get_stepper_bar_active_states(step_level):
 # ROUTES
 # ================================================================================================
 def index(request):
+    # clear all session data
+    request.session.flush()
 
     context = {
         "title": HTML["HOME"]["TITLE"],
@@ -227,8 +226,7 @@ def about(request):
 def faq(request):
     context = {
         "title": HTML["FAQ"]["TITLE"],
-        "navbar": HTML["BASE"]["NAVBAR"],
-        "faq_content": "Placeholder for frequently asked questions"
+        "navbar": HTML["BASE"]["NAVBAR"]
         }
     
     return render(request, PATHS["FAQ"], context=context)
@@ -260,6 +258,7 @@ def choose_image(request):
             "explain_text": HTML["CHOOSE_IMAGE"]["EXPLAIN_TEXT"],
             "next_btn": HTML["CHOOSE_IMAGE"]["NEXT_BTN"],
             "choose_img_btn": HTML["CHOOSE_IMAGE"]["CHOOSE_IMG_BTN"],
+            "upload_img_btn": HTML["CHOOSE_IMAGE"]["UPLOAD_IMG_BTN"],
             "image_pane": HTML["APP"]["IMAGE_PANE"],
             "config": CONFIG,
             "image_data": image_data,
@@ -334,7 +333,7 @@ def analyse_text(request):
             "image_pane": HTML["APP"]["IMAGE_PANE"],
             "config": CONFIG,
             "image_data": image_data, 
-            "region_data": request.session.get(settings.REGION_KEY, None),
+            "region_data": regions,
             }
 
         return render(request, PATHS["ANALYSE_TEXT"], context=context)
