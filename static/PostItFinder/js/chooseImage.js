@@ -48,6 +48,9 @@ function enableNextButton() {
     if(nextBtn.getAttribute("aria-disabled") !== false){
         nextBtn.setAttribute("aria-disabled", false);
     }
+
+    const uploadImgBtn = document.getElementById(CONFIG.HTML.CHOOSE_IMAGE.UPLOAD_IMG_BTN.ID);
+    uploadImgBtn.innerHTML = CONFIG.HTML.CHOOSE_IMAGE.UPLOAD_IMG_BTN.TEXT;
 }
 
 // ---------------------------------------------------------------------------
@@ -84,20 +87,10 @@ function clickUploadImage() {
     // get the Upload Image button
     const uploadImgBtn = document.getElementById(CONFIG.HTML.CHOOSE_IMAGE.UPLOAD_IMG_BTN.ID);
     uploadImgBtn.onclick = function() {
+        uploadImgBtn.innerHTML = CONFIG.HTML.CHOOSE_IMAGE.UPLOAD_IMG_BTN.WAIT_TEXT;
         const img_data = document.getElementById(CONFIG.HTML.APP.IMAGE_PANE.IMAGE.ID).src;
         const img_name = document.querySelector("label[for=" + CONFIG.HTML.CHOOSE_IMAGE.CHOOSE_IMG_BTN.ID  + "]").innerText;
         sendDataToServer({"data": img_data, "name": img_name}, 10000, enableNextButton);
-        // if(result) {
-        //     // set the class and ARIA state of the Next button to active
-        //     const nextBtn = document.getElementById(CONFIG.HTML.APP.NEXT_BTN.ID);
-        //     if(nextBtn.classList.contains("disabled")){
-        //         nextBtn.classList.remove("disabled");
-        //     }
-
-        //     if(nextBtn.getAttribute("aria-disabled") !== false){
-        //         nextBtn.setAttribute("aria-disabled", false);
-        //     }
-        // }
     }
 }
 

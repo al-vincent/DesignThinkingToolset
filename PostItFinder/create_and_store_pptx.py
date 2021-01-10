@@ -222,6 +222,18 @@ class SaveFileToAzureBlobStorage:
         self.container_name = container_name
 
     def create_blob_service_client(self):
+        """
+        Creates a blob service client to interact with the blob service account.
+
+        Returns:
+            BlobServiceClient object or None.
+
+            BlobServiceClient object: can be used to (say) create a blob container 
+            and upload files. Returned if the client is created successfully.
+
+            None: returned if the client is not created successfully, e.g. if the 
+            connection string is malformed.
+        """
         # Create the BlobServiceClient object which will be used to create a container client
         try:
             logger.info("The BlobServiceClient was created successfully")
@@ -239,6 +251,16 @@ class SaveFileToAzureBlobStorage:
             return None
 
     def create_container(self):
+        """
+        Create an Azure Blob Storage Container, which will store blobs.
+
+        Returns:
+            ContainerClient object: client that can be used to interact with the container.
+            Returned if the method executes successfully. 
+
+            None: returned if the method does not execute successfully, e.g. if a
+            container with the same name already exists.
+        """
         blob_service_client = self.create_blob_service_client()
         
         if blob_service_client is not None:
@@ -271,6 +293,19 @@ class SaveFileToAzureBlobStorage:
             return None
 
     def upload_bytes_to_container(self, file_name, file_bytes):
+        """
+        Uploads a blob to the container specified in the object definition.
+
+        Args:
+            file_name (str): the name under which the file will be stored in blob 
+            storage. Does not have to be the same as the original filename.
+            file_bytes (bytes): file bytes to be uploaded to blob storage.
+
+        Returns:
+            str: the URL generated for the file in blob storage. Returned if the 
+            blob was uploaded successfully.
+            None: returned if the blob was not uploaded successfully.
+        """
         blob_client = self.create_blob_client(file_name=file_name)
 
         if blob_client is not None:

@@ -75,6 +75,7 @@ REGION_KEY = "regions"
 OCR_KEY = "ocr_results"
 CONTAINER_NAME_KEY = "container_name"
 PRESENTATION_NAME_KEY = "presentation_filename"
+URL_KEY = "image_url"
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
