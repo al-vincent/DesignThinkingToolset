@@ -75,6 +75,7 @@ REGION_KEY = "regions"
 OCR_KEY = "ocr_results"
 CONTAINER_NAME_KEY = "container_name"
 PRESENTATION_NAME_KEY = "presentation_filename"
+URL_KEY = "image_url"
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
@@ -146,9 +147,9 @@ else:
 # Override the default max data upload value
 # NOTE: this is quite a bit larger than the images which will actually be processed.
 # This is because it applies to the whole data packet, not just the file itself; so 
-# a 3MB file could easily trip a 4MB limit (and did in testing). MAX_IMAGE_SIZE below
-# is for the actual image size (and ultimately, Azure will reject any images outside
-# its limits).
+# a 3MB file could easily trip a 4MB limit (and did in testing). The constant 
+# MAX_IMAGE_SIZE below is for the actual image size (and ultimately, Azure will 
+# reject any images outside its limits).
 DATA_UPLOAD_MAX_MEMORY_SIZE = 8388608
 
 # Azure settings - Custom Vision Object Detection
@@ -156,7 +157,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 8388608
 OBJ_DET_PREDICTION_KEY = os.environ['SNIP_OBJ_DET_PRED_KEY']
 OBJ_DET_PROJECT_ID = os.environ['SNIP_OBJ_DET_PROJ_ID']
 OBJ_DET_PUBLISHED_NAME = os.environ['SNIP_OBJ_DET_PUB_NAME']
-OBJ_DET_API_URL = f'https://snip-object-detection.cognitiveservices.azure.com/customvision/v3.0/Prediction/{OBJ_DET_PROJECT_ID}/detect/iterations/{OBJ_DET_PUBLISHED_NAME}/image'
+OBJ_DET_API_URL = f'https://snip-object-detection.cognitiveservices.azure.com/customvision/v3.0/Prediction/{OBJ_DET_PROJECT_ID}/detect/iterations/{OBJ_DET_PUBLISHED_NAME}'
 OK_IMAGE_TYPES = ['jpeg', 'bmp', 'png']
 MAX_IMAGE_SIZE = 4194304
 

@@ -147,6 +147,11 @@
                 "ID": "choose-img-btn-id",
                 "TEXT": "Choose image"
             },
+            "UPLOAD_IMG_BTN": {
+                "ID": "upload-img-button-id",
+                "TEXT": "Upload image",
+                "WAIT_TEXT": "Loading..."
+            },
             "NEXT_BTN": {
                 "URL": "PostItFinder:set_regions"
             }

@@ -3,5 +3,132 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-    {{ faq_content }}
+    <!-- header -->
+    <div class="row">
+        <div class="col-10">
+            <h1 class="display-3 my-4">Frequently Asked Questions</h1>
+            <p class="lead">
+                The points below may help answer questions about how snip works, and how 
+                to get the best out of it.
+            </p>
+            <div class="list-group list-group-flush" >
+                <a href="#image-limitations-id" class="list-group-item list-group-item-action">Limitations on Images</a>
+                <a href="#best-results-id" class="list-group-item list-group-item-action">Getting the best results</a>
+                <a href="#data-storage-id" class="list-group-item list-group-item-action">Storing your data</a>
+                <a href="#feedback-id" class="list-group-item list-group-item-action">Providing feedback</a>
+            </div>
+        </div>
+    </div>
+    <!-- /header -->
+
+    <br>
+
+    <!-- image limitations faq list -->
+    <div class="row">
+        <div class="col-10">
+            <h2 id="image-limitations-id" class="display-4 mb-4">Limitations on images</h2>
+            <div id="accordion">
+                <!-- faq #1 -->
+                <div class="card">
+                    <div class="card-header" id="headingOne">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            What are the limitations on images, and why are they there?
+                        </button>
+                    </h5>
+                    </div>
+                
+                    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                        <div class="card-body">
+                            There are two main limitations on the images that SNIP can handle:
+                            <ul>
+                                <li class="my-1">The image format must be JPEG, PNG or Bitmap.</li>
+                                <li class="my-1">The image cannot be more than 4MB in size.</li>
+                            </ul>
+                            <p>
+                                This is because SNIP uses Machine Learning services provided by 
+                                <a href="https://azure.microsoft.com/en-gb/">Microsoft Azure</a>. 
+                                The Azure services offer very good performance, but unfortunately 
+                                they also have constraints on the images they can handle.
+                            </p>
+                            <p>
+                                These limitations may also change over time; if so, this will be
+                                reflected in SNIP.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <!-- /faq #1 -->
+
+                <!-- faq #2 -->
+                <div class="card">
+                    <div class="card-header" id="headingTwo">
+                        <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            What if my image is bigger than 4MB?
+                        </button>
+                        </h5>
+                    </div>
+                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                        <div class="card-body">
+                            If you're using an image that's larger than 4MB, there are a few options:
+                            <ul>
+                                <li class="my-1">
+                                    If your image is a PNG or Bitmap, save a new version as a JPEG and try that. 
+                                    This will compress the image, often by quite a lot (especially for Bitmaps). 
+                                    You'll lose a little bit of fidelity, but it will make very little 
+                                    difference to SNIP.
+                                    <br>
+                                    <b>Note</b> that this won't work if your image is already a JPEG.
+                                </li>
+                                <li class="my-1">
+                                    Crop the image to remove anything that doesn't need to be analysed before
+                                    you upload it. This can remove quite a lot of unnecessary space from the 
+                                    image, reducing the size by quite a lot.
+                                </li>
+                                <li class="my-1">
+                                    Reduce the fidelity of the image, using image editing software. This doesn't
+                                    have to be complex; simple tools like Windows Paint will resize an image very
+                                    easily, and making it smaller will reduce the fidelity (and file-size).
+                                </li>
+                                <li class="my-1">
+                                    If none of the methods above work, you can break the image into multiple
+                                    smaller images, and run each of these through SNIP. Again, breaking 
+                                    the image up is straightforward using a simple image editor like Paint.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- /faq #2 -->
+
+                <!-- faq #3 -->
+                <div class="card">
+                    <div class="card-header" id="headingThree">
+                        <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                            Is there a minimum image size that SNIP can use?
+                        </button>
+                        </h5>
+                    </div>
+                    <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+                        <div class="card-body">
+                            <p>
+                                Yes - the image needs to be at least 50 x 50 pixels. Again, this lower 
+                                bound comes from the Azure Machine Learning services that SNIP uses.
+                            </p>
+                            <p>
+                                This is unlikely to cause any practical issues; it'd be very difficult 
+                                to fit any amount of legible text into an image that's smaller than 
+                                50 x 50 pixels.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <!-- /faq #3 -->
+            </div>
+        </div>
+    </div>
+    <!-- image limitations faq list -->
+
 {% endblock %}

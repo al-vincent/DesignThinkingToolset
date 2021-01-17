@@ -7,18 +7,28 @@
 {% endblock%}
 
 {% block image_action_buttons %}
-  <form method="POST" action="">
-    {% csrf_token %}
-    <div class="custom-file">
-      <input type="file" accept=".jpg, .png, .bmp" 
-            id="{{ choose_img_btn.ID }}"
-            class="custom-file-input">
-      </input>
-      <label class="custom-file-label" for="{{ choose_img_btn.ID }}">
-        {{ choose_img_btn.TEXT }}
-      </label>
+  <div class="row pt-2">
+    <div class="col-md-8">
+      <form method="POST" action="">
+        {% csrf_token %}
+        <div class="custom-file">
+          <input type="file" accept=".jpg, .png, .bmp" 
+                id="{{ choose_img_btn.ID }}"
+                class="custom-file-input">
+          </input>
+          <label class="custom-file-label" for="{{ choose_img_btn.ID }}">
+            {{ choose_img_btn.TEXT }}
+          </label>
+        </div>
+      </form>
     </div>
-  </form>
+
+    <div class="col-md-4">
+      <button id="{{ upload_img_btn.ID }}" type="button" class="btn btn-block btn-outline-success">
+        {{ upload_img_btn.TEXT }}
+      </button>
+    </div>
+  </div>
 {% endblock %}
 
 {% block scripts %}

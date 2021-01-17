@@ -144,6 +144,13 @@ class StaticTests(base.StaticTests):
         self.assertEqual(img_label.get_attribute("innerText"), cfg["TEXT"])
 
     # -------------------------------------------------------------------------------------
+    # Upload-image button tests
+    # -------------------------------------------------------------------------------------    
+    def test_upload_image_button_is_disabled(self):
+        upload_img_btn = self.browser.find_element_by_id(base.ELEMS["CHOOSE_IMAGE"]["UPLOAD_IMG_BTN"]["ID"])
+        self.assertFalse(upload_img_btn.is_enabled())
+
+    # -------------------------------------------------------------------------------------
     # Next button tests
     # -------------------------------------------------------------------------------------
     def test_next_button_is_displayed(self):        
@@ -211,19 +218,22 @@ class DynamicTests(base.DynamicTests):
     # -------------------------------------------------------------------------------------
     # Navbar tests
     # -------------------------------------------------------------------------------------
-    # def test_clicking_logo_takes_user_to_home(self):
-    #     pass
+    def test_clicking_logo_takes_user_to_home(self):
+        base_url = self.live_server_url
+        logo = base.ELEMS["BASE"]["NAVBAR"]["LOGO"]
+        self.browser.find_element_by_id(logo["ID"]).click()
+        self.assertEqual(self.browser.current_url, base_url + reverse(logo["URL"]))
 
     def test_clicking_about_takes_user_to_faq_page(self):
         base_url = self.live_server_url
         page = base.ELEMS["BASE"]["NAVBAR"]["PAGES"][0]        
-        page_elem = self.browser.find_element_by_id(page["ID"]).click()
+        self.browser.find_element_by_id(page["ID"]).click()
         self.assertEqual(self.browser.current_url, base_url + reverse(page["URL"]))
 
     def test_clicking_faq_takes_user_to_faq_page(self):
         base_url = self.live_server_url
         page = base.ELEMS["BASE"]["NAVBAR"]["PAGES"][1]        
-        page_elem = self.browser.find_element_by_id(page["ID"]).click()
+        self.browser.find_element_by_id(page["ID"]).click()
         self.assertEqual(self.browser.current_url, base_url + reverse(page["URL"]))
 
     # -------------------------------------------------------------------------------------
@@ -244,6 +254,33 @@ class DynamicTests(base.DynamicTests):
     # def test_clicking_choose_image_opens_dialog(self):
     #     pass
 
+    def test_selecting_image_enables_upload_image_btn_and_next_btn(self):
+        img_file = "test_jpg.jpg"
+        input_id = base.ELEMS["CHOOSE_IMAGE"]["CHOOSE_IMG_BTN"]["ID"]
+
+        # get the input and label elements
+        input_elem = self.browser.find_element_by_id(input_id)
+        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+        
+        # update the input directly with the file path
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
+        path = os.path.join(test_path, "resources", "test_images", img_file)
+        input_elem.send_keys(path)
+        self.assertEqual(img_label.get_attribute("innerText"), img_file)
+
+        # wait a few seconds for the image to render
+        time.sleep(3)
+
+        # check that both the Upload Image button and the Next button are enabled
+        upload_img_btn_id = base.ELEMS["CHOOSE_IMAGE"]["UPLOAD_IMG_BTN"]["ID"]
+        upload_img_btn = self.browser.find_element_by_id(upload_img_btn_id)
+        self.assertTrue(upload_img_btn.is_enabled())
+
+        next_btn_id = base.ELEMS["APP"]["NEXT_BTN"]["ID"]
+        next_btn = self.browser.find_element_by_id(next_btn_id)
+        self.assertTrue(next_btn.is_enabled())
+    
     def test_jpg_can_be_selected(self):
         img_file = "test_jpg.jpg"
         input_id = base.ELEMS["CHOOSE_IMAGE"]["CHOOSE_IMG_BTN"]["ID"]
@@ -253,7 +290,6 @@ class DynamicTests(base.DynamicTests):
         img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
-        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
         current_dir = os.path.dirname(os.path.abspath(__file__))
         test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
         path = os.path.join(test_path, "resources", "test_images", img_file)
@@ -276,7 +312,6 @@ class DynamicTests(base.DynamicTests):
         img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
-        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
         current_dir = os.path.dirname(os.path.abspath(__file__))
         test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
         path = os.path.join(test_path, "resources", "test_images", img_file)
@@ -299,7 +334,6 @@ class DynamicTests(base.DynamicTests):
         img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
-        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
         current_dir = os.path.dirname(os.path.abspath(__file__))
         test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
         path = os.path.join(test_path, "resources", "test_images", img_file)
@@ -330,7 +364,6 @@ class DynamicTests(base.DynamicTests):
         img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
-        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
         current_dir = os.path.dirname(os.path.abspath(__file__))
         test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
         path = os.path.join(test_path, "resources", "test_images", img_file)
@@ -353,7 +386,6 @@ class DynamicTests(base.DynamicTests):
         img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
-        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
         current_dir = os.path.dirname(os.path.abspath(__file__))
         test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
         path = os.path.join(test_path, "resources", "test_images", img_file)
@@ -373,10 +405,9 @@ class DynamicTests(base.DynamicTests):
 
         # get the input and label elements
         input_elem = self.browser.find_element_by_id(input_id)
-        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+        self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
-        # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
         current_dir = os.path.dirname(os.path.abspath(__file__))
         test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
         path = os.path.join(test_path, "resources", "test_images", img_file)
@@ -404,7 +435,7 @@ class DynamicTests(base.DynamicTests):
         
         # get the input and label elements
         input_elem = self.browser.find_element_by_id(input_id)
-        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+        self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         current_dir = os.path.dirname(os.path.abspath(__file__))
         test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
@@ -454,7 +485,7 @@ class DynamicTests(base.DynamicTests):
 
         # get the input and label elements
         input_elem = self.browser.find_element_by_id(input_id)
-        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+        self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
         # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)
@@ -486,7 +517,7 @@ class DynamicTests(base.DynamicTests):
 
         # get the input and label elements
         input_elem = self.browser.find_element_by_id(input_id)
-        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
+        self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
         # path = os.path.join(settings.STATIC, 'PostItFinder', 'img', 'test_images', img_file)

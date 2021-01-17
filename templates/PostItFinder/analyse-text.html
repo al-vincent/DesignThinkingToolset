@@ -87,6 +87,10 @@
 <!-- don't show the previous button on this page -->
 {% endblock%}
 
+{% block image_pane %}
+  <img id="{{ image_pane.IMAGE.ID }}" class="img-fluid" src="{{ image_data }}" alt="Image selected">
+{% endblock %}
+
 {% block scripts %}
   {{ block.super }}
 
