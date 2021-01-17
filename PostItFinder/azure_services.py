@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from json import load
+from json import load, dumps
 import os
 import base64
 import imghdr
@@ -84,39 +84,55 @@ class BasisFunctions:
 # AZURE OBJECT DETECTION
 # ================================================================================================
 class ObjectDetector(BasisFunctions):
-    def __init__(self, image_data, prediction_key, obj_det_url, confidence_threshold=0.3):
+    def __init__(self, is_image_url, image, prediction_key, obj_det_url, confidence_threshold=0.3):
         super().__init__()
-        self.image_data = self.get_image_data(image_data)    
+        self.is_image_url = is_image_url
+        self.image = image
         self.confidence_threshold = confidence_threshold    
         self.prediction_key = prediction_key
         self.obj_det_url = obj_det_url
 
-    def analyse_image(self, image_data=None):
+    def __get_settings(self, is_image_url, image, obj_det_url):
+        conf = {}
+        
+        conf["body"] = dumps({"url": image}) if is_image_url else self.get_image_data(image)
+        conf["content_type"] = "application/json" if is_image_url else "application/octet-stream"
+        conf["url"] = f"{obj_det_url}/url" if is_image_url else f"{obj_det_url}/image"
+
+        return conf
+
+    def analyse_image(self, image=None):
         """
         Access the Azure Custom Vision service to process an image.
 
         Parameters:
-            image_data (bytes), the image bytestream
+            image (str), the image data. Will either be a URL pointing to the image file 
+            (if self.is_image_url == True), or a base64-encoded bytestream of the image.
 
         Returns:
-            Dict containing the analysis results, or None (if the analysis fails)
+            dict or None: dict containing the analysis results if the algorithm runs correctly, 
+            or None if the analysis fails.
         
         NOTE: if results are a dict, the format will be as defined in the Custom Vision API:
         https://southcentralus.dev.cognitive.microsoft.com/docs/services/Custom_Vision_Prediction_3.1/operations/5eb37d24548b571998fde5f3
         """
 
         # If no image data is supplied, use the data encapsulated in the object
-        if image_data is None:
-            image_data = self.image_data
+        if image is None:
+            image = self.image
+
+        conf = self.__get_settings(is_image_url=self.is_image_url, 
+                                   image=image, 
+                                   obj_det_url=self.obj_det_url)
 
         headers = {
             # Request headers
             'Prediction-Key': self.prediction_key,
-            'Content-Type': 'application/octet-stream',
+            'Content-Type': conf["content_type"],
         }
 
         try:
-            response = requests.post(self.obj_det_url, headers=headers, data=image_data)
+            response = requests.post(conf["url"], headers=headers, data=conf["body"])
             response.raise_for_status()
         except Exception as err:
             logger.error(f"Exception raised; sys error message: {err}")
@@ -194,22 +210,26 @@ class ObjectDetector(BasisFunctions):
             results are in an incorrect format.
         """
         sticky_notes = None
-        if self.image_data is not None:
-            if self.image_data_is_valid(self.image_data):
-                logger.info(f"Object Detection request uses valid image data")
-                sticky_notes = self.analyse_image()
-
-                if sticky_notes is not None:                
-                    logger.info(f"Received response from Azure")
+        if self.image is not None:
+            if not self.is_image_url: 
+                if self.image_data_is_valid(self.image):
+                    logger.info(f"Object Detection request uses valid image data")
                 else:
-                    logger.error(f"Azure did not process image successfully")
+                    logger.error(f"AJAX POST request uses invalid bytestream")
+                    return None
+            
+            sticky_notes = self.analyse_image()
+
+            if sticky_notes is not None:                
+                logger.info(f"Received response from Azure")
             else:
-                logger.error(f"AJAX POST request uses invalid bytestream")
+                logger.error(f"Azure did not process image successfully")
+                return None
+            
         else:
             logger.error(f"No image data received from client")
 
         return self.process_output(sticky_notes)
-
 
 # ================================================================================================
 # AZURE TEXT ANALYSIS
@@ -219,14 +239,21 @@ class TextAnalyser(BasisFunctions):
     # https://westcentralus.dev.cognitive.microsoft.com/docs/services/computer-vision-v3-ga/operations/5d9869604be85dee480c8750
     # Example:
     # https://docs.microsoft.com/en-gb/azure/cognitive-services/computer-vision/quickstarts/python-hand-text
-    def __init__(self, image_data, subscription_key, api_url, use_words=True):
+    def __init__(self, is_image_url, image, subscription_key, api_url, use_words=True):
         super().__init__()
-        self.image_data = self.get_image_data(image_data)    
+        self.is_image_url = is_image_url
+        self.image = image
         self.subscription_key = subscription_key
         self.api_url = api_url
-        self.headers = {"Ocp-Apim-Subscription-Key": self.subscription_key,
-                        "Content-Type": "application/octet-stream"}
         self.use_words = use_words
+    
+    def __get_settings(self, is_image_url, image):
+        conf = {}
+        
+        conf["body"] = dumps({"url": image}) if is_image_url else self.get_image_data(image)
+        conf["content_type"] = "application/json" if is_image_url else "application/octet-stream"
+
+        return conf
     
     def submit_image_for_processing(self):
         """
@@ -235,10 +262,13 @@ class TextAnalyser(BasisFunctions):
         Returns: 
             - response object from requests library POST, or None.
             None is returned if an error is encountered.
-        """ 
+        """
+        conf = self.__get_settings(is_image_url=self.is_image_url, image=self.image)
+        headers = {"Ocp-Apim-Subscription-Key": self.subscription_key,
+                   "Content-Type": conf["content_type"]}
 
         try:
-            response = requests.post(self.api_url, headers=self.headers, data=self.image_data)
+            response = requests.post(self.api_url, headers=headers, data=conf["body"])
             # raise_for_status will raise an exception if the response is unsuccessful
             response.raise_for_status()
         except HTTPError as err:
@@ -252,6 +282,10 @@ class TextAnalyser(BasisFunctions):
             return response
 
     def get_results(self, response):
+        conf = self.__get_settings(is_image_url=self.is_image_url, image=self.image)
+        headers = {"Ocp-Apim-Subscription-Key": self.subscription_key,
+                   "Content-Type": conf["content_type"]}
+
         # The recognized text isn't immediately available, so poll to wait 
         # for completion.
         results = {}
@@ -260,7 +294,7 @@ class TextAnalyser(BasisFunctions):
         while(poll):
             try:
                 response_final = requests.get(response.headers["Operation-Location"], 
-                                            headers=self.headers)
+                                            headers=headers)
                 response_final.raise_for_status()
             except HTTPError as err:
                 logger.error(f"HTTP error occurred while connecting to OCR URL. Sys error: {err}")
@@ -491,19 +525,23 @@ class TextAnalyser(BasisFunctions):
         Returns the output from process_words() or process_lines()
         """
         text = None
-        if self.image_data is not None:
-            if self.image_data_is_valid(self.image_data):
-                logger.info(f"OCR request from client uses valid image data")
-                text = self.analyse_image()
-
-                if text is not None:                
-                    logger.info(f"Received response from Azure")
+        if self.image is not None:
+            if not self.is_image_url:
+                if self.image_data_is_valid(self.image):
+                    logger.info(f"OCR request from client uses valid image data")
                 else:
-                    logger.error(f"Azure did not process image successfully")
+                    logger.error(f"OCR request from client uses invalid bytestream")
+                    return None
+
+            text = self.analyse_image()
+            if text is not None:                
+                logger.info(f"Received response from Azure")
             else:
-                logger.error(f"OCR request from client uses invalid bytestream")
+                logger.error(f"Azure did not process image successfully")
+                return None
         else:
             logger.error(f"No image data received from client")
+            return None
 
         return self.process_output(text)
 
@@ -709,36 +747,64 @@ def get_file_bytes(image_path):
 # DRIVER
 # ================================================================================================
 def main():
-    from json import dumps
 
+    # --- IMAGE SETUP ---
     # get the image data
-    img_file = "match_words_regions_4.png"
+    img_file = "match_words_regions_1.jpg"
     current_dir = os.path.dirname(os.path.abspath(__file__))    
     img_path = os.path.join(current_dir, "tests", "resources", "test_images", img_file)
     image_data = get_file_bytes(img_path)
 
+    # set the image URL
+    img_url = "https://snipblobstorage.blob.core.windows.net/snip-test-container-01/test_postits.jpg"
+    # --- /IMAGE SETUP ---
+
     # --- OBJECT DETECTION ---
+    # general settings
     prediction_key = os.environ.get("SNIP_OBJ_DET_PRED_KEY")
     project_id = os.environ.get("SNIP_OBJ_DET_PROJ_ID")
     published_name = os.environ.get("SNIP_OBJ_DET_PUB_NAME")
-    api_url = f"https://snip-object-detection.cognitiveservices.azure.com/customvision/v3.0/Prediction/{project_id}/detect/iterations/{published_name}/image"
+    api_url = f"https://snip-object-detection.cognitiveservices.azure.com/customvision/v3.0/Prediction/{project_id}/detect/iterations/{published_name}"
 
-    aod = ObjectDetector(image_data=image_data, 
+    # obj detection using an image stream
+    ods = ObjectDetector(is_image_url=False,
+                        image=image_data, 
                         prediction_key=prediction_key,                       
-                        obj_det_url=api_url)
-    regions = aod.analyse_and_process()
+                        obj_det_url=api_url)                        
+    regions = ods.analyse_and_process()
     print(f"{'-'*24}\nObject Detection output:\n{'-'*24}\n{dumps(regions, indent=4)}\n")
+
+    # # obj detection using an image URL
+    odu = ObjectDetector(is_image_url=True,
+                            image=img_url, 
+                            prediction_key=prediction_key,                       
+                            obj_det_url=api_url)
+    regions2 = odu.analyse_and_process()
+    assert regions == regions2, "*** ERROR: Regions for the two obj detection methods are different! ***"
     # --- /OBJECT DETECTION ---
 
     # --- TEXT ANALYSIS ---
+    # general settings
     subscription_key = os.environ.get("SNIP_OCR_SUBS_KEY")
     api_url = "https://snip-ocr.cognitiveservices.azure.com/vision/v3.0/read/analyze"
-    ta = TextAnalyser(image_data=image_data, 
+
+    # OCR using an image bytestream
+    tas = TextAnalyser(is_image_url=False,
+                    image=image_data, 
                     subscription_key=subscription_key, 
                     api_url=api_url,
                     use_words=True)
-    words = ta.analyse_and_process()
+    words = tas.analyse_and_process()
     print(f"{'-'*11}\nOCR output:\n{'-'*11}\n{dumps(words, indent=4)}\n")
+
+    # OCR using an image URL
+    tau = TextAnalyser(is_image_url=True,
+                    image=img_url, 
+                    subscription_key=subscription_key, 
+                    api_url=api_url,
+                    use_words=True)
+    words2 = tau.analyse_and_process()
+    assert words == words2, "*** ERROR: Words discovered for the two OCR methods are different! ***"
     # --- /TEXT ANALYSIS ---
 
     # --- MATCH WORDS TO REGIONS ---

@@ -166,7 +166,11 @@
       <i class="fa fa-arrow-right"></i>
     </a>
   </form>
-{% endblock%}
+{% endblock %}
+
+{% block image_pane %}
+  <img id="{{ image_pane.IMAGE.ID }}" class="img-fluid" src="{{ image_data }}" alt="Image selected">
+{% endblock %}
 
 {% block scripts %}
   {{ block.super }}

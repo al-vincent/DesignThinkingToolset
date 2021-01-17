@@ -60,7 +60,6 @@ def choose_image(request):
     request.session[settings.REGION_KEY] = None
 
     if request.is_ajax() and request.method == "POST":
-        # ut.set_session_image_data(request)
         result = ut.click_upload_image_button(request)
         if result:
             return JsonResponse({"status": "success"}, status=200)
@@ -95,12 +94,11 @@ def choose_image(request):
         return render(request, PATHS["CHOOSE_IMAGE"], context=context)
 
 def set_regions(request):
-    # get session data
-    image_data = request.session.get(settings.IMAGE_KEY, None)
+    image_url = request.session.get(settings.URL_KEY, None)
 
     if request.is_ajax() and request.method == "GET":
         logger.info(f"AJAX GET request received at server")        
-        processed_data = ut.get_regions(image_data.get("data", None))
+        processed_data = ut.get_regions(img_url=image_url)
         if processed_data is not None:
             logger.info(f"Azure processing successful, results sent to client")
             return JsonResponse(processed_data, safe=False, status=200)
@@ -130,7 +128,7 @@ def set_regions(request):
             "prev_btn": HTML["SET_REGIONS"]["PREVIOUS_BTN"],
             "image_pane": HTML["APP"]["IMAGE_PANE"],
             "config": CONFIG,
-            "image_data": image_data,
+            "image_data": image_url,
             "region_data": request.session.get(settings.REGION_KEY, None),
             }
             
@@ -138,12 +136,13 @@ def set_regions(request):
 
 def analyse_text(request):
     # get session data
-    image_data = request.session.get(settings.IMAGE_KEY, None)
+    # image_data = request.session.get(settings.IMAGE_KEY, None)
+    image_url = request.session.get(settings.URL_KEY, None)
     regions = request.session.get(settings.REGION_KEY, None)
 
     # user has clicked "Analyse Text"
     if request.is_ajax() and request.method == "GET":        
-        return ut.analyse_text_button_click(request)
+        return ut.click_analyse_text_button(request)
     else:
         # Update config to set the 'active' class for the stepper bar
         stepper_bar = ut.get_stepper_bar_active_states(3)
@@ -160,7 +159,8 @@ def analyse_text(request):
             "download_results_btn": HTML["ANALYSE_TEXT"]["DOWNLOAD_RESULTS_BTN"],
             "image_pane": HTML["APP"]["IMAGE_PANE"],
             "config": CONFIG,
-            "image_data": image_data, 
+            # "image_data": image_data, 
+            "image_data": image_url, 
             "region_data": regions,
             }
 

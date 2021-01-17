@@ -163,8 +163,14 @@ class SnipPptxCreator:
         text_frame.text = "Each bullet shows all text in a single region:"
         for text_box in self.text_boxes:
             para = text_frame.add_paragraph()
-            para.text = text_box["text"]
             para.level = 1
+            # set font size to be 'fairly small'
+            run = para.add_run()
+            run.text = text_box["text"] if text_box["text"] is not None else "[No text recovered]"
+            font = run.font
+            font.size = Pt(14)
+        text_frame.word_wrap = True
+        text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
 
     def add_textbox(self, slide, text_box):
         # convert the coords from normalised in range [0,1] to image coords
@@ -184,21 +190,33 @@ class SnipPptxCreator:
         self.set_shape_transparency(txt_box,70000)
 
         # add the text and format it
+        text = str(text_box["text"]) if text_box["text"] is not None else "[No text recovered]"
         text_frame = txt_box.text_frame
-        text_frame.text = text_box["text"]
-        text_frame.word_wrap = True
-        text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
         text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE        
         para = text_frame.paragraphs[0]
         para.alignment = PP_ALIGN.CENTER
+        text_frame.word_wrap = True
+        # The next few lines are a hack to use small font-sizes, since the auto-fit
+        # doesn't seem to work correctly
+        run = para.add_run()
+        run.text = text 
+        font = run.font
+        font.size = Pt(8)
+
         # ------------------------------------------------------------------
-        # NOTE: the lines below allow the font-size to be changed; *BUT* the 
-        # TEXT_TO_FIT_SHAPE sizing doesn't then work. So ignoring.
+        # NOTE: the lines below *SHOULD* offer 2 methods for auto-fitting 
+        # the text size to the shape. But neither one seems to work, so am 
+        # setting font size to be very small instead.
         # ------------------------------------------------------------------
-        # run = para.add_run()
-        # run.text = text_box["text"]
-        # font = run.font
-        # font.size = Pt(80)
+        # # OPT 1: fit_text() method <- should do word-wrap and auto-fit
+        # try:
+        #     text_frame.fit_text()
+        # except TypeError as err:
+        #     logger.warning(f"Text could not be fitted to shape. Text: {text}. Sys err: {err}")
+        #
+        # # OPT 2: use the TEXT_TO_FIT_SHAPE parameter
+        # text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
+        # text_frame.text = text
         # ------------------------------------------------------------------
 
     def save_pres_as_bytes(self):
