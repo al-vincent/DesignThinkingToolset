@@ -25,7 +25,7 @@
             "TOOLTIP": "tooltip"
         },
         "VALUES": {
-            "HANDLE_RADIUS": 3,
+            "HANDLE_RADIUS": 5,
             "CORNER_RADIUS": 3,
             "MIN_RECT_WIDTH": 20,
             "MIN_RECT_HEIGHT": 20,

@@ -43,20 +43,23 @@ function createRegions(svg, data, isStatic) {
     let dragRect = d3.behavior.drag()
         .origin(function(d) { return d; })
         .on("dragstart", dragStarted)
-        .on("drag", dragRegion);
+        .on("drag", dragRegion)
+        .on("dragend", dragEnded);
     if (isStatic) { dragRect = function(){}; }  // do nothing
 
     // setup drag behaviour for the top-left handle
     const dragTopLeftHandle = d3.behavior.drag()
         .origin(function(d) { return d; })
         .on("dragstart", dragStarted)
-        .on("drag", dragTlHandle);
+        .on("drag", dragTlHandle)
+        .on("dragend", dragEnded);
     
     // setup drag behaviour for the bottom-right handle
     const dragBottomRightHandle = d3.behavior.drag()
         .origin(function(d) { return d; })
         .on("dragstart", dragStarted)
-        .on("drag", dragBrHandle);
+        .on("drag", dragBrHandle)
+        .on("dragend", dragEnded);
 
 
     // Define the div for the tooltip
@@ -251,17 +254,39 @@ function dragRegion(d) {
 }
 
 /**
- * @description: callback to overwrite any callbacks that might be bound to the 
- * calling element. 
- * 
- * May not be 100% required, but defensive against unexpected behaviour.
+ * @description: function to prevent the default browser touch behaviour. Used to 
+ * temporarily 
+ * @param: event, the event that has triggered the function.
+ * @returns: none.
+ * @throws: none.
+ * @todo: none.
+ */
+function preventTouchBehaviour(event) {
+    event.preventDefault();
+}
+
+/**
+ * @description: callback to overwrite default drag touch behaviour for browsers.
  * @param: none.
  * @returns: none.
  * @throws: none.
  * @todo: none.
  */
 function dragStarted() {
-    d3.event.sourceEvent.stopPropagation();
+    d3.event.sourceEvent.stopPropagation();    
+    document.body.addEventListener('touchmove', preventTouchBehaviour, {passive:false});
+}
+
+/**
+ * @description: callback to remove overwrite on default browser touch behaviour for
+ * drag events (i.e. to ensure default touch behaviour is used).
+ * @param: none.
+ * @returns: none.
+ * @throws: none.
+ * @todo: none.
+ */
+function dragEnded() {
+    document.body.removeEventListener('touchmove', preventTouchBehaviour, {passive:false});
 }
 
 /**
