@@ -150,7 +150,9 @@
             "UPLOAD_IMG_BTN": {
                 "ID": "upload-img-button-id",
                 "TEXT": "Upload image",
-                "WAIT_TEXT": "Loading..."
+                "WAIT_TEXT": "Loading...",
+                "SUCCESS_TEXT": "Done!"
+                
             },
             "NEXT_BTN": {
                 "URL": "PostItFinder:set_regions"

@@ -571,8 +571,7 @@ function rescaleDataToAbsoluteCoords(data, imgWidth, imgHeight) {
 // AJAX REQUESTS
 // ================================================================================================
 
-
-function sendDataToServer(data, timeout, callbackFunc){
+function sendDataToServer(data, timeout, successCallback, failureCallback){
     
     // ----------
     // This section is from the Django docs, to reduce Cross Site Request Forgeries
@@ -600,8 +599,8 @@ function sendDataToServer(data, timeout, callbackFunc){
     })
     .done(function(returnData) {
         console.log("AJAX RESPONSE SUCCEEDED");
-        if(callbackFunc !== null && callbackFunc !== undefined) {
-            callbackFunc();
+        if(successCallback !== null && successCallback !== undefined) {
+            successCallback();
         }
     })
     .fail(function(jqXHR) {
@@ -615,6 +614,10 @@ function sendDataToServer(data, timeout, callbackFunc){
         if(jqXHR.statusText === "timeout") {
             alert("The request timed out; please try again.");
         }
+        else {
+            failureCallback();
+        }
+
     })
 }
 
