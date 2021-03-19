@@ -5,7 +5,11 @@
 
 {% block title %}{{ title }}{% endblock %}
 
-{% block content %}    
+{% block content %}
+    <div class="alert alert-info" role="alert">
+        SNIP uses essential cookies to function. No personal information is used. 
+        For more information, see the <a href="{% url faq.URL %}" class="alert-link">FAQs</a>.
+    </div>
     <div class="jumbotron">
         <div class="row">
             <div class="col-12"> 

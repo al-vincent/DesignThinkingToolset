@@ -70,11 +70,11 @@ WSGI_APPLICATION = 'DesignThinkingToolset.wsgi.application'
 # Set session info to write to file, instead of db
 SESSION_ENGINE = 'django.contrib.sessions.backends.file' 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+USER_ID = "user_id"
 IMAGE_KEY = "image_info"
 REGION_KEY = "regions"
 OCR_KEY = "ocr_results"
 CONTAINER_NAME_KEY = "container_name"
-PRESENTATION_NAME_KEY = "presentation_filename"
 URL_KEY = "image_url"
 
 # Database
@@ -176,7 +176,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'console': {
-            'format': ' {levelname} {name} {funcName} {message}',
+            'format': '{levelname} {name} {funcName} {message}',
             'style': '{'
         },
         'file': {

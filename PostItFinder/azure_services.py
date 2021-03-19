@@ -1,5 +1,7 @@
 from django.conf import settings
 
+# from PostItFinder.utilities import ImageValidation
+
 from json import load, dumps
 import os
 import base64
@@ -15,12 +17,13 @@ import copy
 logger = logging.getLogger(__name__)
 
 # ================================================================================================
-# BASE CLASS
+# IMAGE VALIDATION
 # ================================================================================================
-class BasisFunctions:
-    def __init__(self, max_image_size=4194304, ok_image_types=['jpeg', 'bmp', 'png']):
-        self.MAX_IMAGE_SIZE = max_image_size if max_image_size is not None else settings.MAX_IMAGE_SIZE
-        self.OK_IMAGE_TYPES = ok_image_types if ok_image_types is not None else settings.OK_IMAGE_TYPES
+class ImageValidation:
+    def __init__(self, max_image_size=4194304, ok_image_types=["jpeg", "jpg", "bmp", "png"], user_id=None):
+        self.MAX_IMAGE_SIZE = max_image_size
+        self.OK_IMAGE_TYPES = ok_image_types
+        self.user_id = user_id
         
     def get_image_data(self, input_data):
         """
@@ -80,22 +83,26 @@ class BasisFunctions:
 
         return result
 
+
 # ================================================================================================
 # AZURE OBJECT DETECTION
 # ================================================================================================
-class ObjectDetector(BasisFunctions):
-    def __init__(self, is_image_url, image, prediction_key, obj_det_url, confidence_threshold=0.3):
-        super().__init__()
+class ObjectDetector:
+    def __init__(self, is_image_url, image, prediction_key, obj_det_url, confidence_threshold=0.3, user_id=None):
+        # super().__init__()
         self.is_image_url = is_image_url
-        self.image = image
-        self.confidence_threshold = confidence_threshold    
+        self.image = image   
         self.prediction_key = prediction_key
         self.obj_det_url = obj_det_url
+        self.confidence_threshold = confidence_threshold 
+        self.user_id = user_id
 
     def __get_settings(self, is_image_url, image, obj_det_url):
         conf = {}
         
-        conf["body"] = dumps({"url": image}) if is_image_url else self.get_image_data(image)
+        im = ImageValidation(user_id=self.user_id)
+
+        conf["body"] = dumps({"url": image}) if is_image_url else im.get_image_data(image)
         conf["content_type"] = "application/json" if is_image_url else "application/octet-stream"
         conf["url"] = f"{obj_det_url}/url" if is_image_url else f"{obj_det_url}/image"
 
@@ -135,14 +142,14 @@ class ObjectDetector(BasisFunctions):
             response = requests.post(conf["url"], headers=headers, data=conf["body"])
             response.raise_for_status()
         except Exception as err:
-            logger.error(f"Exception raised; sys error message: {err}")
+            logger.error(f"User id {self.user_id}: Exception occurred; sys error message: {err}")
             return None
         
         results = response.json()
         if "predictions" in results:
             return results
         else:
-            logger.error(f"Unexpected Azure return, contains no 'predictions' key. Return provided: {results}")
+            logger.error(f"User id {self.user_id}: Unexpected Azure return, contains no 'predictions' key. Return provided: {results}")
             return None
     
     def process_output(self, azure_results):
@@ -169,7 +176,7 @@ class ObjectDetector(BasisFunctions):
         try:
             regions = azure_results.get("predictions", None)
         except AttributeError as err:
-            logger.error(f"Azure return contains no predictions. Sys error message: {err}")
+            logger.error(f"User id {self.user_id}: Azure return contains no predictions. Sys error message: {err}")
             regions = None
 
         results = []
@@ -185,9 +192,9 @@ class ObjectDetector(BasisFunctions):
                                 "height": region["boundingBox"]["height"]
                             })
                         except Exception as err:
-                            logger.warning(f"An exception occurred; region={region}, error={err}")
+                            logger.warning(f"User id {self.user_id}: An exception occurred; region={region}, error={err}")
                 else:
-                    logger.error(f"Input data does not contain required keys")        
+                    logger.error(f"User id {self.user_id}: Input data does not contain required keys")        
 
         # The ternary operator below is using the truthiness of a list to return results
         # iff it's a non-empty list; else return None
@@ -212,45 +219,47 @@ class ObjectDetector(BasisFunctions):
         sticky_notes = None
         if self.image is not None:
             if not self.is_image_url: 
-                if self.image_data_is_valid(self.image):
-                    logger.info(f"Object Detection request uses valid image data")
+                im = ImageValidation(user_id=self.user_id)
+                if im.image_data_is_valid(self.image):
+                    logger.info(f"User id {self.user_id}: Object Detection request uses valid image data")
                 else:
-                    logger.error(f"AJAX POST request uses invalid bytestream")
+                    logger.error(f"User id {self.user_id}: AJAX POST request uses invalid bytestream")
                     return None
             
             sticky_notes = self.analyse_image()
 
             if sticky_notes is not None:                
-                logger.info(f"Received response from Azure")
+                logger.info(f"User id {self.user_id}: Received response from Azure")
             else:
-                logger.error(f"Azure did not process image successfully")
+                logger.error(f"User id {self.user_id}: Azure did not process image successfully")
                 return None
             
         else:
-            logger.error(f"No image data received from client")
+            logger.error(f"User id {self.user_id}: No image data received from client")
 
         return self.process_output(sticky_notes)
 
 # ================================================================================================
 # AZURE TEXT ANALYSIS
 # ================================================================================================
-class TextAnalyser(BasisFunctions):
+class TextAnalyser:
     # Documentation: 
     # https://westcentralus.dev.cognitive.microsoft.com/docs/services/computer-vision-v3-ga/operations/5d9869604be85dee480c8750
     # Example:
     # https://docs.microsoft.com/en-gb/azure/cognitive-services/computer-vision/quickstarts/python-hand-text
-    def __init__(self, is_image_url, image, subscription_key, api_url, use_words=True):
-        super().__init__()
+    def __init__(self, is_image_url, image, subscription_key, api_url, use_words=True, user_id=None):
         self.is_image_url = is_image_url
         self.image = image
         self.subscription_key = subscription_key
         self.api_url = api_url
         self.use_words = use_words
+        self.user_id = user_id
     
     def __get_settings(self, is_image_url, image):
         conf = {}
         
-        conf["body"] = dumps({"url": image}) if is_image_url else self.get_image_data(image)
+        im = ImageValidation(user_id=self.user_id)
+        conf["body"] = dumps({"url": image}) if is_image_url else im.get_image_data(image)
         conf["content_type"] = "application/json" if is_image_url else "application/octet-stream"
 
         return conf
@@ -272,13 +281,13 @@ class TextAnalyser(BasisFunctions):
             # raise_for_status will raise an exception if the response is unsuccessful
             response.raise_for_status()
         except HTTPError as err:
-            logger.error(f"An HTTP error occurred while submitting the image for processing. Sys error: {err}")
+            logger.error(f"User id {self.user_id}: An HTTP error occurred while submitting the image for processing. Sys error: {err}")
             return None
         except Exception as err:
-            logger.error(f"Another error occurred while submitting the image for processing. Sys error: {err}")
+            logger.error(f"User id {self.user_id}: Another error occurred while submitting the image for processing. Sys error: {err}")
             return None
         else:
-            logger.info("Image successfully submitted for processing.")
+            logger.info("User id {self.user_id}: Image successfully submitted for processing.")
             return response
 
     def get_results(self, response):
@@ -297,10 +306,10 @@ class TextAnalyser(BasisFunctions):
                                             headers=headers)
                 response_final.raise_for_status()
             except HTTPError as err:
-                logger.error(f"HTTP error occurred while connecting to OCR URL. Sys error: {err}")
+                logger.error(f"User id {self.user_id}: HTTP error occurred while connecting to OCR URL. Sys error: {err}")
                 return None
             except Exception as err:
-                logger.error(f"Another error occured while connecting to OCR URL. Sys error: {err}")
+                logger.error(f"User id {self.user_id}: Another error occured while connecting to OCR URL. Sys error: {err}")
                 return None  
 
             results = response_final.json()
@@ -316,19 +325,19 @@ class TextAnalyser(BasisFunctions):
         if "status" in results: 
             # In this case, we've got our results
             if results["status"] == "succeeded":
-                logger.info("OCR results successfully returned from Azure.")
+                logger.info("User id {self.user_id}: OCR results successfully returned from Azure.")
                 return (results, False)
             # in this case, the analysis has completed but failed to work
             elif results["status"] == "failed":
-                logger.warning("The Azure service failed to return any results.")
+                logger.warning("User id {self.user_id}: The Azure service failed to return any results.")
                 return (None, False)
         else:
-            logger.warning(f"Azure results missing expected key 'status': {results}")
+            logger.warning(f"User id {self.user_id}: Azure results missing expected key 'status': {results}")
             return (None, False)
 
         # in this case it's taken too long for the service to work, so exit
         if time_elapsed >= max_time:
-            logger.warning("The Azure OCR service exceeded the max response time.")
+            logger.warning("User id {self.user_id}: The Azure OCR service exceeded the max response time.")
             return (None, False)            
 
         # Otherwise, we're still waiting
@@ -354,13 +363,13 @@ class TextAnalyser(BasisFunctions):
                 width = results_page["width"]
                 height = results_page["height"]
             except KeyError as k:
-                logger.error(f"Azure OCR results do not contain the key {k}.")
+                logger.error(f"User id {self.user_id}: Azure OCR results do not contain the key {k}.")
                 return None
             except IndexError as err:
-                logger.error(f"Azure OCR readResults list is empty. Sys error: {err}")
+                logger.error(f"User id {self.user_id}: Azure OCR readResults list is empty. Sys error: {err}")
                 return None
             except Exception as err:
-                logger.error(f"Another error occurred: {err}")
+                logger.error(f"User id {self.user_id}: Another error occurred: {err}")
                 return None
 
             # process the lines or words (depending on whether the user has provided
@@ -378,7 +387,7 @@ class TextAnalyser(BasisFunctions):
                                 if word_info is not None:
                                     processed_results.append(word_info)
                         else:
-                            logger.warning(f"Azure OCR results line does not contain any words.")
+                            logger.warning(f"User id {self.user_id}: Azure OCR results line does not contain any words.")
                     # otherwise, let Azure group words together into lines
                     else:
                         line_info = self.process_json(line, width, height)
@@ -390,20 +399,21 @@ class TextAnalyser(BasisFunctions):
                 return processed_results if processed_results else None
             # In this case, no actual OCR data (i.e. lines of text) have been returned
             else:
+                logger.warning(f"User id {self.user_id}: No OCR results returned.")
                 return None
   
             # a couple of warnings to the server
             if len(results_pages) > 1:
-                logger.warning(f"Azure OCR has returned {len(results_pages)} pages (one page expected)")
+                logger.warning(f"User id {self.user_id}: Azure OCR has returned {len(results_pages)} pages (one page expected)")
             try:
                 if results_page["unit"] != "pixel":
-                    logger.warning(f"Azure OCR is using an unexpected unit: {results_page['unit']}")
+                    logger.warning(f"User id {self.user_id}: Azure OCR is using an unexpected unit: {results_page['unit']}")
             except KeyError as k:
-                logger.warning(f"Azure OCR results do not contain the key {k}.")
+                logger.warning(f"User id {self.user_id}: Azure OCR results do not contain the key {k}.")
             except Exception as err:
-                logger.warning(f"Another exception occured.")
+                logger.warning(f"User id {self.user_id}: Another exception occured, {err}.")
         else:
-            logger.warning("Input parameter azure_results is None")
+            logger.warning("User id {self.user_id}: Input parameter azure_results is None")
             return None
     
     def process_json(self, json, max_width, max_height):
@@ -414,13 +424,13 @@ class TextAnalyser(BasisFunctions):
         # Handle any exceptions, returning None if required keys don't exist
         # (as there are no results )
         except KeyError as k:
-            logger.warning(f"'json' does not contain the key {k}.")
+            logger.warning(f"User id {self.user_id}: 'json' does not contain the key {k}.")
             return None
         except TypeError as err:
-            logger.warning(f"'json' is of type {type(json)}; should be dict.")
+            logger.warning(f"User id {self.user_id}: 'json' is of type {type(json)}; should be dict.")
             return None
         except Exception as err:
-            logger.warning(f"Another error occurred: {err}")
+            logger.warning(f"User id {self.user_id}: Another error occurred: {err}")
             return None
         
         w = self.convert_bounds(bbox, max_width, max_height) 
@@ -473,13 +483,13 @@ class TextAnalyser(BasisFunctions):
             assert max_height > 0, f"max_height={max_height}, which is <= 0"
             assert all(i >= 0 for i in bounding_coords), f"One of bounding_coords < 0: {bounding_coords}"            
         except AssertionError as err:
-            logger.error(err)
+            logger.error(f"User id {self.user_id}: err {err}")
             return None
         except TypeError as err:
-            logger.error(err)
+            logger.error(f"User id {self.user_id}: err {err}")
             return None
         except Exception as err:
-            logger.error(err)
+            logger.error(f"User id {self.user_id}: err {err}")
             return None
 
         try:
@@ -494,13 +504,13 @@ class TextAnalyser(BasisFunctions):
             width = (max(all_x) - min(all_x)) / max_width
             height = (max(all_y) - min(all_y)) / max_height
         except AssertionError as err:
-            logger.error(err)
+            logger.error(f"User id {self.user_id}: err {err}")
             return None
         except TypeError as err:
-            logger.error(err)
+            logger.error(f"User id {self.user_id}: err {err}")
             return None
         except Exception as err:
-            logger.error(err)
+            logger.error(f"User id {self.user_id}: err {err}")
             return None
 
         # some sanity-checking on the output
@@ -510,10 +520,10 @@ class TextAnalyser(BasisFunctions):
             assert width > 0, f"Calculated width <= 0, which is impossible; {width}"
             assert height > 0, f"Calculated height <= 0, which is impossible; {height}"
         except AssertionError as err:
-            logger.error(err)
+            logger.error(f"User id {self.user_id}: err {err}")
             return None
         except Exception as err:
-            logger.error(err)
+            logger.error(f"User id {self.user_id}: err {err}")
             return None
 
         return {"x": x, "y": y, "width": width, "height": height}
@@ -527,20 +537,21 @@ class TextAnalyser(BasisFunctions):
         text = None
         if self.image is not None:
             if not self.is_image_url:
-                if self.image_data_is_valid(self.image):
-                    logger.info(f"OCR request from client uses valid image data")
+                im = ImageValidation(user_id=self.user_id)
+                if im.image_data_is_valid(self.image):
+                    logger.info(f"User id {self.user_id}: OCR request from client uses valid image data")
                 else:
-                    logger.error(f"OCR request from client uses invalid bytestream")
+                    logger.error(f"User id {self.user_id}: OCR request from client uses invalid bytestream")
                     return None
 
             text = self.analyse_image()
             if text is not None:                
-                logger.info(f"Received response from Azure")
+                logger.info(f"User id {self.user_id}: Received response from Azure")
             else:
-                logger.error(f"Azure did not process image successfully")
+                logger.error(f"User id {self.user_id}: Azure did not process image successfully")
                 return None
         else:
-            logger.error(f"No image data received from client")
+            logger.error(f"User id {self.user_id}: No image data received from client")
             return None
 
         return self.process_output(text)
@@ -549,7 +560,7 @@ class TextAnalyser(BasisFunctions):
 # MATCHING WORDS TO REGIONS
 # ================================================================================================
 class MatchWordsToRegions:
-    def __init__(self, region_data, word_data):
+    def __init__(self, region_data, word_data, user_id=None):
         """
         Constructor for the class.
 
@@ -585,6 +596,7 @@ class MatchWordsToRegions:
         """
         self.regions = region_data
         self.words = word_data
+        self.user_id = user_id
 
     def input_is_valid(self):
         """
@@ -604,7 +616,7 @@ class MatchWordsToRegions:
             assert isinstance(self.regions, list), f"Region list supplied to class should be list of dicts - {self.regions}"
             assert all(isinstance(region, dict) for region in self.regions), f"Region list supplied to class should be list of dicts - {self.regions}"        
         except AssertionError as err:
-            logger.error(err)
+            logger.error(f"User id {self.user_id}: err {err}")
             return False
         
         return True
@@ -639,11 +651,11 @@ class MatchWordsToRegions:
 
                     words.append(word["text"])
             except KeyError as k:
-                logger.warning(f"The key {k} is not in 'word': {word}")
+                logger.warning(f"User id {self.user_id}: The key {k} is not in 'word': {word}")
             except TypeError as err:
-                logger.warning(f"A TypeError occurred: {err}")
+                logger.warning(f"User id {self.user_id}: A TypeError occurred: {err}")
             except Exception as err:
-                logger.warning(f"Another exception occurred: {err}")
+                logger.warning(f"User id {self.user_id}: Another exception occurred: {err}")
 
         return words if words else None
     
@@ -675,13 +687,13 @@ class MatchWordsToRegions:
             assert isinstance(words, list), f"'words' should be of type list; actual type is {type(words)}"
             return " ".join(word for word in words) if words else None
         except AssertionError as err:
-            logger.error(err)
+            logger.error(f"User id {self.user_id}: err {err}")
             return None
         except TypeError as err:
-            logger.error(f"'words' contains non-str elements. Sys error: {err}")
+            logger.error(f"User id {self.user_id}: 'words' contains non-str elements. Sys error: {err}")
             return None
         except Exception as err:
-            logger.error(f"Another exception occurred; {err}")
+            logger.error(f"User id {self.user_id}: Another exception occurred; {err}")
             return None
 
     def match(self):
