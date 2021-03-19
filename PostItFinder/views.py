@@ -6,6 +6,7 @@ from django.http import JsonResponse
 import PostItFinder.utilities as ut
 
 import os
+import uuid
 from json import load
 import logging
 
@@ -28,9 +29,15 @@ def index(request):
     # clear all session data
     request.session.flush()
 
+    # create a user ID, and save as a session variable (useful for logs)
+    request.session[settings.USER_ID] = str(uuid.uuid4())
+    
+    logger.info(f"User {request.session.get(settings.USER_ID, None)} browsed to Home page")
+
     context = {
         "title": HTML["HOME"]["TITLE"],
         "navbar": HTML["BASE"]["NAVBAR"],
+        "faq": HTML["FAQ"],
         "home_content": "Home page",
         "start_btn": HTML["HOME"]["START_BTN"],
         "config": CONFIG,
@@ -39,6 +46,8 @@ def index(request):
     return render(request, PATHS["HOME"], context=context)
 
 def about(request):
+    logger.info(f"User {request.session.get(settings.USER_ID, None)} browsed to About page")
+
     context = {
         "title": HTML["ABOUT"]["TITLE"],
         "navbar": HTML["BASE"]["NAVBAR"],
@@ -48,6 +57,9 @@ def about(request):
     return render(request, PATHS["ABOUT"], context=context)
 
 def faq(request):
+
+    logger.info(f"User {request.session.get(settings.USER_ID, None)} browsed to FAQ page")
+
     context = {
         "title": HTML["FAQ"]["TITLE"],
         "navbar": HTML["BASE"]["NAVBAR"]
@@ -56,6 +68,9 @@ def faq(request):
     return render(request, PATHS["FAQ"], context=context)
 
 def choose_image(request):
+
+    logger.info(f"User {request.session.get(settings.USER_ID, None)} browsed to Choose-Image page")
+
     # clear any regions session data, to prevent crossover between regions
     request.session[settings.REGION_KEY] = None
 
@@ -94,19 +109,22 @@ def choose_image(request):
         return render(request, PATHS["CHOOSE_IMAGE"], context=context)
 
 def set_regions(request):
+    user_id = request.session.get(settings.USER_ID, None)
+    logger.info(f"User {user_id} browsed to Set-Regions page")
+
     image_url = request.session.get(settings.URL_KEY, None)
 
     if request.is_ajax() and request.method == "GET":
-        logger.info(f"AJAX GET request received at server")        
-        processed_data = ut.get_regions(img_url=image_url)
+        logger.info(f"User {user_id}: AJAX GET request received at server")        
+        processed_data = ut.get_regions(img_url=image_url, user_id=user_id)
         if processed_data is not None:
-            logger.info(f"Azure processing successful, results sent to client")
+            logger.info(f"User {user_id}: Azure processing successful, results sent to client")
             return JsonResponse(processed_data, safe=False, status=200)
         else:
-            logger.warning(f"Azure processing unsuccessful, null response sent to client")
+            logger.warning(f"User {user_id}: Azure processing unsuccessful, null response sent to client")
             return JsonResponse(processed_data, safe=False, status=400)
     elif request.is_ajax() and request.method == "POST":
-        logger.info(f"AJAX POST request received at server")        
+        logger.info(f"User {user_id}: AJAX POST request received at server")        
         ut.set_session_region_data(request)
         return JsonResponse({"status": "success"}, status=200)
     else:
@@ -135,8 +153,9 @@ def set_regions(request):
         return render(request, PATHS["SET_REGIONS"], context=context)
 
 def analyse_text(request):
+    logger.info(f"User {request.session.get(settings.USER_ID, None)} browsed to Analyse-Text page")
+
     # get session data
-    # image_data = request.session.get(settings.IMAGE_KEY, None)
     image_url = request.session.get(settings.URL_KEY, None)
     regions = request.session.get(settings.REGION_KEY, None)
 
