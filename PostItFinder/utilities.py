@@ -9,10 +9,8 @@ import logging
 from json import load, loads
 from datetime import datetime, timedelta
 from io import BytesIO
-# import uuid
 import base64
-import imghdr
-from sys import getsizeof
+
 
 # ================================================================================================
 # GLOBALS
@@ -260,7 +258,7 @@ def click_analyse_text_button(request):
     user_id = request.session.get(settings.USER_ID, None)
 
     # analyse the text
-    if all(image_url, regions, user_id):
+    if all([image_url, regions, user_id]):
         region_text = get_text(image_url, regions, user_id)
     else:
         logger.warning(f"User {user_id}: var is None. image_url: {image_url}; regions: {regions}; user_id: {user_id}")
