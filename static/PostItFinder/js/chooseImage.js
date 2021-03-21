@@ -124,4 +124,3 @@ function clickUploadImage() {
         sendDataToServer({"data": img_data, "name": img_name}, 30000, uploadSuccessful, uploadFailed);
     }
 }
-
