@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.http import JsonResponse
 
-from PostItFinder.azure_services import ObjectDetector, TextAnalyser, MatchWordsToRegions
+from PostItFinder.azure_services import ImageValidation, ObjectDetector, TextAnalyser, MatchWordsToRegions
 from PostItFinder.create_and_store_pptx import SnipPptxCreator, SaveFileToAzureBlobStorage
 
 import os
@@ -9,6 +9,7 @@ import logging
 from json import load, loads
 from datetime import datetime, timedelta
 from io import BytesIO
+from PIL import Image, ImageOps
 import base64
 
 
@@ -186,6 +187,13 @@ def get_bytes_from_b64_encoded_string(b64_string):
     base64_img_bytes = image_data_b64.encode('utf-8')
     return BytesIO(base64.decodebytes(base64_img_bytes))
 
+# def set_image_orientation(img_bytes):
+#     img = Image.open(img_bytes)
+#     new_img = ImageOps.exif_transpose(img)
+#     img_byte_arr = BytesIO()
+#     new_img.save(img_byte_arr, format=img.format)
+#     return img_byte_arr.getvalue()
+
 # ================================================================================================
 # DRIVER FUNCTIONS FOR INDIVIDUAL PAGE ACTIONS
 # ================================================================================================
@@ -201,12 +209,12 @@ def click_upload_image_button(request):
     - upload the image to Azure Blob Storage;
     - store the URL created in a session variable.
 
-    Args:
-        request (django HttpRequest object): created when the HTTP request is made, 
+    Parameters:
+        - request (django HttpRequest object): created when the HTTP request is made, 
         and contains the data sent via the AJAX POST request.
 
     Returns:
-        bool: True if everything executes correctly, otherwise False.
+        - bool: True if everything executes correctly, otherwise False.
     """
     # get the user id
     user_id = request.session.get(settings.USER_ID, None)

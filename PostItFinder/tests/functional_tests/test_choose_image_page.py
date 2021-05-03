@@ -347,35 +347,31 @@ class DynamicTests(base.DynamicTests):
         img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
         self.assertNotIn("#", img.get_attribute("src"))
     
-    # The next test is very odd. 
-    # GIFs are accepted by the Azure Object Detection service, but not the OCR service
-    # (bizarrely, for TIFs it's the other way around). So I want to exclude both GIFs 
-    # and TIFs, which I've done in the HTML.
-    # However, a user can type in a .GIF filename and it will be sent via POST, whereas
-    # a .TIF won't be?!
-    # I can't work out why this is, so adding the expectedFailure decorator for now.
-    @unittest.expectedFailure
     def test_gif_cannot_be_selected(self):
         img_file = "test_gif.gif"
         input_id = base.ELEMS["CHOOSE_IMAGE"]["CHOOSE_IMG_BTN"]["ID"]
 
         # get the input and label elements
         input_elem = self.browser.find_element_by_id(input_id)
-        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
         current_dir = os.path.dirname(os.path.abspath(__file__))
         test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
         path = os.path.join(test_path, "resources", "test_images", img_file)
         input_elem.send_keys(path)
-        self.assertEqual(img_label.get_attribute("innerText"), img_file)
 
-        # wait a few seconds for the image to render
-        time.sleep(3)
+        # wait for the alert to fire
+        try: 
+            WebDriverWait(self.browser, base.MAX_WAIT).until(EC.alert_is_present(),
+                                   "Timed out waiting for alert to appear.")
+            alert = self.browser.switch_to.alert
+            alert.accept()            
+        except TimeoutException:
+            self.fail("ERROR - alert was not fired")
 
-        # check whether the image src attribute is no longer '#'
+        # check that the image src attribute is still the default pic
         img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
-        self.assertIn("#", img.get_attribute("src"))
+        self.assertIn("no-image.png", img.get_attribute("src"))
 
     def test_tif_cannot_be_selected(self):
         img_file = "test_tif.tif"
@@ -383,21 +379,25 @@ class DynamicTests(base.DynamicTests):
 
         # get the input and label elements
         input_elem = self.browser.find_element_by_id(input_id)
-        img_label = self.browser.find_element_by_xpath(f'//label[@for="{input_id}"]')      
         
         # update the input directly with the file path
         current_dir = os.path.dirname(os.path.abspath(__file__))
         test_path = os.path.abspath(os.path.join(current_dir, os.pardir))
         path = os.path.join(test_path, "resources", "test_images", img_file)
         input_elem.send_keys(path)
-        self.assertEqual(img_label.get_attribute("innerText"), img_file)
+        
+        # wait for the alert to fire
+        try: 
+            WebDriverWait(self.browser, base.MAX_WAIT).until(EC.alert_is_present(),
+                                   "Timed out waiting for alert to appear.")
+            alert = self.browser.switch_to.alert
+            alert.accept()            
+        except TimeoutException:
+            self.fail("ERROR - alert was not fired")
 
-        # wait a few seconds for the image to render
-        time.sleep(3)
-
-        # check whether the image src attribute is no longer '#'
+        # check that the image src attribute is still the default
         img = self.browser.find_element_by_id(base.ELEMS["APP"]["IMAGE_PANE"]["IMAGE"]["ID"])
-        self.assertIn("#", img.get_attribute("src"))
+        self.assertIn("no-image.png", img.get_attribute("src"))
 
     def test_image_src_updates_correctly(self):
         img_file = "test_jpg.jpg"
@@ -528,6 +528,13 @@ class DynamicTests(base.DynamicTests):
 
         # wait a few seconds for the image to render
         time.sleep(3)
+
+        # click the 'upload-image' button, and wait for the button text to change
+        self.browser.find_element_by_id(base.ELEMS["CHOOSE_IMAGE"]["UPLOAD_IMG_BTN"]["ID"]).click()
+        WebDriverWait(self.browser, base.MAX_WAIT).until(
+            EC.text_to_be_present_in_element((By.ID, base.ELEMS["CHOOSE_IMAGE"]["UPLOAD_IMG_BTN"]["ID"]),
+                                            base.ELEMS["CHOOSE_IMAGE"]["UPLOAD_IMG_BTN"]["SUCCESS_TEXT"])
+        )
 
         # click the Next button
         base_url = self.live_server_url        

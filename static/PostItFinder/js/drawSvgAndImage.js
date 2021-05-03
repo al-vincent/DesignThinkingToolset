@@ -72,7 +72,7 @@ function mimeType(headerString) {
 
     const SIGS = [
         {"type": "image/bmp", "sig": "424d"},
-        {"type": "image/png", "sig": "89 50 4E 47"},
+        {"type": "image/png", "sig": "89504e47"},
         {"type": "image/jpeg", "sig": "ffd8ff"}        
     ]
     

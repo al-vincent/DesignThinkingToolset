@@ -37,7 +37,8 @@
             <div class="row">
                 <div class="mx-auto">
                     {% block previous_button %}
-                    <a id="{{ prev_btn.ID}}" href="{% url prev_btn.URL %}" role="button" class="btn btn-success btn-lg rounded-circle">
+                    <a id="{{ prev_btn.ID}}" title="Go to previous step" href="{% url prev_btn.URL %}" 
+                    role="button" class="btn btn-success btn-lg rounded-circle">
                         <i class="fa fa-arrow-left"></i>
                     </a>
                     {% endblock %}
@@ -57,7 +58,8 @@
             <div class="row">
                 <div class="mx-auto">
                     {% block next_button %}
-                    <a id="{{ next_btn.ID}}" href="{% url next_btn.URL %}" role="button" class="btn btn-success btn-lg rounded-circle">
+                    <a id="{{ next_btn.ID}}" title="Go to next step" href="{% url next_btn.URL %}" 
+                    role="button" class="btn btn-success btn-lg rounded-circle">
                         <i class="fa fa-arrow-right"></i>
                     </a>
                     {% endblock %}
