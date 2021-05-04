@@ -182,7 +182,7 @@ class DynamicTests(StaticLiveServerTestCase):
 class ExceptionTests(StaticLiveServerTestCase):
     """
     These dynamic tests cannot use the standard boilerplate setUp and tearDown
-    form base.py, as they need some extra options configured.
+    from base.py, as they need some extra options configured.
     """
         
     def setUp(self):
