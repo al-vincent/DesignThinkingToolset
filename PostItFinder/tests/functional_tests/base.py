@@ -85,6 +85,13 @@ def navigate_to_set_regions_page(browser):
     # wait a few seconds for the image to render
     time.sleep(2)
 
+    # click the 'upload-image' button, and wait for the button text to change
+    browser.find_element_by_id(ELEMS["CHOOSE_IMAGE"]["UPLOAD_IMG_BTN"]["ID"]).click()
+    WebDriverWait(browser, MAX_WAIT).until(
+        EC.text_to_be_present_in_element((By.ID, ELEMS["CHOOSE_IMAGE"]["UPLOAD_IMG_BTN"]["ID"]),
+                                        ELEMS["CHOOSE_IMAGE"]["UPLOAD_IMG_BTN"]["SUCCESS_TEXT"])
+    )
+
     # click the Next button
     browser.find_element_by_id(ELEMS["APP"]["NEXT_BTN"]["ID"]).click()
     
@@ -175,7 +182,7 @@ class DynamicTests(StaticLiveServerTestCase):
 class ExceptionTests(StaticLiveServerTestCase):
     """
     These dynamic tests cannot use the standard boilerplate setUp and tearDown
-    form base.py, as they need some extra options configured.
+    from base.py, as they need some extra options configured.
     """
         
     def setUp(self):

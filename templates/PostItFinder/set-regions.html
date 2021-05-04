@@ -162,7 +162,8 @@
 {% block next_button %}
   <form method="POST" action="">
     {% csrf_token %}
-    <a id="{{ next_btn.ID}}" href="{% url next_btn.URL %}" role="button" class="btn btn-success btn-lg rounded-circle">
+    <a id="{{ next_btn.ID}}" title="Go to next step" href="{% url next_btn.URL %}" 
+    role="button" class="btn btn-success btn-lg rounded-circle">
       <i class="fa fa-arrow-right"></i>
     </a>
   </form>

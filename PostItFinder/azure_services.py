@@ -1,11 +1,11 @@
 from django.conf import settings
 
-# from PostItFinder.utilities import ImageValidation
-
 from json import load, dumps
 import os
 import base64
 import imghdr
+from PIL import Image
+import functools
 from sys import getsizeof
 import logging
 import requests
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # IMAGE VALIDATION
 # ================================================================================================
 class ImageValidation:
-    def __init__(self, max_image_size=4194304, ok_image_types=["jpeg", "jpg", "bmp", "png"], user_id=None):
+    def __init__(self, max_image_size=4194304, ok_image_types=["jpeg", "bmp", "png"], user_id=None):
         self.MAX_IMAGE_SIZE = max_image_size
         self.OK_IMAGE_TYPES = ok_image_types
         self.user_id = user_id
@@ -82,14 +82,13 @@ class ImageValidation:
                 logger.error(f"Bytestream provided is not an image.")
 
         return result
-
-
+    
+    
 # ================================================================================================
 # AZURE OBJECT DETECTION
 # ================================================================================================
 class ObjectDetector:
     def __init__(self, is_image_url, image, prediction_key, obj_det_url, confidence_threshold=0.3, user_id=None):
-        # super().__init__()
         self.is_image_url = is_image_url
         self.image = image   
         self.prediction_key = prediction_key

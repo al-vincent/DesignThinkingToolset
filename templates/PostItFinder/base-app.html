@@ -37,7 +37,8 @@
             <div class="row">
                 <div class="mx-auto">
                     {% block previous_button %}
-                    <a id="{{ prev_btn.ID}}" href="{% url prev_btn.URL %}" role="button" class="btn btn-success btn-lg rounded-circle">
+                    <a id="{{ prev_btn.ID}}" title="Go to previous step" href="{% url prev_btn.URL %}" 
+                    role="button" class="btn btn-success btn-lg rounded-circle">
                         <i class="fa fa-arrow-left"></i>
                     </a>
                     {% endblock %}
@@ -57,7 +58,8 @@
             <div class="row">
                 <div class="mx-auto">
                     {% block next_button %}
-                    <a id="{{ next_btn.ID}}" href="{% url next_btn.URL %}" role="button" class="btn btn-success btn-lg rounded-circle">
+                    <a id="{{ next_btn.ID}}" title="Go to next step" href="{% url next_btn.URL %}" 
+                    role="button" class="btn btn-success btn-lg rounded-circle">
                         <i class="fa fa-arrow-right"></i>
                     </a>
                     {% endblock %}
@@ -75,8 +77,9 @@
         <div class="col-lg-2"></div>
         <div class="col-12 col-lg-8">
             <div id="{{ image_pane.CONTAINER.ID }}" class="img-overlay-wrap">
-                {% block image_pane %}            
-                <img id="{{ image_pane.IMAGE.ID }}" class="img-fluid" src="#" alt="No image selected">
+                {% block image_pane %}     
+                {% load static %}       
+                <img id="{{ image_pane.IMAGE.ID }}" class="img-fluid" src="{% static 'PostItFinder/img/no-image.png' %}" alt="No image selected">
                 {% endblock %}
             </div>
         </div>
@@ -96,7 +99,7 @@
     {{ image_data|json_script:"image-data-id" }}
 
     <!-- load JavaScript files -->
-    {% load static %}
+    <!-- {% load static %} -->
     <script type="text/javascript" src="{% static 'PostItFinder/js/d3.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'PostItFinder/js/drawAndEditRegions.js' %}"></script>
     <script type="text/javascript" src="{% static 'PostItFinder/js/drawSvgAndImage.js' %}"></script>
