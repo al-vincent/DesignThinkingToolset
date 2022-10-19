@@ -24,3 +24,11 @@ More generally, the project is aimed at generating a better understanding of are
 - Developing and deploying web apps;
 - Creating and using Azure services for AI / ML;
 - TDD.
+
+## Tech stack
+The project uses the following technologies:
+- Back end: Python, using Django
+- AI (object detection, text extraction): MS Azure services
+- Storage (for images provided, files generated): Azure blob storage
+- Front end: HTML / CSS / JavaScript. Main JS library used is d3.js
+- Hosting and logs: Heroku
