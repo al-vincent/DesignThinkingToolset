@@ -21,8 +21,9 @@ The web app is currently hosted on Heroku, at http://snip-app.herokuapp.com/  Ho
 change in the near future.  
 
 More generally, the project is aimed at generating a better understanding of areas that I'm interested in, including:
-- Developing and deploying web apps;
+- Developing and deploying web apps, using at least some best practice;
 - Creating and using Azure services for AI / ML;
+- CI / CD processes, with GitHub, TravisCI and Heroku;
 - TDD.
 
 ## Tech stack
